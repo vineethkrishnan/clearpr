@@ -9,5 +9,4 @@ export abstract class MemoryRepositoryPort {
   abstract save(entry: PrMemoryEntry): Promise<void>;
   abstract saveBatch(entries: PrMemoryEntry[]): Promise<void>;
   abstract findSimilar(repositoryId: string, embedding: number[], limit: number, threshold: number): Promise<SimilarMemoryResult[]>;
-  abstract deleteByRepository(repositoryId: string): Promise<void>;
 }

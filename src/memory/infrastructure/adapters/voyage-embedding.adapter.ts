@@ -40,11 +40,11 @@ export class VoyageEmbeddingAdapter extends EmbeddingProviderPort {
         throw new EmbeddingApiError(`Voyage API returned ${response.status}`);
       }
 
-      const data = (await response.json()) as {
+      const voyageResponse = (await response.json()) as {
         data: Array<{ embedding: number[] }>;
       };
 
-      return data.data.map((d) => d.embedding);
+      return voyageResponse.data.map((entry) => entry.embedding);
     } catch (error) {
       if (error instanceof EmbeddingApiError) throw error;
       this.logger.error('Embedding API call failed', error instanceof Error ? error.message : '');

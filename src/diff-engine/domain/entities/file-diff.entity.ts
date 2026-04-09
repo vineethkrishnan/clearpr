@@ -1,4 +1,5 @@
 import { type LanguageValue } from '../value-objects/language.vo.js';
+import { calculateNoiseReductionPct } from '../utils/noise-reduction.js';
 import { type DiffHunk } from '../value-objects/diff-hunk.vo.js';
 
 export type DiffStrategy = 'ast' | 'whitespace' | 'structural' | 'identity';
@@ -40,7 +41,6 @@ export class FileDiff {
   }
 
   get noiseReductionPct(): number {
-    if (this.rawLines === 0) return 0;
-    return Math.round(((this.rawLines - this.semanticLines) / this.rawLines) * 10000) / 100;
+    return calculateNoiseReductionPct(this.rawLines, this.semanticLines);
   }
 }

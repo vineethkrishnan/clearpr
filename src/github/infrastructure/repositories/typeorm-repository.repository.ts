@@ -27,16 +27,6 @@ export class TypeOrmRepositoryRepository extends RepositoryRepositoryPort {
     return row ? this.toDomain(row) : null;
   }
 
-  async findById(id: string): Promise<Repository | null> {
-    const row = await this.repo.findOneBy({ id });
-    return row ? this.toDomain(row) : null;
-  }
-
-  async findByInstallation(installationId: string): Promise<Repository[]> {
-    const rows = await this.repo.findBy({ installation_id: installationId });
-    return rows.map((row) => this.toDomain(row));
-  }
-
   private toRow(entity: Repository): RepositoryRow {
     return {
       id: entity.id,

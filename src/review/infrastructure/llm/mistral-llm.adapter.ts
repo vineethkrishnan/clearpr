@@ -1,6 +1,7 @@
+import { DEFAULT_RATE_LIMIT_RETRY_SECONDS } from './llm-constants.js';
 import { Mistral } from '@mistralai/mistralai';
 import { LlmProviderPort } from '../../domain/ports/llm-provider.port.js';
-import type { LlmResponse } from '../../application/types/llm-response.types.js';
+import type { LlmResponse } from '../../domain/types/llm-response.types.js';
 import { LlmRateLimitError } from '../../domain/errors/review.errors.js';
 import { AppConfig } from '../../../config/app.config.js';
 
@@ -30,7 +31,7 @@ export class MistralLlmAdapter extends LlmProviderPort {
       };
     } catch (error) {
       if (error instanceof Error && error.message.includes('429')) {
-        throw new LlmRateLimitError(60);
+        throw new LlmRateLimitError(DEFAULT_RATE_LIMIT_RETRY_SECONDS);
       }
       throw error;
     }

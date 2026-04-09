@@ -4,6 +4,7 @@ import {
   HealthCheckService,
   TypeOrmHealthIndicator,
   HealthCheckResult,
+  type HealthIndicatorFunction,
   type HealthIndicatorResult,
 } from '@nestjs/terminus';
 import Redis from 'ioredis';
@@ -20,19 +21,13 @@ export class HealthController {
   @Get()
   @HealthCheck()
   check(): Promise<HealthCheckResult> {
-    return this.health.check([
-      () => this.db.pingCheck('database'),
-      async (): Promise<HealthIndicatorResult> => this.checkRedis(),
-    ]);
+    return this.health.check(this.indicators());
   }
 
   @Get('ready')
   @HealthCheck()
   ready(): Promise<HealthCheckResult> {
-    return this.health.check([
-      () => this.db.pingCheck('database'),
-      async (): Promise<HealthIndicatorResult> => this.checkRedis(),
-    ]);
+    return this.health.check(this.indicators());
   }
 
   @Get('live')
@@ -40,11 +35,16 @@ export class HealthController {
     return { status: 'ok' };
   }
 
+  private indicators(): HealthIndicatorFunction[] {
+    return [
+      () => this.db.pingCheck('database'),
+      async (): Promise<HealthIndicatorResult> => this.checkRedis(),
+    ];
+  }
+
   private async checkRedis(): Promise<HealthIndicatorResult> {
     const result = await this.redis.ping();
-    if (result !== 'PONG') {
-      return { redis: { status: 'down' } };
-    }
-    return { redis: { status: 'up' } };
+    const isHealthy = result === 'PONG';
+    return { redis: { status: isHealthy ? 'up' : 'down' } };
   }
 }

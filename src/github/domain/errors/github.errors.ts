@@ -20,12 +20,3 @@ export class GitHubRateLimitError extends DomainError {
     this.resetAt = resetAt;
   }
 }
-
-export class InvalidSignatureError extends DomainError {
-  readonly code = 'INVALID_SIGNATURE';
-  readonly isTransient = false;
-
-  constructor() {
-    super('Invalid webhook signature');
-  }
-}

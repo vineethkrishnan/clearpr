@@ -97,13 +97,9 @@ export class FileProcessorService {
     }
 
     // Normalize both versions
-    let strategy: DiffStrategy = language.isSupported ? 'ast' : 'whitespace';
+    const strategy: DiffStrategy = language.isSupported ? 'ast' : 'whitespace';
     const normalizedBase = this.normalizer.normalize(baseContent, language);
     const normalizedHead = this.normalizer.normalize(headContent, language);
-
-    if (!language.isSupported) {
-      strategy = 'whitespace';
-    }
 
     // Compare normalized versions
     if (normalizedBase === normalizedHead) {

@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { LlmProviderPort } from '../../domain/ports/llm-provider.port.js';
-import type { LlmResponse } from '../../application/types/llm-response.types.js';
+import type { LlmResponse } from '../../domain/types/llm-response.types.js';
 import { AppConfig } from '../../../config/app.config.js';
 
 export class GeminiLlmAdapter extends LlmProviderPort {

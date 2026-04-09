@@ -6,9 +6,10 @@ export class JsonNormalizer implements LanguageNormalizer {
   normalize(source: string): string {
     try {
       const parsed: unknown = JSON.parse(source);
-      return JSON.stringify(parsed, Object.keys(parsed as object).sort(), 0);
+      const isPlainObject = typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed);
+      const sortedKeys = isPlainObject ? Object.keys(parsed).sort() : undefined;
+      return JSON.stringify(parsed, sortedKeys, 0);
     } catch {
-      // If JSON is invalid, return trimmed source
       return source.trim();
     }
   }

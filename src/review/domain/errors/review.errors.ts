@@ -20,20 +20,20 @@ export class LlmRateLimitError extends DomainError {
   }
 }
 
+export class ReviewSkippedError extends DomainError {
+  readonly code = 'REVIEW_SKIPPED';
+  readonly isTransient = false;
+
+  constructor(reason: string) {
+    super(reason);
+  }
+}
+
 export class MalformedLlmResponseError extends DomainError {
   readonly code = 'LLM_RESPONSE_MALFORMED';
   readonly isTransient = true;
 
   constructor(reason: string) {
     super(`LLM response could not be parsed: ${reason}`);
-  }
-}
-
-export class GuidelinesNotFoundError extends DomainError {
-  readonly code = 'GUIDELINES_NOT_FOUND';
-  readonly isTransient = false;
-
-  constructor(repositoryId: string) {
-    super(`No guidelines found for repository ${repositoryId}`);
   }
 }

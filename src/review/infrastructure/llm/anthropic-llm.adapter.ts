@@ -1,6 +1,7 @@
+import { DEFAULT_RATE_LIMIT_RETRY_SECONDS } from './llm-constants.js';
 import Anthropic from '@anthropic-ai/sdk';
 import { LlmProviderPort } from '../../domain/ports/llm-provider.port.js';
-import type { LlmResponse } from '../../application/types/llm-response.types.js';
+import type { LlmResponse } from '../../domain/types/llm-response.types.js';
 import { LlmTimeoutError, LlmRateLimitError } from '../../domain/errors/review.errors.js';
 import { AppConfig } from '../../../config/app.config.js';
 
@@ -36,7 +37,7 @@ export class AnthropicLlmAdapter extends LlmProviderPort {
     } catch (error) {
       if (error instanceof Anthropic.APIError) {
         if (error.status === 429) {
-          throw new LlmRateLimitError(60);
+          throw new LlmRateLimitError(DEFAULT_RATE_LIMIT_RETRY_SECONDS);
         }
         if (error.status === 408 || error.status === 504) {
           throw new LlmTimeoutError();

@@ -16,12 +16,13 @@ export class PromptSanitizer {
     ];
 
     for (const pattern of patterns) {
-      if (pattern.test(sanitized)) {
+      const replaced = sanitized.replace(pattern, '[filtered]');
+      if (replaced !== sanitized) {
         this.logger.warn(
           { audit: true, event: 'prompt_injection_sanitized', pattern: pattern.source },
           'Prompt injection pattern detected and sanitized',
         );
-        sanitized = sanitized.replace(pattern, '[filtered]');
+        sanitized = replaced;
       }
     }
 

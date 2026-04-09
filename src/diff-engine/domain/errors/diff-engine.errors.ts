@@ -8,12 +8,3 @@ export class DiffTooLargeError extends DomainError {
     super(`Semantic diff has ${semanticLines} lines, exceeding limit of ${maxLines}`);
   }
 }
-
-export class AstParseError extends DomainError {
-  readonly code = 'AST_PARSE_FAILED';
-  readonly isTransient = false;
-
-  constructor(filePath: string, reason: string) {
-    super(`Failed to parse ${filePath}: ${reason}`);
-  }
-}

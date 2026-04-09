@@ -55,13 +55,4 @@ export class Installation extends BaseEntity {
     return this._status;
   }
 
-  deactivate(): void {
-    this._status = InstallationStatus.inactive();
-    this.updatedAt = new Date();
-  }
-
-  activate(): void {
-    this._status = InstallationStatus.active();
-    this.updatedAt = new Date();
-  }
 }

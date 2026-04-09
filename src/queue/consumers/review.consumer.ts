@@ -2,9 +2,8 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { ReviewOrchestratorService } from '../../review/application/services/review-orchestrator.service.js';
-import { ReviewTrigger } from '../../review/domain/value-objects/review-trigger.vo.js';
 import { QUEUE_NAMES, type ReviewJobPayload } from '../types/job-payload.types.js';
-import type { ReviewContext } from '../../review/application/types/review-context.types.js';
+import type { ReviewContext } from '../../review/domain/types/review-context.types.js';
 
 @Processor(QUEUE_NAMES.REVIEWS, { concurrency: 3 })
 export class ReviewConsumer extends WorkerHost {
@@ -33,14 +32,12 @@ export class ReviewConsumer extends WorkerHost {
       baseBranch: payload.baseBranch,
     };
 
-    const trigger = payload.trigger === 'manual' ? ReviewTrigger.MANUAL : ReviewTrigger.AUTO;
-
     this.logger.log(
       { correlationId: payload.correlationId, prNumber: payload.prNumber, jobId: job.id },
-      `Processing review job`,
+      'Processing review job',
     );
 
-    const result = await this.orchestrator.execute(context, trigger);
+    const result = await this.orchestrator.execute(context, payload.trigger);
 
     if (result.isErr()) {
       this.logger.warn(

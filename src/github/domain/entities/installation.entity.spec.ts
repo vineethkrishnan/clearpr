@@ -13,16 +13,6 @@ describe('Installation', () => {
     expect(inst.accountLogin).toBe('acme-corp');
   });
 
-  it('should deactivate', () => {
-    const inst = Installation.create({
-      githubInstallationId: 1,
-      accountLogin: 'user',
-      accountType: 'User',
-    });
-    inst.deactivate();
-    expect(inst.status.isActive).toBe(false);
-  });
-
   it('should reconstitute from persisted data', () => {
     const inst = Installation.reconstitute({
       id: 'uuid-1',

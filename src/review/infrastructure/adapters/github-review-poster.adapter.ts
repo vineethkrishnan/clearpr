@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ReviewPosterPort } from '../../domain/ports/review-poster.port.js';
 import { type ReviewComment } from '../../domain/entities/review-comment.entity.js';
-import { type ReviewContext } from '../../application/types/review-context.types.js';
+import { type ReviewContext } from '../../domain/types/review-context.types.js';
 import { GitHubClientService } from '../../../github/application/services/github-client.service.js';
 
 @Injectable()

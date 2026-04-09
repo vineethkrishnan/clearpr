@@ -6,14 +6,14 @@ import { Review } from '../../domain/entities/review.entity.js';
 import { ReviewComment } from '../../domain/entities/review-comment.entity.js';
 import { Severity } from '../../domain/value-objects/severity.vo.js';
 import { ReviewTrigger } from '../../domain/value-objects/review-trigger.vo.js';
-import { MalformedLlmResponseError } from '../../domain/errors/review.errors.js';
-import { DiffTooLargeError } from '../../../diff-engine/domain/errors/diff-engine.errors.js';
+import { MalformedLlmResponseError, ReviewSkippedError } from '../../domain/errors/review.errors.js';
+import { RESPONSE_TOKENS } from '../../domain/value-objects/token-budget.vo.js';
 import { SemanticDiffService } from '../../../diff-engine/application/services/semantic-diff.service.js';
 import { GuidelineLoaderService } from './guideline-loader.service.js';
 import { PromptBuilderService } from './prompt-builder.service.js';
 import { MemoryRetrieverService } from '../../../memory/application/services/memory-retriever.service.js';
-import type { ReviewContext } from '../types/review-context.types.js';
-import type { ParsedReview, ParsedReviewComment } from '../types/review-result.types.js';
+import type { ReviewContext } from '../../domain/types/review-context.types.js';
+import type { ParsedReview, ParsedReviewComment } from '../../application/types/review-result.types.js';
 import { type Result, ok, err } from '../../../shared/types/result.types.js';
 import { type DomainError } from '../../../shared/domain/errors/domain-error.base.js';
 import { AppConfig } from '../../../config/app.config.js';
@@ -35,9 +35,10 @@ export class ReviewOrchestratorService {
 
   async execute(
     context: ReviewContext,
-    trigger: ReviewTrigger = ReviewTrigger.AUTO,
+    triggerType: 'auto' | 'manual' = 'auto',
   ): Promise<Result<Review, DomainError>> {
     const startTime = Date.now();
+    const trigger = triggerType === 'manual' ? ReviewTrigger.MANUAL : ReviewTrigger.AUTO;
 
     const review = Review.create({
       repositoryId: context.repositoryId,
@@ -62,18 +63,16 @@ export class ReviewOrchestratorService {
       });
 
       // Check size limit
-      if (diffResult.totalSemanticLines > this.config.MAX_DIFF_LINES) {
-        const error = new DiffTooLargeError(
-          diffResult.totalSemanticLines,
-          this.config.MAX_DIFF_LINES,
-        );
-        review.markSkipped(error.message);
+      const isDiffTooLarge = diffResult.totalSemanticLines > this.config.MAX_DIFF_LINES;
+      if (isDiffTooLarge) {
+        const skipReason = `Semantic diff has ${diffResult.totalSemanticLines} lines, exceeding limit of ${this.config.MAX_DIFF_LINES}`;
+        review.markSkipped(skipReason);
         await this.reviewRepo.save(review);
         await this.reviewPoster.postSummary(
           context,
           `**ClearPR** — Review skipped: this PR has ${diffResult.totalSemanticLines} semantic diff lines, exceeding the ${this.config.MAX_DIFF_LINES} line limit.`,
         );
-        return err(error);
+        return err(new ReviewSkippedError(skipReason));
       }
 
       // Load guidelines
@@ -103,7 +102,7 @@ export class ReviewOrchestratorService {
       });
 
       // Call LLM
-      const llmResponse = await this.llmProvider.generateReview(prompt, 4000);
+      const llmResponse = await this.llmProvider.generateReview(prompt, RESPONSE_TOKENS);
 
       // Parse response
       const parsed = this.parseResponse(llmResponse.content);

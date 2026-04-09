@@ -52,10 +52,6 @@ export class TypeOrmMemoryRepository extends MemoryRepositoryPort {
       .slice(0, limit);
   }
 
-  async deleteByRepository(repositoryId: string): Promise<void> {
-    await this.repo.delete({ repository_id: repositoryId });
-  }
-
   private cosineSimilarity(a: number[], b: number[]): number {
     if (a.length !== b.length || a.length === 0) return 0;
     let dotProduct = 0;

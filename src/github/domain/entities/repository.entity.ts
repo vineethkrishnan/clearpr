@@ -49,18 +49,4 @@ export class Repository extends BaseEntity {
     return new Repository(params);
   }
 
-  markIndexing(): void {
-    this.indexingStatus = IndexingStatus.IN_PROGRESS;
-    this.updatedAt = new Date();
-  }
-
-  markIndexed(): void {
-    this.indexingStatus = IndexingStatus.COMPLETED;
-    this.updatedAt = new Date();
-  }
-
-  markIndexFailed(): void {
-    this.indexingStatus = IndexingStatus.FAILED;
-    this.updatedAt = new Date();
-  }
 }

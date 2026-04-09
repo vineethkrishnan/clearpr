@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PromptSanitizer } from '../../infrastructure/security/prompt-sanitizer.js';
+import { PromptSanitizer } from './prompt-sanitizer.service.js';
 import { type SemanticDiffResult } from '../../../diff-engine/application/types/diff-result.types.js';
 import { calculateTokenBudget } from '../../domain/value-objects/token-budget.vo.js';
 

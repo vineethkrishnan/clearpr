@@ -48,8 +48,4 @@ export class InstallationTokenService {
 
     return token;
   }
-
-  async invalidateToken(installationId: number): Promise<void> {
-    await this.redis.del(`token:${installationId}`);
-  }
 }

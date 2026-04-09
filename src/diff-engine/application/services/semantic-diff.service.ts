@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { FileProcessorService } from './file-processor.service.js';
+import { calculateNoiseReductionPct } from '../../domain/utils/noise-reduction.js';
 import type { DiffInput, SemanticDiffResult } from '../types/diff-result.types.js';
 import { AppConfig } from '../../../config/app.config.js';
 
@@ -54,10 +55,7 @@ export class SemanticDiffService {
 
     const totalRawLines = results.reduce((sum, f) => sum + f.rawLines, 0);
     const totalSemanticLines = results.reduce((sum, f) => sum + f.semanticLines, 0);
-    const noiseReductionPct =
-      totalRawLines > 0
-        ? Math.round(((totalRawLines - totalSemanticLines) / totalRawLines) * 10000) / 100
-        : 0;
+    const noiseReductionPct = calculateNoiseReductionPct(totalRawLines, totalSemanticLines);
 
     this.logger.log(
       {
