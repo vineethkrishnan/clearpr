@@ -1,0 +1,7 @@
+* @vineethkrishnan
+.github/ @vineethkrishnan
+Dockerfile @vineethkrishnan
+docker-compose*.yml @vineethkrishnan
+scripts/ @vineethkrishnan
+src/webhooks/ @vineethkrishnan
+src/github-app/ @vineethkrishnan
