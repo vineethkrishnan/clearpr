@@ -1,0 +1,47 @@
+name: Commitlint
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  commitlint:
+    name: Validate PR Title
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            refactor
+            chore
+            docs
+            test
+            build
+            ci
+            perf
+            hotfix
+          scopes: |
+            github-app
+            diff-engine
+            ai-review
+            memory
+            webhooks
+            api
+            config
+            docker
+            deps
+            ci
+            docs
+            security
+            release
+            test
+            lint
+          requireScope: false
+          subjectPattern: ^(?![A-Z]).+$
+          subjectPatternError: >
+            The subject must start with a lowercase letter.
+            e.g. "feat(diff-engine): add tree-sitter parser for typescript"
