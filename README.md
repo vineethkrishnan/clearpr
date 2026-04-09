@@ -77,7 +77,7 @@ ClearPR indexes your team's review history. When someone makes a mistake that wa
 ### Install
 
 ```bash
-git clone https://github.com/clearpr/clearpr.git
+git clone https://github.com/vineethkrishnan/clearpr.git
 cd clearpr
 cp .env.example .env
 ```
@@ -88,7 +88,11 @@ Edit `.env` with your credentials:
 GITHUB_APP_ID=your_app_id
 GITHUB_PRIVATE_KEY=your_private_key.pem
 GITHUB_WEBHOOK_SECRET=your_webhook_secret
-ANTHROPIC_API_KEY=sk-ant-...
+
+# LLM Provider — choose one: anthropic, openai, ollama, mistral, gemini
+LLM_PROVIDER=anthropic
+LLM_API_KEY=sk-ant-...
+
 DATABASE_URL=postgresql://clearpr:clearpr@db:5432/clearpr
 REDIS_URL=redis://redis:6379
 ```
@@ -155,10 +159,12 @@ Comment on any PR to interact with ClearPR:
 | `GITHUB_APP_ID` | Yes | — | GitHub App ID |
 | `GITHUB_PRIVATE_KEY` | Yes | — | Path to `.pem` private key |
 | `GITHUB_WEBHOOK_SECRET` | Yes | — | Webhook signature verification |
-| `ANTHROPIC_API_KEY` | Yes | — | Claude API key |
+| `LLM_PROVIDER` | No | `anthropic` | `anthropic`, `openai`, `ollama`, `mistral`, `gemini` |
+| `LLM_API_KEY` | Yes* | — | API key for chosen provider (*not required for Ollama) |
+| `LLM_MODEL` | No | (per provider) | Model override (e.g., `gpt-4o`, `llama3`) |
+| `LLM_BASE_URL` | No | — | Custom API URL (required for Ollama) |
 | `DATABASE_URL` | Yes | — | PostgreSQL connection string |
 | `REDIS_URL` | Yes | — | Redis connection string |
-| `REVIEW_MODEL` | No | `claude-sonnet-4-20250514` | Claude model to use |
 | `MAX_DIFF_LINES` | No | `5000` | Skip review if clean diff exceeds this |
 | `HISTORY_DEPTH` | No | `200` | Number of past PRs to index |
 
@@ -268,7 +274,7 @@ For a team of 10 doing ~200 PRs/month: **~$25–60/month** vs $80–220/month se
 
 ```bash
 # Clone the repo
-git clone https://github.com/clearpr/clearpr.git
+git clone https://github.com/vineethkrishnan/clearpr.git
 cd clearpr
 
 # Install dependencies
@@ -347,7 +353,7 @@ No. ClearPR is advisory only. It posts comments but never approves or requests c
 ClearPR falls back to whitespace-only filtering. You'll still get a cleaner diff than GitHub's default, just not as precise as AST-based filtering.
 
 **Can I use a different LLM instead of Claude?**
-Not yet. Claude-only for v1. Multi-provider support (OpenAI, Ollama, local models) is on the roadmap.
+Yes. ClearPR supports 5 providers: Anthropic Claude, OpenAI, Ollama (local), Mistral, and Google Gemini. Set `LLM_PROVIDER` in your `.env` to switch. See the [LLM Providers docs](docs-site/guide/llm-providers.md) for details.
 
 **How does it handle monorepos?**
 ClearPR processes each PR independently. For very large diffs, use `MAX_DIFF_LINES` and file exclusion patterns in `.reviewconfig` to keep token usage reasonable.

@@ -11,7 +11,7 @@ Thank you for your interest in contributing! This document covers the developmen
 ## Development Setup
 
 ```bash
-git clone https://github.com/vineethkrishnan/ClearPR.git
+git clone https://github.com/vineethkrishnan/clearpr.git
 cd ClearPR
 npm install
 cp .env.example .env  # fill in your GitHub App credentials

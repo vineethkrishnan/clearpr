@@ -58,6 +58,10 @@ docs/ARCHITECTURE.md
 .cursor/
 _knowledgebase/
 
+# VitePress build output
+docs-site/.vitepress/dist/
+docs-site/.vitepress/cache/
+
 # Temp
 tmp/
 temp/
