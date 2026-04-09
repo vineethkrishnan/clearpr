@@ -18,6 +18,7 @@ export default defineConfig({
           text: 'Introduction',
           items: [
             { text: 'What is ClearPR?', link: '/guide/what-is-clearpr' },
+            { text: 'Why ClearPR?', link: '/guide/why-clearpr' },
             { text: 'Getting Started', link: '/guide/getting-started' },
           ],
         },
