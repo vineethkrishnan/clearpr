@@ -16,8 +16,8 @@ export class WebhookController {
     @Req() request: Request,
     @Body() body: Record<string, unknown>,
   ): Promise<{ received: boolean }> {
-    const event = request.headers['x-github-event'] as string;
-    const deliveryId = request.headers['x-github-delivery'] as string;
+    const event = request.headers['x-github-event'] as string | undefined;
+    const deliveryId = request.headers['x-github-delivery'] as string | undefined;
     const action = (body['action'] as string) ?? '';
     const installation = body['installation'] as { id: number } | undefined;
 
@@ -26,11 +26,16 @@ export class WebhookController {
       return { received: false };
     }
 
+    if (!installation?.id) {
+      this.logger.warn({ event, deliveryId }, 'Webhook missing installation ID');
+      return { received: false };
+    }
+
     await this.dispatcher.dispatch({
       event,
       action,
       deliveryId,
-      installationId: installation?.id ?? 0,
+      installationId: installation.id,
       body,
     });
 

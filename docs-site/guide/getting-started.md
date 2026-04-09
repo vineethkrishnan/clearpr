@@ -11,7 +11,7 @@
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/vineethkrishnan/ClearPR.git
+git clone https://github.com/vineethkrishnan/clearpr.git
 cd ClearPR
 ```
 

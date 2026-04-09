@@ -13,7 +13,7 @@ Only the latest release is actively supported with security fixes.
 
 **Do not open a public GitHub issue for security vulnerabilities.**
 
-Please report vulnerabilities via [GitHub Security Advisories](https://github.com/vineethkrishnan/ClearPR/security/advisories/new) (private).
+Please report vulnerabilities via [GitHub Security Advisories](https://github.com/vineethkrishnan/clearpr/security/advisories/new) (private).
 
 We aim to acknowledge reports within **48 hours** and coordinate a fix before public disclosure.
 

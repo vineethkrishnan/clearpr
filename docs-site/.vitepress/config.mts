@@ -9,7 +9,7 @@ export default defineConfig({
     nav: [
       { text: 'Guide', link: '/guide/getting-started' },
       { text: 'Reference', link: '/reference/configuration' },
-      { text: 'GitHub', link: 'https://github.com/vineethkrishnan/ClearPR' },
+      { text: 'GitHub', link: 'https://github.com/vineethkrishnan/clearpr' },
     ],
 
     sidebar: {
@@ -58,7 +58,7 @@ export default defineConfig({
     },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/vineethkrishnan/ClearPR' },
+      { icon: 'github', link: 'https://github.com/vineethkrishnan/clearpr' },
     ],
 
     footer: {

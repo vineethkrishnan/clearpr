@@ -17,7 +17,7 @@ hero:
       link: /guide/why-clearpr
     - theme: alt
       text: GitHub
-      link: https://github.com/vineethkrishnan/ClearPR
+      link: https://github.com/vineethkrishnan/clearpr
 
 features:
   - icon: "\U0001F333"
