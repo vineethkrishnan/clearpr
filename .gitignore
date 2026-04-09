@@ -43,10 +43,10 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 
-# Internal planning docs (keep private)
-prd.md
-architecture.md
-roadmap.md
+# Internal planning docs (keep private, root-level only)
+/prd.md
+/architecture.md
+/roadmap.md
 *.arch.md
 *.roadmap.md
 

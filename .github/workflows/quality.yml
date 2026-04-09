@@ -14,6 +14,7 @@ jobs:
   dead-code:
     name: Dead Code
     runs-on: ubuntu-latest
+    if: hashFiles('package.json') != ''
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -26,6 +27,7 @@ jobs:
   duplicates:
     name: Code Duplication
     runs-on: ubuntu-latest
+    if: hashFiles('package.json') != ''
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -38,6 +40,7 @@ jobs:
   strict-types:
     name: Strict Type Safety
     runs-on: ubuntu-latest
+    if: hashFiles('package.json') != ''
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
