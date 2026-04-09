@@ -30,8 +30,8 @@ jobs:
     needs: release-please
     if: needs.release-please.outputs.release_created && hashFiles('package.json') != ''
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
           cache: npm
