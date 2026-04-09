@@ -8,6 +8,7 @@ import { Severity } from '../../domain/value-objects/severity.vo.js';
 import { ReviewTrigger } from '../../domain/value-objects/review-trigger.vo.js';
 import { MalformedLlmResponseError, ReviewSkippedError } from '../../domain/errors/review.errors.js';
 import { RESPONSE_TOKENS } from '../../domain/value-objects/token-budget.vo.js';
+import { PrFileListProviderPort } from '../../domain/ports/pr-file-list-provider.port.js';
 import { SemanticDiffService } from '../../../diff-engine/application/services/semantic-diff.service.js';
 import { GuidelineLoaderService } from './guideline-loader.service.js';
 import { PromptBuilderService } from './prompt-builder.service.js';
@@ -29,6 +30,7 @@ export class ReviewOrchestratorService {
     private readonly llmProvider: LlmProviderPort,
     private readonly reviewRepo: ReviewRepositoryPort,
     private readonly reviewPoster: ReviewPosterPort,
+    private readonly prFileListProvider: PrFileListProviderPort,
     private readonly memoryRetriever: MemoryRetrieverService,
     private readonly config: AppConfig,
   ) {}
@@ -51,6 +53,14 @@ export class ReviewOrchestratorService {
     await this.reviewRepo.save(review);
 
     try {
+      // Fetch PR file list
+      const prFiles = await this.prFileListProvider.getPrFiles(
+        context.installationId,
+        context.owner,
+        context.repo,
+        context.prNumber,
+      );
+
       // Compute semantic diff
       const diffResult = await this.diffService.computeDiff({
         installationId: context.installationId,
@@ -59,7 +69,7 @@ export class ReviewOrchestratorService {
         repo: context.repo,
         baseSha: context.baseBranch,
         headSha: context.prSha,
-        files: [], // Will be populated by the consumer from GitHub PR files
+        files: prFiles,
       });
 
       // Check size limit

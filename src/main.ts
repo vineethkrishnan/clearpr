@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
 import { Logger } from 'nestjs-pino';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -9,6 +10,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
     rawBody: true,
+    bodyParser: true,
   });
 
   app.useLogger(app.get(Logger));
@@ -23,8 +25,20 @@ async function bootstrap() {
   app.enableCors({ origin: false });
   app.use(compression());
 
+  // Validation
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
+
   // Global filter
   app.useGlobalFilters(new GlobalExceptionFilter());
+
+  // Graceful shutdown
+  app.enableShutdownHooks();
 
   const port = process.env['PORT'] ?? 3000;
   await app.listen(port);

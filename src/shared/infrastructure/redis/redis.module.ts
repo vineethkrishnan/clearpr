@@ -1,4 +1,4 @@
-import { Global, Module, type OnModuleDestroy } from '@nestjs/common';
+import { Global, Inject, Module, type OnModuleDestroy, type OnModuleInit, Logger } from '@nestjs/common';
 import Redis from 'ioredis';
 import { AppConfig, NodeEnv } from '../../../config/app.config.js';
 
@@ -11,7 +11,7 @@ export const REDIS_CLIENT = Symbol('REDIS_CLIENT');
       provide: REDIS_CLIENT,
       inject: [AppConfig],
       useFactory: (config: AppConfig): Redis => {
-        const redis = new Redis(config.REDIS_URL, {
+        return new Redis(config.REDIS_URL, {
           password: config.REDIS_PASSWORD,
           tls:
             config.NODE_ENV === NodeEnv.PRODUCTION
@@ -21,16 +21,27 @@ export const REDIS_CLIENT = Symbol('REDIS_CLIENT');
           retryStrategy: (times: number) => Math.min(times * 200, 5000),
           lazyConnect: true,
         });
-        return redis;
       },
     },
   ],
   exports: [REDIS_CLIENT],
 })
-export class RedisModule implements OnModuleDestroy {
-  constructor(private readonly redis: Redis) {}
+export class RedisModule implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(RedisModule.name);
+
+  constructor(@Inject(REDIS_CLIENT) private readonly redis: Redis) {}
+
+  async onModuleInit(): Promise<void> {
+    try {
+      await this.redis.connect();
+      this.logger.log('Redis connected');
+    } catch (error) {
+      this.logger.error('Redis connection failed — will retry on first use', error instanceof Error ? error.message : '');
+    }
+  }
 
   async onModuleDestroy(): Promise<void> {
     await this.redis.quit();
+    this.logger.log('Redis disconnected');
   }
 }

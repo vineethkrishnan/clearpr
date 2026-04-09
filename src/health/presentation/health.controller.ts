@@ -1,4 +1,4 @@
-import { Controller, Get, Inject } from '@nestjs/common';
+import { Controller, Get, Inject, Optional } from '@nestjs/common';
 import {
   HealthCheck,
   HealthCheckService,
@@ -15,7 +15,7 @@ export class HealthController {
   constructor(
     private readonly health: HealthCheckService,
     private readonly db: TypeOrmHealthIndicator,
-    @Inject(REDIS_CLIENT) private readonly redis: Redis,
+    @Optional() @Inject(REDIS_CLIENT) private readonly redis?: Redis,
   ) {}
 
   @Get()
@@ -36,13 +36,17 @@ export class HealthController {
   }
 
   private indicators(): HealthIndicatorFunction[] {
-    return [
+    const checks: HealthIndicatorFunction[] = [
       () => this.db.pingCheck('database'),
-      async (): Promise<HealthIndicatorResult> => this.checkRedis(),
     ];
+    if (this.redis) {
+      checks.push(async (): Promise<HealthIndicatorResult> => this.checkRedis());
+    }
+    return checks;
   }
 
   private async checkRedis(): Promise<HealthIndicatorResult> {
+    if (!this.redis) return { redis: { status: 'down' } };
     const result = await this.redis.ping();
     const isHealthy = result === 'PONG';
     return { redis: { status: isHealthy ? 'up' : 'down' } };

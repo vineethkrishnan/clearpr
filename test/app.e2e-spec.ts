@@ -10,20 +10,34 @@ import { WebhookController } from '../src/webhook/presentation/webhook.controlle
 import { WebhookDispatcherService } from '../src/webhook/application/services/webhook-dispatcher.service.js';
 import { HmacSignatureGuard } from '../src/webhook/infrastructure/guards/hmac-signature.guard.js';
 import { IdempotencyStorePort } from '../src/webhook/domain/ports/idempotency-store.port.js';
-import { AppConfig } from '../src/config/app.config.js';
+import { JobProducerService } from '../src/queue/producers/job-producer.service.js';
+import { InstallationRepositoryPort } from '../src/github/domain/ports/installation-repository.port.js';
+import { RepositoryRepositoryPort } from '../src/github/domain/ports/repository-repository.port.js';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 
-// In-memory idempotency store for tests
+// In-memory mocks
 class InMemoryIdempotencyStore extends IdempotencyStorePort {
   private store = new Set<string>();
-  async exists(id: string): Promise<boolean> {
-    return this.store.has(id);
-  }
-  async mark(id: string): Promise<void> {
-    this.store.add(id);
-  }
+  async exists(id: string): Promise<boolean> { return this.store.has(id); }
+  async mark(id: string): Promise<void> { this.store.add(id); }
 }
+
+const mockJobProducer = {
+  enqueueReview: jest.fn(),
+  enqueueCommand: jest.fn(),
+  enqueueIndexing: jest.fn(),
+};
+
+const mockInstallationRepo = {
+  save: jest.fn(),
+  findByGithubId: jest.fn().mockResolvedValue(null),
+};
+
+const mockRepositoryRepo = {
+  save: jest.fn(),
+  findByGithubId: jest.fn().mockResolvedValue(null),
+};
 
 const TEST_SECRET = 'e2e-test-secret';
 
@@ -31,7 +45,6 @@ function signPayload(body: string): string {
   return 'sha256=' + createHmac('sha256', TEST_SECRET).update(body).digest('hex');
 }
 
-// Minimal test module — just webhook + health, no DB/Redis/GitHub deps
 @Module({
   imports: [
     ConfigModule,
@@ -43,14 +56,11 @@ function signPayload(body: string): string {
   providers: [
     WebhookDispatcherService,
     HmacSignatureGuard,
-    {
-      provide: IdempotencyStorePort,
-      useClass: InMemoryIdempotencyStore,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
+    { provide: IdempotencyStorePort, useClass: InMemoryIdempotencyStore },
+    { provide: JobProducerService, useValue: mockJobProducer },
+    { provide: InstallationRepositoryPort, useValue: mockInstallationRepo },
+    { provide: RepositoryRepositoryPort, useValue: mockRepositoryRepo },
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],
 })
 class TestModule {}
@@ -84,7 +94,6 @@ describe('ClearPR E2E', () => {
 
     it('should return 401 when signature is invalid', async () => {
       const body = JSON.stringify({ action: 'opened' });
-
       await request(app.getHttpServer() as Server)
         .post('/webhook')
         .send(body)
@@ -122,7 +131,6 @@ describe('ClearPR E2E', () => {
       const signature = signPayload(body);
       const deliveryId = 'e2e-delivery-dup';
 
-      // First request
       await request(app.getHttpServer() as Server)
         .post('/webhook')
         .send(body)
@@ -132,7 +140,6 @@ describe('ClearPR E2E', () => {
         .set('x-hub-signature-256', signature)
         .expect(200);
 
-      // Duplicate — should still return 200
       await request(app.getHttpServer() as Server)
         .post('/webhook')
         .send(body)
