@@ -21,13 +21,32 @@ export class TypeOrmReviewRepository extends ReviewRepositoryPort {
     return review;
   }
 
-  async findByPrAndSha(repositoryId: string, prNumber: number, sha: string): Promise<Review | null> {
+  async findByPrAndSha(
+    repositoryId: string,
+    prNumber: number,
+    sha: string,
+  ): Promise<Review | null> {
     const row = await this.repo.findOneBy({
       repository_id: repositoryId,
       pr_number: prNumber,
       pr_sha: sha,
     });
     return row ? this.toDomain(row) : null;
+  }
+
+  async deleteByRepositoryId(repositoryId: string): Promise<number> {
+    const result = await this.repo.delete({ repository_id: repositoryId });
+    return result.affected ?? 0;
+  }
+
+  async deleteByRepositoryIds(repositoryIds: string[]): Promise<number> {
+    if (repositoryIds.length === 0) return 0;
+    const result = await this.repo
+      .createQueryBuilder()
+      .delete()
+      .where('repository_id IN (:...ids)', { ids: repositoryIds })
+      .execute();
+    return result.affected ?? 0;
   }
 
   private toRow(entity: Review): ReviewRow {

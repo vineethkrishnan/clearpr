@@ -24,6 +24,6 @@ import { OutcomeDetectorService } from './application/services/outcome-detector.
     MemoryRetrieverService,
     OutcomeDetectorService,
   ],
-  exports: [MemoryRetrieverService, MemoryIndexerService],
+  exports: [MemoryRetrieverService, MemoryIndexerService, MemoryRepositoryPort],
 })
 export class MemoryModule {}

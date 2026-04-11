@@ -1,11 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { IdempotencyStorePort } from '../../domain/ports/idempotency-store.port.js';
-import { mapWebhookEvent, ClearPrAction } from '../../domain/value-objects/webhook-event-type.vo.js';
+import {
+  mapWebhookEvent,
+  ClearPrAction,
+} from '../../domain/value-objects/webhook-event-type.vo.js';
 import { JobProducerService } from '../../../queue/producers/job-producer.service.js';
 import { InstallationRepositoryPort } from '../../../github/domain/ports/installation-repository.port.js';
 import { RepositoryRepositoryPort } from '../../../github/domain/ports/repository-repository.port.js';
 import { Installation } from '../../../github/domain/entities/installation.entity.js';
 import { Repository } from '../../../github/domain/entities/repository.entity.js';
+import { InstallationCleanupService } from '../../../review/application/services/installation-cleanup.service.js';
 import type { WebhookPayload } from '../types/webhook-event.types.js';
 
 export interface DispatchResult {
@@ -23,6 +27,7 @@ export class WebhookDispatcherService {
     private readonly jobProducer: JobProducerService,
     private readonly installationRepo: InstallationRepositoryPort,
     private readonly repositoryRepo: RepositoryRepositoryPort,
+    private readonly cleanupService: InstallationCleanupService,
   ) {}
 
   async dispatch(payload: WebhookPayload): Promise<DispatchResult> {
@@ -41,7 +46,11 @@ export class WebhookDispatcherService {
     }
 
     this.logger.log(
-      { deliveryId: payload.deliveryId, clearprAction: action, installationId: payload.installationId },
+      {
+        deliveryId: payload.deliveryId,
+        clearprAction: action,
+        installationId: payload.installationId,
+      },
       `Webhook dispatched: ${action}`,
     );
 
@@ -62,7 +71,7 @@ export class WebhookDispatcherService {
         await this.handleReposAdded(payload);
         break;
       case ClearPrAction.REPOS_REMOVED:
-        // Repos removed — no-op for now, tracked repos remain in DB
+        await this.handleReposRemoved(payload);
         break;
     }
 
@@ -70,7 +79,9 @@ export class WebhookDispatcherService {
   }
 
   private async handleReviewPr(payload: WebhookPayload): Promise<void> {
-    const pr = payload.body['pull_request'] as { number: number; head: { sha: string }; base: { ref: string } } | undefined;
+    const pr = payload.body['pull_request'] as
+      | { number: number; head: { sha: string }; base: { ref: string } }
+      | undefined;
     const repo = payload.body['repository'] as { id: number; full_name: string } | undefined;
     if (!pr || !repo) return;
 
@@ -118,10 +129,12 @@ export class WebhookDispatcherService {
   }
 
   private async handleInstallationCreated(payload: WebhookPayload): Promise<void> {
-    const account = payload.body['installation'] as {
-      id: number;
-      account: { login: string; type: string };
-    } | undefined;
+    const account = payload.body['installation'] as
+      | {
+          id: number;
+          account: { login: string; type: string };
+        }
+      | undefined;
     if (!account) return;
 
     const installation = Installation.create({
@@ -132,7 +145,9 @@ export class WebhookDispatcherService {
     await this.installationRepo.save(installation);
 
     // Register initial repositories
-    const repos = payload.body['repositories'] as Array<{ id: number; full_name: string }> | undefined;
+    const repos = payload.body['repositories'] as
+      | Array<{ id: number; full_name: string }>
+      | undefined;
     if (repos) {
       for (const repo of repos) {
         const repository = Repository.create({
@@ -154,7 +169,12 @@ export class WebhookDispatcherService {
     });
 
     this.logger.log(
-      { audit: true, event: 'installation_created', ghInstallationId: account.id, accountLogin: account.account.login },
+      {
+        audit: true,
+        event: 'installation_created',
+        ghInstallationId: account.id,
+        accountLogin: account.account.login,
+      },
       `Installation created: ${account.account.login}`,
     );
   }
@@ -166,15 +186,26 @@ export class WebhookDispatcherService {
     const installation = await this.installationRepo.findByGithubId(ghInstallation.id);
     if (!installation) return;
 
-    // We don't delete — just log. Data cleanup can be scheduled separately.
+    const result = await this.cleanupService.cleanupInstallation(
+      installation.id,
+      ghInstallation.id,
+    );
+
     this.logger.log(
-      { audit: true, event: 'installation_deleted', ghInstallationId: ghInstallation.id },
+      {
+        audit: true,
+        event: 'installation_deleted',
+        ghInstallationId: ghInstallation.id,
+        ...result,
+      },
       `Installation deleted: ${ghInstallation.id}`,
     );
   }
 
   private async handleReposAdded(payload: WebhookPayload): Promise<void> {
-    const repos = payload.body['repositories_added'] as Array<{ id: number; full_name: string }> | undefined;
+    const repos = payload.body['repositories_added'] as
+      | Array<{ id: number; full_name: string }>
+      | undefined;
     if (!repos) return;
 
     const ghInstallation = payload.body['installation'] as { id: number } | undefined;
@@ -193,6 +224,27 @@ export class WebhookDispatcherService {
         });
         await this.repositoryRepo.save(repository);
       }
+    }
+  }
+
+  private async handleReposRemoved(payload: WebhookPayload): Promise<void> {
+    const repos = payload.body['repositories_removed'] as
+      | Array<{ id: number; full_name: string }>
+      | undefined;
+    if (!repos || repos.length === 0) return;
+
+    for (const repo of repos) {
+      const result = await this.cleanupService.cleanupRepository(repo.id);
+      this.logger.log(
+        {
+          audit: true,
+          event: 'repository_removed',
+          githubRepoId: repo.id,
+          fullName: repo.full_name,
+          ...(result ?? { skipped: true }),
+        },
+        `Repository removed: ${repo.full_name}`,
+      );
     }
   }
 }

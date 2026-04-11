@@ -17,6 +17,7 @@ import { PromptBuilderService } from './application/services/prompt-builder.serv
 import { ReviewOrchestratorService } from './application/services/review-orchestrator.service.js';
 import { IgnoreListService } from './application/services/ignore-list.service.js';
 import { CommandHandlerService } from './application/services/command-handler.service.js';
+import { InstallationCleanupService } from './application/services/installation-cleanup.service.js';
 
 @Module({
   imports: [TypeOrmModule.forFeature([ReviewSchema]), GitHubModule, DiffEngineModule, MemoryModule],
@@ -40,7 +41,13 @@ import { CommandHandlerService } from './application/services/command-handler.se
     IgnoreListService,
     ReviewOrchestratorService,
     CommandHandlerService,
+    InstallationCleanupService,
   ],
-  exports: [ReviewOrchestratorService, IgnoreListService, CommandHandlerService],
+  exports: [
+    ReviewOrchestratorService,
+    IgnoreListService,
+    CommandHandlerService,
+    InstallationCleanupService,
+  ],
 })
 export class ReviewModule {}
