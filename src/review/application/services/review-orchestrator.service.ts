@@ -6,15 +6,23 @@ import { Review } from '../../domain/entities/review.entity.js';
 import { ReviewComment } from '../../domain/entities/review-comment.entity.js';
 import { Severity } from '../../domain/value-objects/severity.vo.js';
 import { ReviewTrigger } from '../../domain/value-objects/review-trigger.vo.js';
-import { MalformedLlmResponseError, ReviewSkippedError } from '../../domain/errors/review.errors.js';
+import {
+  MalformedLlmResponseError,
+  ReviewSkippedError,
+} from '../../domain/errors/review.errors.js';
 import { RESPONSE_TOKENS } from '../../domain/value-objects/token-budget.vo.js';
 import { PrFileListProviderPort } from '../../domain/ports/pr-file-list-provider.port.js';
 import { SemanticDiffService } from '../../../diff-engine/application/services/semantic-diff.service.js';
 import { GuidelineLoaderService } from './guideline-loader.service.js';
 import { PromptBuilderService } from './prompt-builder.service.js';
+import { IgnoreListService } from './ignore-list.service.js';
+import { matchesAnyPattern } from './glob-match.util.js';
 import { MemoryRetrieverService } from '../../../memory/application/services/memory-retriever.service.js';
 import type { ReviewContext } from '../../domain/types/review-context.types.js';
-import type { ParsedReview, ParsedReviewComment } from '../../application/types/review-result.types.js';
+import type {
+  ParsedReview,
+  ParsedReviewComment,
+} from '../../application/types/review-result.types.js';
 import { type Result, ok, err } from '../../../shared/types/result.types.js';
 import { type DomainError } from '../../../shared/domain/errors/domain-error.base.js';
 import { AppConfig } from '../../../config/app.config.js';
@@ -32,6 +40,7 @@ export class ReviewOrchestratorService {
     private readonly reviewPoster: ReviewPosterPort,
     private readonly prFileListProvider: PrFileListProviderPort,
     private readonly memoryRetriever: MemoryRetrieverService,
+    private readonly ignoreList: IgnoreListService,
     private readonly config: AppConfig,
   ) {}
 
@@ -61,6 +70,16 @@ export class ReviewOrchestratorService {
         context.prNumber,
       );
 
+      // Apply per-PR ignore patterns stored in Redis (via @clearpr ignore)
+      const ignorePatterns = await this.ignoreList.getPatterns(
+        context.repositoryId,
+        context.prNumber,
+      );
+      const filteredFiles =
+        ignorePatterns.length > 0
+          ? prFiles.filter((f) => !matchesAnyPattern(f.filename, ignorePatterns))
+          : prFiles;
+
       // Compute semantic diff
       const diffResult = await this.diffService.computeDiff({
         installationId: context.installationId,
@@ -69,7 +88,7 @@ export class ReviewOrchestratorService {
         repo: context.repo,
         baseSha: context.baseBranch,
         headSha: context.prSha,
-        files: prFiles,
+        files: filteredFiles,
       });
 
       // Check size limit
@@ -201,7 +220,7 @@ export class ReviewOrchestratorService {
         .map((c) => ({
           path: c.path,
           line: c.line,
-          side: (c.side === 'LEFT' ? 'LEFT' : 'RIGHT') as 'LEFT' | 'RIGHT',
+          side: c.side === 'LEFT' ? 'LEFT' : 'RIGHT',
           severity: (Object.values(Severity).includes(c.severity as Severity)
             ? c.severity
             : Severity.INFO) as Severity,

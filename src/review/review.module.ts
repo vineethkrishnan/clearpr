@@ -15,14 +15,11 @@ import { PromptSanitizer } from './application/services/prompt-sanitizer.service
 import { GuidelineLoaderService } from './application/services/guideline-loader.service.js';
 import { PromptBuilderService } from './application/services/prompt-builder.service.js';
 import { ReviewOrchestratorService } from './application/services/review-orchestrator.service.js';
+import { IgnoreListService } from './application/services/ignore-list.service.js';
+import { CommandHandlerService } from './application/services/command-handler.service.js';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([ReviewSchema]),
-    GitHubModule,
-    DiffEngineModule,
-    MemoryModule,
-  ],
+  imports: [TypeOrmModule.forFeature([ReviewSchema]), GitHubModule, DiffEngineModule, MemoryModule],
   providers: [
     createLlmProvider(),
     {
@@ -40,8 +37,10 @@ import { ReviewOrchestratorService } from './application/services/review-orchest
     PromptSanitizer,
     GuidelineLoaderService,
     PromptBuilderService,
+    IgnoreListService,
     ReviewOrchestratorService,
+    CommandHandlerService,
   ],
-  exports: [ReviewOrchestratorService],
+  exports: [ReviewOrchestratorService, IgnoreListService, CommandHandlerService],
 })
 export class ReviewModule {}
