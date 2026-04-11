@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository as TypeOrmRepo } from 'typeorm';
-import { MemoryRepositoryPort, type SimilarMemoryResult } from '../../domain/ports/memory-repository.port.js';
+import {
+  MemoryRepositoryPort,
+  type SimilarMemoryResult,
+} from '../../domain/ports/memory-repository.port.js';
 import { PrMemoryEntry } from '../../domain/entities/pr-memory-entry.entity.js';
 import { type FeedbackOutcome } from '../../domain/value-objects/feedback-outcome.vo.js';
 import { PrMemorySchema, type PrMemoryRow } from './memory.schema.js';
@@ -50,6 +53,21 @@ export class TypeOrmMemoryRepository extends MemoryRepositoryPort {
       .filter((r) => r.similarity >= _threshold)
       .sort((a, b) => b.similarity - a.similarity)
       .slice(0, limit);
+  }
+
+  async deleteByRepositoryId(repositoryId: string): Promise<number> {
+    const result = await this.repo.delete({ repository_id: repositoryId });
+    return result.affected ?? 0;
+  }
+
+  async deleteByRepositoryIds(repositoryIds: string[]): Promise<number> {
+    if (repositoryIds.length === 0) return 0;
+    const result = await this.repo
+      .createQueryBuilder()
+      .delete()
+      .where('repository_id IN (:...ids)', { ids: repositoryIds })
+      .execute();
+    return result.affected ?? 0;
   }
 
   private cosineSimilarity(a: number[], b: number[]): number {

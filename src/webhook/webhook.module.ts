@@ -8,14 +8,14 @@ import { IdempotencyStorePort } from './domain/ports/idempotency-store.port.js';
 import { RedisIdempotencyStoreAdapter } from './infrastructure/adapters/redis-idempotency-store.adapter.js';
 import { QueueModule } from '../queue/queue.module.js';
 import { GitHubModule } from '../github/github.module.js';
+import { ReviewModule } from '../review/review.module.js';
 
 @Module({
   imports: [
-    ThrottlerModule.forRoot([
-      { name: 'webhook', ttl: 60000, limit: 100 },
-    ]),
+    ThrottlerModule.forRoot([{ name: 'webhook', ttl: 60000, limit: 100 }]),
     forwardRef(() => QueueModule),
     GitHubModule,
+    ReviewModule,
   ],
   controllers: [WebhookController],
   providers: [

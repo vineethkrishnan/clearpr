@@ -55,4 +55,7 @@ export class Installation extends BaseEntity {
     return this._status;
   }
 
+  markInactive(): void {
+    this._status = InstallationStatus.inactive();
+  }
 }
