@@ -13,14 +13,21 @@ import { IdempotencyStorePort } from '../src/webhook/domain/ports/idempotency-st
 import { JobProducerService } from '../src/queue/producers/job-producer.service.js';
 import { InstallationRepositoryPort } from '../src/github/domain/ports/installation-repository.port.js';
 import { RepositoryRepositoryPort } from '../src/github/domain/ports/repository-repository.port.js';
+import { InstallationCleanupService } from '../src/review/application/services/installation-cleanup.service.js';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 
 // In-memory mocks
 class InMemoryIdempotencyStore extends IdempotencyStorePort {
   private store = new Set<string>();
-  async exists(id: string): Promise<boolean> { return this.store.has(id); }
-  async mark(id: string): Promise<void> { this.store.add(id); }
+  async exists(id: string): Promise<boolean> {
+    await Promise.resolve();
+    return this.store.has(id);
+  }
+  async mark(id: string): Promise<void> {
+    await Promise.resolve();
+    this.store.add(id);
+  }
 }
 
 const mockJobProducer = {
@@ -37,6 +44,18 @@ const mockInstallationRepo = {
 const mockRepositoryRepo = {
   save: jest.fn(),
   findByGithubId: jest.fn().mockResolvedValue(null),
+  findByInstallationId: jest.fn().mockResolvedValue([]),
+  deleteByInstallationId: jest.fn().mockResolvedValue(0),
+  deleteByGithubId: jest.fn().mockResolvedValue(null),
+};
+
+const mockCleanupService = {
+  cleanupInstallation: jest.fn().mockResolvedValue({
+    repositoriesDeleted: 0,
+    reviewsDeleted: 0,
+    memoryEntriesDeleted: 0,
+  }),
+  cleanupRepository: jest.fn().mockResolvedValue(null),
 };
 
 const TEST_SECRET = 'e2e-test-secret';
@@ -60,6 +79,7 @@ function signPayload(body: string): string {
     { provide: JobProducerService, useValue: mockJobProducer },
     { provide: InstallationRepositoryPort, useValue: mockInstallationRepo },
     { provide: RepositoryRepositoryPort, useValue: mockRepositoryRepo },
+    { provide: InstallationCleanupService, useValue: mockCleanupService },
     { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],
 })
