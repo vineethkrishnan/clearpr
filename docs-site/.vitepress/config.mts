@@ -20,6 +20,7 @@ export default defineConfig({
             { text: 'What is ClearPR?', link: '/guide/what-is-clearpr' },
             { text: 'Why ClearPR?', link: '/guide/why-clearpr' },
             { text: 'Getting Started', link: '/guide/getting-started' },
+            { text: 'Requirements', link: '/guide/requirements' },
           ],
         },
         {
@@ -42,6 +43,13 @@ export default defineConfig({
           items: [
             { text: 'Overview', link: '/guide/architecture' },
             { text: 'Domain Model', link: '/guide/domain-model' },
+          ],
+        },
+        {
+          text: 'Help',
+          items: [
+            { text: 'FAQ & Troubleshooting', link: '/guide/faq' },
+            { text: 'Help & Support', link: '/guide/support' },
           ],
         },
       ],
