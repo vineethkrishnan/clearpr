@@ -10,10 +10,7 @@ import { AppConfig, NodeEnv } from '../../../config/app.config.js';
       useFactory: (config: AppConfig) => ({
         type: 'postgres',
         url: config.DATABASE_URL,
-        ssl:
-          config.NODE_ENV === NodeEnv.PRODUCTION
-            ? { rejectUnauthorized: true }
-            : false,
+        ssl: config.NODE_ENV === NodeEnv.PRODUCTION ? { rejectUnauthorized: true } : false,
         autoLoadEntities: true,
         synchronize: false,
         extra: {

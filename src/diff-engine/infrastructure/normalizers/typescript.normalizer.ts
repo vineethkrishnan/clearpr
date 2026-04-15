@@ -22,18 +22,15 @@ export class TypeScriptNormalizer implements LanguageNormalizer {
     result = result.replace(/[ \t]+$/gm, '');
 
     // Sort import specifiers (e.g., { b, a } → { a, b })
-    result = result.replace(
-      /import\s*\{([^}]+)\}\s*from/g,
-      (_match, specifiers: string) => {
-        const sorted = specifiers
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean)
-          .sort()
-          .join(', ');
-        return `import { ${sorted} } from`;
-      },
-    );
+    result = result.replace(/import\s*\{([^}]+)\}\s*from/g, (_match, specifiers: string) => {
+      const sorted = specifiers
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .sort()
+        .join(', ');
+      return `import { ${sorted} } from`;
+    });
 
     return result.trim();
   }

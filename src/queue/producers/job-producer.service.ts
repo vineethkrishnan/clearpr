@@ -42,7 +42,12 @@ export class JobProducerService {
     const job = await this.reviewQueue.add('review-pr', payload, {
       priority: payload.trigger === 'manual' ? 1 : 10,
     });
-    await this.redis.set(debounceKey, job.id ?? '', 'EX', Math.floor(this.config.DEBOUNCE_WINDOW_MS / 1000));
+    await this.redis.set(
+      debounceKey,
+      job.id ?? '',
+      'EX',
+      Math.floor(this.config.DEBOUNCE_WINDOW_MS / 1000),
+    );
 
     this.logger.log(
       { prNumber: payload.prNumber, jobId: job.id, trigger: payload.trigger },
@@ -63,9 +68,6 @@ export class JobProducerService {
       payload.type === 'bulk' ? 'index-pr-history' : 'index-merged-pr',
       payload,
     );
-    this.logger.log(
-      { type: payload.type, jobId: job.id },
-      'Indexing job enqueued',
-    );
+    this.logger.log({ type: payload.type, jobId: job.id }, 'Indexing job enqueued');
   }
 }

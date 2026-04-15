@@ -25,9 +25,13 @@ export class IndexingConsumer extends WorkerHost {
       `Processing ${payload.type} indexing job`,
     );
 
-    // Actual PR history fetching and comment extraction will be
-    // orchestrated by the MemoryIndexerService when connected to
-    // the GitHub module. For now, the consumer is wired and ready.
+    // Stub: MemoryIndexerService will be wired once the GitHub module
+    // exposes PR history fetching. Touch the injected service so the
+    // hook stays a no-op today without tripping unused-locals, and
+    // satisfy the async/Promise signature required by WorkerHost.
+    void this.indexer;
+    await Promise.resolve();
+
     this.logger.log(
       { correlationId: payload.correlationId, jobId: job.id },
       'Indexing job completed',

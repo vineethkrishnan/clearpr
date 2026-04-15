@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Octokit } from 'octokit';
 import { InstallationTokenService } from './installation-token.service.js';
 import { RateLimiterService } from './rate-limiter.service.js';
@@ -7,8 +7,6 @@ import type { GitHubPrFile, GitHubPr } from '../types/github-types.js';
 
 @Injectable()
 export class GitHubClientService {
-  private readonly logger = new Logger(GitHubClientService.name);
-
   constructor(
     private readonly tokenService: InstallationTokenService,
     private readonly rateLimiter: RateLimiterService,
@@ -74,7 +72,7 @@ export class GitHubClientService {
 
       return data.map((file) => ({
         filename: file.filename,
-        status: file.status as GitHubPrFile['status'],
+        status: file.status,
         additions: file.additions,
         deletions: file.deletions,
         patch: file.patch,
@@ -107,7 +105,11 @@ export class GitHubClientService {
       }
       return null;
     } catch (error) {
-      if (error instanceof Error && 'status' in error && (error as { status: number }).status === 404) {
+      if (
+        error instanceof Error &&
+        'status' in error &&
+        (error as { status: number }).status === 404
+      ) {
         return null;
       }
       throw this.wrapError(error);
@@ -167,9 +169,7 @@ export class GitHubClientService {
   private wrapError(error: unknown): GitHubApiError {
     if (error instanceof GitHubApiError) return error;
     const statusCode =
-      error instanceof Error && 'status' in error
-        ? (error as { status: number }).status
-        : 500;
+      error instanceof Error && 'status' in error ? (error as { status: number }).status : 500;
     const message = error instanceof Error ? error.message : 'Unknown GitHub API error';
     return new GitHubApiError(message, statusCode);
   }

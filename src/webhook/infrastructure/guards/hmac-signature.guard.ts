@@ -1,4 +1,10 @@
-import { CanActivate, ExecutionContext, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import type { RawBodyRequest } from '@nestjs/common';
 import type { Request } from 'express';
@@ -30,9 +36,7 @@ export class HmacSignatureGuard implements CanActivate {
 
     const expected =
       'sha256=' +
-      createHmac('sha256', this.config.GITHUB_WEBHOOK_SECRET)
-        .update(rawBody)
-        .digest('hex');
+      createHmac('sha256', this.config.GITHUB_WEBHOOK_SECRET).update(rawBody).digest('hex');
 
     const signatureBuffer = Buffer.from(signature);
     const expectedBuffer = Buffer.from(expected);

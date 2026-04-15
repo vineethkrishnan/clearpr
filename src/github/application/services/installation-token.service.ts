@@ -34,10 +34,7 @@ export class InstallationTokenService {
 
     const token = data.token;
     const expiresAt = new Date(data.expires_at);
-    const ttlSeconds = Math.max(
-      Math.floor((expiresAt.getTime() - Date.now()) / 1000) - 600,
-      60,
-    );
+    const ttlSeconds = Math.max(Math.floor((expiresAt.getTime() - Date.now()) / 1000) - 600, 60);
 
     await this.redis.set(cacheKey, token, 'EX', ttlSeconds);
 
