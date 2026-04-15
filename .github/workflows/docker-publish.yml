@@ -9,6 +9,16 @@ on:
       tag_name:
         required: true
         type: string
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Semver version to tag the image with (e.g. 0.1.0)'
+        required: true
+        type: string
+      tag_name:
+        description: 'Git tag name (e.g. v0.1.0) — used for release asset naming'
+        required: true
+        type: string
 
 env:
   DOCKER_HUB_IMAGE: vineethkrishnan/clearpr
