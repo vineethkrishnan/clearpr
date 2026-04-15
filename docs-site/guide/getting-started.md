@@ -17,7 +17,7 @@ Released versions are published to GitHub Container Registry and Docker Hub on e
 docker pull ghcr.io/vineethkrishnan/clearpr:latest
 
 # …or Docker Hub
-docker pull vineethkrishnan/clearpr:latest
+docker pull vineethnkrishnan/clearpr:latest
 ```
 
 Pin to a specific version (`:1.2.3`), a minor (`:1.2`), or a major (`:1`) instead of `:latest` for production.
