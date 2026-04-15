@@ -20,9 +20,7 @@ export class OutcomeDetectorService {
     );
 
     // If any subsequent commit modified the same file → accepted
-    const fileWasChanged = commitsAfterComment.some((c) =>
-      c.changedFiles.includes(input.filePath),
-    );
+    const fileWasChanged = commitsAfterComment.some((c) => c.changedFiles.includes(input.filePath));
 
     return fileWasChanged ? FeedbackOutcome.ACCEPTED : FeedbackOutcome.DISMISSED;
   }

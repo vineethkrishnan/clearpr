@@ -10,9 +10,7 @@ describe('BaseEntity', () => {
   it('should generate a UUID id when none provided', () => {
     const entity = new TestEntity();
     expect(entity.id).toBeDefined();
-    expect(entity.id).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
-    );
+    expect(entity.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
   });
 
   it('should use provided id', () => {

@@ -1,4 +1,5 @@
 import { Global, Module } from '@nestjs/common';
+import type { Request } from 'express';
 import { ClsModule as NestClsModule } from 'nestjs-cls';
 
 export const CLS_CORRELATION_ID = 'correlationId';
@@ -11,7 +12,7 @@ export const CLS_CORRELATION_ID = 'correlationId';
       middleware: {
         mount: true,
         generateId: true,
-        setup: (cls, req) => {
+        setup: (cls, req: Request) => {
           const deliveryId = req.headers['x-github-delivery'];
           if (typeof deliveryId === 'string') {
             cls.set(CLS_CORRELATION_ID, deliveryId);

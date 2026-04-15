@@ -12,7 +12,7 @@ describe('TypeScriptNormalizer', () => {
   it('should remove trailing commas', () => {
     const input = 'const arr = [1, 2, 3,]';
     const result = normalizer.normalize(input);
-    expect(result).toBe("const arr = [1, 2, 3]");
+    expect(result).toBe('const arr = [1, 2, 3]');
   });
 
   it('should remove semicolons', () => {

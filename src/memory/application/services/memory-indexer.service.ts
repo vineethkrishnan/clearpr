@@ -21,10 +21,7 @@ export class MemoryIndexerService {
     private readonly memoryRepo: MemoryRepositoryPort,
   ) {}
 
-  async indexComments(
-    repositoryId: string,
-    comments: IndexableComment[],
-  ): Promise<number> {
+  async indexComments(repositoryId: string, comments: IndexableComment[]): Promise<number> {
     if (comments.length === 0) return 0;
 
     // Batch embed all comments

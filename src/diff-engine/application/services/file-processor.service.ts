@@ -70,8 +70,22 @@ export class FileProcessorService {
 
     // Fetch file contents
     const [baseContent, headContent] = await Promise.all([
-      this.fileProvider.getFileContent(repositoryId, installationId, owner, repo, baseSha, file.previousFilename ?? file.filename),
-      this.fileProvider.getFileContent(repositoryId, installationId, owner, repo, headSha, file.filename),
+      this.fileProvider.getFileContent(
+        repositoryId,
+        installationId,
+        owner,
+        repo,
+        baseSha,
+        file.previousFilename ?? file.filename,
+      ),
+      this.fileProvider.getFileContent(
+        repositoryId,
+        installationId,
+        owner,
+        repo,
+        headSha,
+        file.filename,
+      ),
     ]);
 
     if (!baseContent || !headContent) {
@@ -117,10 +131,7 @@ export class FileProcessorService {
 
     // Compute semantic diff hunks
     const hunks = this.computeHunks(normalizedBase, normalizedHead);
-    const semanticLines = hunks.reduce(
-      (sum, h) => sum + (h.endLine - h.startLine + 1),
-      0,
-    );
+    const semanticLines = hunks.reduce((sum, h) => sum + (h.endLine - h.startLine + 1), 0);
 
     return new FileDiff({
       filePath: file.filename,

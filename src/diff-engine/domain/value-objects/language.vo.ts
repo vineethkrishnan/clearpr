@@ -35,7 +35,9 @@ export class Language extends ValueObject<LanguageProps> {
     if (overrides) {
       for (const [pattern, lang] of Object.entries(overrides)) {
         if (filePath.endsWith(pattern.replace('*', ''))) {
-          const value = Object.values(LanguageValue).find((v) => v === lang);
+          const value = Object.values(LanguageValue).find(
+            (candidate) => candidate === (lang as LanguageValue),
+          );
           if (value) return new Language({ value });
         }
       }

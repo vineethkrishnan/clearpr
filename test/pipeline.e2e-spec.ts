@@ -193,6 +193,11 @@ class FakeEmbeddingProvider extends EmbeddingProviderPort {
     await Promise.resolve();
     return new Array(512).fill(0) as number[];
   }
+
+  async embedBatch(texts: string[]): Promise<number[][]> {
+    await Promise.resolve();
+    return texts.map(() => new Array(512).fill(0) as number[]);
+  }
 }
 
 class FakeFileContentProvider extends FileContentProviderPort {

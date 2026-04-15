@@ -23,8 +23,11 @@ export class MistralLlmAdapter extends LlmProviderPort {
         messages: [{ role: 'user', content: prompt }],
       });
 
+      const rawContent = response.choices?.[0]?.message?.content;
+      const content = typeof rawContent === 'string' ? rawContent : '';
+
       return {
-        content: response.choices?.[0]?.message?.content?.toString() ?? '',
+        content,
         promptTokens: response.usage?.promptTokens ?? 0,
         completionTokens: response.usage?.completionTokens ?? 0,
         model: response.model ?? this.model,

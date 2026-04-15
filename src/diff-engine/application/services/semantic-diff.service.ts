@@ -2,23 +2,35 @@ import { Injectable, Logger } from '@nestjs/common';
 import { FileProcessorService } from './file-processor.service.js';
 import { calculateNoiseReductionPct } from '../../domain/utils/noise-reduction.js';
 import type { DiffInput, SemanticDiffResult } from '../types/diff-result.types.js';
-import { AppConfig } from '../../../config/app.config.js';
 
 const BINARY_EXTENSIONS = new Set([
-  '.png', '.jpg', '.jpeg', '.gif', '.ico', '.webp', '.svg',
-  '.woff', '.woff2', '.ttf', '.eot',
-  '.zip', '.tar', '.gz', '.bz2',
-  '.pdf', '.exe', '.dll', '.so', '.dylib',
+  '.png',
+  '.jpg',
+  '.jpeg',
+  '.gif',
+  '.ico',
+  '.webp',
+  '.svg',
+  '.woff',
+  '.woff2',
+  '.ttf',
+  '.eot',
+  '.zip',
+  '.tar',
+  '.gz',
+  '.bz2',
+  '.pdf',
+  '.exe',
+  '.dll',
+  '.so',
+  '.dylib',
 ]);
 
 @Injectable()
 export class SemanticDiffService {
   private readonly logger = new Logger(SemanticDiffService.name);
 
-  constructor(
-    private readonly fileProcessor: FileProcessorService,
-    private readonly config: AppConfig,
-  ) {}
+  constructor(private readonly fileProcessor: FileProcessorService) {}
 
   async computeDiff(input: DiffInput): Promise<SemanticDiffResult> {
     const skippedFiles: string[] = [];

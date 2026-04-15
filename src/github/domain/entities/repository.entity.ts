@@ -48,5 +48,4 @@ export class Repository extends BaseEntity {
   }): Repository {
     return new Repository(params);
   }
-
 }
