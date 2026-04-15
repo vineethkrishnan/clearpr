@@ -12,7 +12,6 @@ jobs:
   codeql:
     name: CodeQL
     runs-on: ubuntu-latest
-    if: hashFiles('**/*.js', '**/*.ts', '**/*.jsx', '**/*.tsx') != ''
     permissions:
       actions: read
       contents: read
@@ -28,7 +27,7 @@ jobs:
   dependency-review:
     name: Dependency Review
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && hashFiles('package.json') != ''
+    if: github.event_name == 'pull_request'
     permissions:
       contents: read
       pull-requests: write
@@ -42,7 +41,6 @@ jobs:
   trivy-filesystem:
     name: Trivy (Source)
     runs-on: ubuntu-latest
-    if: hashFiles('package.json') != ''
     permissions:
       contents: read
       security-events: write
