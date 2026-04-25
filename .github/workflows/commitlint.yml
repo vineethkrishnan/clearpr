@@ -37,6 +37,7 @@ jobs:
             config
             docker
             deps
+            deps-dev
             ci
             docs
             security
