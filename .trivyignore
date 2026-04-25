@@ -1,0 +1,9 @@
+# Trivy ignore list. Format: one CVE/GHSA per line, optional `#` rationale.
+
+# uuid <14.0.0 (transitive via bullmq + typeorm)
+# Advisory affects only v3/v5/v6 when a caller passes the `buf` argument.
+# Both bullmq and typeorm use uuid v4 (random) for queue/entity identifiers and
+# never pass `buf`, so the bounds-check bug is not reachable from this code base.
+# uuid@14 is the first fixed version but is ESM-only and breaks Jest's CJS
+# resolution; revisit once bullmq/typeorm or our test runner support pure ESM.
+GHSA-w5hq-g745-h8pq
