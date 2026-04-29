@@ -30,7 +30,7 @@
     "migration:revert": "typeorm migration:revert -d dist/shared/infrastructure/database/data-source.js"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.90.0",
+    "@anthropic-ai/sdk": "^0.91.1",
     "@google/generative-ai": "^0.24.1",
     "@mistralai/mistralai": "^2.2.0",
     "@nestjs/bullmq": "^11.0.4",
