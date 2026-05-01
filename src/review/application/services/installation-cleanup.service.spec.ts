@@ -19,27 +19,27 @@ describe('InstallationCleanupService', () => {
     installationRepo = {
       save: jest.fn().mockImplementation((inst: Installation) => Promise.resolve(inst)),
       findByGithubId: jest.fn().mockResolvedValue(null),
-    } as unknown as jest.Mocked<InstallationRepositoryPort>;
+    };
     repositoryRepo = {
       save: jest.fn(),
       findByGithubId: jest.fn(),
       findByInstallationId: jest.fn().mockResolvedValue([]),
       deleteByInstallationId: jest.fn().mockResolvedValue(0),
       deleteByGithubId: jest.fn().mockResolvedValue(null),
-    } as unknown as jest.Mocked<RepositoryRepositoryPort>;
+    };
     reviewRepo = {
       save: jest.fn(),
       findByPrAndSha: jest.fn(),
       deleteByRepositoryId: jest.fn().mockResolvedValue(0),
       deleteByRepositoryIds: jest.fn().mockResolvedValue(0),
-    } as unknown as jest.Mocked<ReviewRepositoryPort>;
+    };
     memoryRepo = {
       save: jest.fn(),
       saveBatch: jest.fn(),
       findSimilar: jest.fn(),
       deleteByRepositoryId: jest.fn().mockResolvedValue(0),
       deleteByRepositoryIds: jest.fn().mockResolvedValue(0),
-    } as unknown as jest.Mocked<MemoryRepositoryPort>;
+    };
 
     service = new InstallationCleanupService(
       installationRepo,

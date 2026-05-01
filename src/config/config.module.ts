@@ -36,7 +36,7 @@ function validate(config: Record<string, unknown>): AppConfig {
     {
       provide: AppConfig,
       useFactory: () => {
-        return validate(process.env as Record<string, unknown>);
+        return validate(process.env);
       },
     },
   ],
