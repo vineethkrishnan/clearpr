@@ -8,6 +8,7 @@ permissions:
   contents: write
   pull-requests: write
   packages: write
+  deployments: write
 
 jobs:
   release-please:
