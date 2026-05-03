@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/vineethkrishnan/clearpr/compare/v0.1.1...v0.1.2) (2026-05-03)
+
+
+### CI/CD
+
+* **deps:** bump the github-actions group with 7 updates ([#35](https://github.com/vineethkrishnan/clearpr/issues/35)) ([d94a477](https://github.com/vineethkrishnan/clearpr/commit/d94a47747105d256117f7ed5d7f8dad5e5eb6e65))
+
 ## [0.1.1](https://github.com/vineethkrishnan/clearpr/compare/v0.1.0...v0.1.1) (2026-05-01)
 
 
