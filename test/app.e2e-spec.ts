@@ -8,6 +8,12 @@ import { ClsConfigModule } from '../src/shared/infrastructure/cls/cls.module.js'
 import { LoggingModule } from '../src/shared/infrastructure/logging/logging.module.js';
 import { WebhookController } from '../src/webhook/presenters/http/webhook.controller.js';
 import { WebhookDispatcherService } from '../src/webhook/application/use-cases/webhook-dispatcher.use-case.js';
+import { EnqueueReviewUseCase } from '../src/webhook/application/use-cases/enqueue-review.use-case.js';
+import { EnqueueCommandUseCase } from '../src/webhook/application/use-cases/enqueue-command.use-case.js';
+import { RegisterInstallationUseCase } from '../src/webhook/application/use-cases/register-installation.use-case.js';
+import { RemoveInstallationUseCase } from '../src/webhook/application/use-cases/remove-installation.use-case.js';
+import { RegisterRepositoriesUseCase } from '../src/webhook/application/use-cases/register-repositories.use-case.js';
+import { RemoveRepositoriesUseCase } from '../src/webhook/application/use-cases/remove-repositories.use-case.js';
 import { HmacSignatureGuard } from '../src/webhook/infrastructure/guards/hmac-signature.guard.js';
 import { IdempotencyStorePort } from '../src/webhook/domain/ports/idempotency-store.port.js';
 import { JobProducerService } from '../src/queue/application/use-cases/job-producer.use-case.js';
@@ -74,6 +80,12 @@ function signPayload(body: string): string {
   controllers: [WebhookController],
   providers: [
     WebhookDispatcherService,
+    EnqueueReviewUseCase,
+    EnqueueCommandUseCase,
+    RegisterInstallationUseCase,
+    RemoveInstallationUseCase,
+    RegisterRepositoriesUseCase,
+    RemoveRepositoriesUseCase,
     HmacSignatureGuard,
     { provide: IdempotencyStorePort, useClass: InMemoryIdempotencyStore },
     { provide: JobProducerService, useValue: mockJobProducer },

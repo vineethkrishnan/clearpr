@@ -2,12 +2,12 @@
 import { WebhookDispatcherService } from './webhook-dispatcher.use-case.js';
 import { IdempotencyStorePort } from '../../domain/ports/idempotency-store.port.js';
 import { ClearPrAction } from '../../domain/value-objects/webhook-event-type.vo.js';
-import { JobProducerService } from '../../../queue/application/use-cases/job-producer.use-case.js';
-import { InstallationRepositoryPort } from '../../../github/domain/ports/installation-repository.port.js';
-import { RepositoryRepositoryPort } from '../../../github/domain/ports/repository-repository.port.js';
-import { InstallationCleanupService } from '../../../review/application/use-cases/installation-cleanup.use-case.js';
-import { Installation } from '../../../github/domain/entities/installation.entity.js';
-import { Repository } from '../../../github/domain/entities/repository.entity.js';
+import { EnqueueReviewUseCase } from './enqueue-review.use-case.js';
+import { EnqueueCommandUseCase } from './enqueue-command.use-case.js';
+import { RegisterInstallationUseCase } from './register-installation.use-case.js';
+import { RemoveInstallationUseCase } from './remove-installation.use-case.js';
+import { RegisterRepositoriesUseCase } from './register-repositories.use-case.js';
+import { RemoveRepositoriesUseCase } from './remove-repositories.use-case.js';
 
 class MockIdempotencyStore extends IdempotencyStorePort {
   private store = new Set<string>();
@@ -21,53 +21,41 @@ class MockIdempotencyStore extends IdempotencyStorePort {
   }
 }
 
+function makeMockHandler<T>(): jest.Mocked<T> {
+  return { execute: jest.fn().mockResolvedValue(undefined) } as unknown as jest.Mocked<T>;
+}
+
 describe('WebhookDispatcherService', () => {
   let dispatcher: WebhookDispatcherService;
   let store: MockIdempotencyStore;
-  let jobProducer: jest.Mocked<JobProducerService>;
-  let installationRepo: jest.Mocked<InstallationRepositoryPort>;
-  let repositoryRepo: jest.Mocked<RepositoryRepositoryPort>;
-  let cleanupService: jest.Mocked<InstallationCleanupService>;
+  let enqueueReview: jest.Mocked<EnqueueReviewUseCase>;
+  let enqueueCommand: jest.Mocked<EnqueueCommandUseCase>;
+  let registerInstallation: jest.Mocked<RegisterInstallationUseCase>;
+  let removeInstallation: jest.Mocked<RemoveInstallationUseCase>;
+  let registerRepositories: jest.Mocked<RegisterRepositoriesUseCase>;
+  let removeRepositories: jest.Mocked<RemoveRepositoriesUseCase>;
 
   beforeEach(() => {
     store = new MockIdempotencyStore();
-    jobProducer = {
-      enqueueReview: jest.fn().mockResolvedValue(undefined),
-      enqueueCommand: jest.fn().mockResolvedValue(undefined),
-      enqueueIndexing: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<JobProducerService>;
-    installationRepo = {
-      save: jest.fn().mockImplementation((inst: Installation) => Promise.resolve(inst)),
-      findById: jest.fn().mockResolvedValue(null),
-      findByGithubId: jest.fn().mockResolvedValue(null),
-    };
-    repositoryRepo = {
-      save: jest.fn().mockImplementation((repo: Repository) => Promise.resolve(repo)),
-      findById: jest.fn().mockResolvedValue(null),
-      findByGithubId: jest.fn().mockResolvedValue(null),
-      findByInstallationId: jest.fn().mockResolvedValue([]),
-      deleteByInstallationId: jest.fn().mockResolvedValue(0),
-      deleteByGithubId: jest.fn().mockResolvedValue(null),
-    };
-    cleanupService = {
-      cleanupInstallation: jest.fn().mockResolvedValue({
-        repositoriesDeleted: 0,
-        reviewsDeleted: 0,
-        memoryEntriesDeleted: 0,
-      }),
-      cleanupRepository: jest.fn().mockResolvedValue(null),
-    } as unknown as jest.Mocked<InstallationCleanupService>;
+    enqueueReview = makeMockHandler<EnqueueReviewUseCase>();
+    enqueueCommand = makeMockHandler<EnqueueCommandUseCase>();
+    registerInstallation = makeMockHandler<RegisterInstallationUseCase>();
+    removeInstallation = makeMockHandler<RemoveInstallationUseCase>();
+    registerRepositories = makeMockHandler<RegisterRepositoriesUseCase>();
+    removeRepositories = makeMockHandler<RemoveRepositoriesUseCase>();
 
     dispatcher = new WebhookDispatcherService(
       store,
-      jobProducer,
-      installationRepo,
-      repositoryRepo,
-      cleanupService,
+      enqueueReview,
+      enqueueCommand,
+      registerInstallation,
+      removeInstallation,
+      registerRepositories,
+      removeRepositories,
     );
   });
 
-  it('should dispatch pull_request.opened as REVIEW_PR', async () => {
+  it('routes pull_request.opened to EnqueueReviewUseCase', async () => {
     const result = await dispatcher.dispatch({
       event: 'pull_request',
       action: 'opened',
@@ -77,9 +65,55 @@ describe('WebhookDispatcherService', () => {
     });
     expect(result.action).toBe(ClearPrAction.REVIEW_PR);
     expect(result.dispatched).toBe(true);
+    expect(enqueueReview.execute).toHaveBeenCalledTimes(1);
+    expect(enqueueCommand.execute).not.toHaveBeenCalled();
   });
 
-  it('should skip duplicate deliveries', async () => {
+  it('routes installation.created to RegisterInstallationUseCase', async () => {
+    await dispatcher.dispatch({
+      event: 'installation',
+      action: 'created',
+      deliveryId: 'delivery-2',
+      installationId: 999,
+      body: {},
+    });
+    expect(registerInstallation.execute).toHaveBeenCalledTimes(1);
+  });
+
+  it('routes installation.deleted to RemoveInstallationUseCase', async () => {
+    await dispatcher.dispatch({
+      event: 'installation',
+      action: 'deleted',
+      deliveryId: 'delivery-3',
+      installationId: 999,
+      body: {},
+    });
+    expect(removeInstallation.execute).toHaveBeenCalledTimes(1);
+  });
+
+  it('routes installation_repositories.added to RegisterRepositoriesUseCase', async () => {
+    await dispatcher.dispatch({
+      event: 'installation_repositories',
+      action: 'added',
+      deliveryId: 'delivery-4',
+      installationId: 999,
+      body: {},
+    });
+    expect(registerRepositories.execute).toHaveBeenCalledTimes(1);
+  });
+
+  it('routes installation_repositories.removed to RemoveRepositoriesUseCase', async () => {
+    await dispatcher.dispatch({
+      event: 'installation_repositories',
+      action: 'removed',
+      deliveryId: 'delivery-5',
+      installationId: 999,
+      body: {},
+    });
+    expect(removeRepositories.execute).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips duplicate deliveries without invoking any handler', async () => {
     const payload = {
       event: 'pull_request',
       action: 'opened',
@@ -89,12 +123,15 @@ describe('WebhookDispatcherService', () => {
     };
 
     await dispatcher.dispatch(payload);
+    enqueueReview.execute.mockClear();
+
     const result = await dispatcher.dispatch(payload);
     expect(result.dispatched).toBe(false);
     expect(result.reason).toBe('duplicate');
+    expect(enqueueReview.execute).not.toHaveBeenCalled();
   });
 
-  it('should not dispatch unknown events', async () => {
+  it('does not dispatch unknown events', async () => {
     const result = await dispatcher.dispatch({
       event: 'star',
       action: 'created',
@@ -104,75 +141,6 @@ describe('WebhookDispatcherService', () => {
     });
     expect(result.dispatched).toBe(false);
     expect(result.reason).toBe('unhandled_event');
-  });
-
-  describe('installation.deleted', () => {
-    it('invokes cleanup service with installation id', async () => {
-      const installation = Installation.create({
-        githubInstallationId: 999,
-        accountLogin: 'acme',
-        accountType: 'Organization',
-      });
-      installationRepo.findByGithubId.mockResolvedValue(installation);
-
-      await dispatcher.dispatch({
-        event: 'installation',
-        action: 'deleted',
-        deliveryId: 'delivery-deleted',
-        installationId: 999,
-        body: { installation: { id: 999 } },
-      });
-
-      expect(cleanupService.cleanupInstallation).toHaveBeenCalledWith(installation.id, 999);
-    });
-
-    it('skips cleanup when installation is not tracked', async () => {
-      installationRepo.findByGithubId.mockResolvedValue(null);
-
-      await dispatcher.dispatch({
-        event: 'installation',
-        action: 'deleted',
-        deliveryId: 'delivery-untracked',
-        installationId: 42,
-        body: { installation: { id: 42 } },
-      });
-
-      expect(cleanupService.cleanupInstallation).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('installation_repositories.removed', () => {
-    it('invokes cleanup per removed repository', async () => {
-      cleanupService.cleanupRepository.mockResolvedValueOnce({
-        repositoriesDeleted: 1,
-        reviewsDeleted: 5,
-        memoryEntriesDeleted: 12,
-      });
-
-      await dispatcher.dispatch({
-        event: 'installation_repositories',
-        action: 'removed',
-        deliveryId: 'delivery-repo-removed',
-        installationId: 999,
-        body: {
-          installation: { id: 999 },
-          repositories_removed: [{ id: 111, full_name: 'acme/retired' }],
-        },
-      });
-
-      expect(cleanupService.cleanupRepository).toHaveBeenCalledWith(111);
-    });
-
-    it('is a no-op when repositories_removed is empty', async () => {
-      await dispatcher.dispatch({
-        event: 'installation_repositories',
-        action: 'removed',
-        deliveryId: 'delivery-empty-removed',
-        installationId: 999,
-        body: { installation: { id: 999 }, repositories_removed: [] },
-      });
-
-      expect(cleanupService.cleanupRepository).not.toHaveBeenCalled();
-    });
+    expect(enqueueReview.execute).not.toHaveBeenCalled();
   });
 });
