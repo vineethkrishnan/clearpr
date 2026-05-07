@@ -16,7 +16,7 @@ import { LoadGuidelinesUseCase } from './application/use-cases/load-guidelines.u
 import { PromptBuilderService } from './application/use-cases/prompt-builder.use-case.js';
 import { ReviewOrchestratorService } from './application/use-cases/review-orchestrator.use-case.js';
 import { ManageIgnorePatternsUseCase } from './application/use-cases/manage-ignore-patterns.use-case.js';
-import { CommandHandlerService } from './application/use-cases/command-handler.use-case.js';
+import { HandleCommandUseCase } from './application/use-cases/handle-command.use-case.js';
 import { CleanupInstallationUseCase } from './application/use-cases/cleanup-installation.use-case.js';
 import { ParseLlmResponseUseCase } from './application/use-cases/parse-llm-response.use-case.js';
 import { BuildReviewSummaryUseCase } from './application/use-cases/build-review-summary.use-case.js';
@@ -44,13 +44,13 @@ import { BuildReviewSummaryUseCase } from './application/use-cases/build-review-
     ParseLlmResponseUseCase,
     BuildReviewSummaryUseCase,
     ReviewOrchestratorService,
-    CommandHandlerService,
+    HandleCommandUseCase,
     CleanupInstallationUseCase,
   ],
   exports: [
     ReviewOrchestratorService,
     ManageIgnorePatternsUseCase,
-    CommandHandlerService,
+    HandleCommandUseCase,
     CleanupInstallationUseCase,
   ],
 })

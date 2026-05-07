@@ -1,14 +1,14 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
-import { CommandHandlerService } from '../../review/application/use-cases/command-handler.use-case.js';
+import { HandleCommandUseCase } from '../../review/application/use-cases/handle-command.use-case.js';
 import { QUEUE_NAMES, type CommandJobPayload } from '../types/job-payload.types.js';
 
 @Processor(QUEUE_NAMES.COMMANDS, { concurrency: 5 })
 export class CommandConsumer extends WorkerHost {
   private readonly logger = new Logger(CommandConsumer.name);
 
-  constructor(private readonly handler: CommandHandlerService) {
+  constructor(private readonly handler: HandleCommandUseCase) {
     super();
   }
 

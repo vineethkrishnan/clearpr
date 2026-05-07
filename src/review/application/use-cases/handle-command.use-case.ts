@@ -12,8 +12,8 @@ import type { CommandJobPayload } from '../../../queue/types/job-payload.types.j
 import type { FileDiff } from '../../../diff-engine/domain/entities/file-diff.entity.js';
 
 @Injectable()
-export class CommandHandlerService {
-  private readonly logger = new Logger(CommandHandlerService.name);
+export class HandleCommandUseCase {
+  private readonly logger = new Logger(HandleCommandUseCase.name);
 
   constructor(
     private readonly githubClient: GitHubClientService,
