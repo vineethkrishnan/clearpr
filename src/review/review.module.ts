@@ -14,7 +14,7 @@ import { createLlmProvider } from './infrastructure/llm/llm-provider.registry.js
 import { PromptSanitizer } from './application/use-cases/prompt-sanitizer.use-case.js';
 import { LoadGuidelinesUseCase } from './application/use-cases/load-guidelines.use-case.js';
 import { BuildPromptUseCase } from './application/use-cases/build-prompt.use-case.js';
-import { ReviewOrchestratorService } from './application/use-cases/review-orchestrator.use-case.js';
+import { OrchestrateReviewUseCase } from './application/use-cases/orchestrate-review.use-case.js';
 import { ManageIgnorePatternsUseCase } from './application/use-cases/manage-ignore-patterns.use-case.js';
 import { HandleCommandUseCase } from './application/use-cases/handle-command.use-case.js';
 import { CleanupInstallationUseCase } from './application/use-cases/cleanup-installation.use-case.js';
@@ -43,12 +43,12 @@ import { BuildReviewSummaryUseCase } from './application/use-cases/build-review-
     ManageIgnorePatternsUseCase,
     ParseLlmResponseUseCase,
     BuildReviewSummaryUseCase,
-    ReviewOrchestratorService,
+    OrchestrateReviewUseCase,
     HandleCommandUseCase,
     CleanupInstallationUseCase,
   ],
   exports: [
-    ReviewOrchestratorService,
+    OrchestrateReviewUseCase,
     ManageIgnorePatternsUseCase,
     HandleCommandUseCase,
     CleanupInstallationUseCase,

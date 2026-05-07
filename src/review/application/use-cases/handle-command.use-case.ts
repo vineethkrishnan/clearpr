@@ -5,7 +5,7 @@ import { ComputeSemanticDiffUseCase } from '../../../diff-engine/application/use
 import { PrFileListProviderPort } from '../../domain/ports/pr-file-list-provider.port.js';
 import { LoadGuidelinesUseCase } from './load-guidelines.use-case.js';
 import { ManageIgnorePatternsUseCase } from './manage-ignore-patterns.use-case.js';
-import { ReviewOrchestratorService } from './review-orchestrator.use-case.js';
+import { OrchestrateReviewUseCase } from './orchestrate-review.use-case.js';
 import { matchesAnyPattern } from './glob-match.util.js';
 import type { ReviewContext } from '../../domain/types/review-context.types.js';
 import type { CommandJobPayload } from '../../../queue/types/job-payload.types.js';
@@ -21,7 +21,7 @@ export class HandleCommandUseCase {
     private readonly prFileListProvider: PrFileListProviderPort,
     private readonly guidelineLoader: LoadGuidelinesUseCase,
     private readonly ignoreList: ManageIgnorePatternsUseCase,
-    private readonly orchestrator: ReviewOrchestratorService,
+    private readonly orchestrator: OrchestrateReviewUseCase,
     private readonly config: AppConfig,
   ) {}
 

@@ -54,7 +54,7 @@ import { type FileInput } from '../src/diff-engine/application/types/diff-result
 import { PromptSanitizer } from '../src/review/application/use-cases/prompt-sanitizer.use-case.js';
 import { BuildPromptUseCase } from '../src/review/application/use-cases/build-prompt.use-case.js';
 import { LoadGuidelinesUseCase } from '../src/review/application/use-cases/load-guidelines.use-case.js';
-import { ReviewOrchestratorService } from '../src/review/application/use-cases/review-orchestrator.use-case.js';
+import { OrchestrateReviewUseCase } from '../src/review/application/use-cases/orchestrate-review.use-case.js';
 import { ManageIgnorePatternsUseCase } from '../src/review/application/use-cases/manage-ignore-patterns.use-case.js';
 import { CleanupInstallationUseCase } from '../src/review/application/use-cases/cleanup-installation.use-case.js';
 import { ParseLlmResponseUseCase } from '../src/review/application/use-cases/parse-llm-response.use-case.js';
@@ -325,7 +325,7 @@ class FakeRedis {
 // review pipeline without needing a real queue infrastructure.
 class SyncJobProducer {
   constructor(
-    private readonly orchestrator: ReviewOrchestratorService,
+    private readonly orchestrator: OrchestrateReviewUseCase,
     private readonly repoFullName: string,
   ) {}
 
@@ -432,7 +432,7 @@ const prFiles: FileInput[] = [
     { provide: LlmProviderPort, useClass: FakeLlmProvider },
     { provide: ReviewPosterPort, useClass: FakeReviewPoster },
     { provide: ReviewRepositoryPort, useClass: FakeReviewRepo },
-    ReviewOrchestratorService,
+    OrchestrateReviewUseCase,
 
     // Cleanup service (unused in this path but wired to satisfy dispatcher DI)
     CleanupInstallationUseCase,
@@ -440,8 +440,8 @@ const prFiles: FileInput[] = [
     // Fake job producer bridging dispatcher → orchestrator synchronously
     {
       provide: JobProducerService,
-      inject: [ReviewOrchestratorService],
-      useFactory: (orchestrator: ReviewOrchestratorService): SyncJobProducer =>
+      inject: [OrchestrateReviewUseCase],
+      useFactory: (orchestrator: OrchestrateReviewUseCase): SyncJobProducer =>
         new SyncJobProducer(orchestrator, TRACKED_REPO.fullName),
     },
   ],

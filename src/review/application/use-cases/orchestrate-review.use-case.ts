@@ -21,8 +21,8 @@ import { type Result, ok, err } from '../../../shared/types/result.types.js';
 import { type DomainError } from '../../../shared/domain/errors/domain-error.base.js';
 
 @Injectable()
-export class ReviewOrchestratorService {
-  private readonly logger = new Logger(ReviewOrchestratorService.name);
+export class OrchestrateReviewUseCase {
+  private readonly logger = new Logger(OrchestrateReviewUseCase.name);
 
   constructor(
     private readonly diffService: ComputeSemanticDiffUseCase,
