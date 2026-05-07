@@ -1,7 +1,7 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
-import { WebhookController } from './presentation/webhook.controller.js';
+import { WebhookController } from './presenters/http/webhook.controller.js';
 import { WebhookDispatcherService } from './application/services/webhook-dispatcher.service.js';
 import { HmacSignatureGuard } from './infrastructure/guards/hmac-signature.guard.js';
 import { IdempotencyStorePort } from './domain/ports/idempotency-store.port.js';

@@ -6,7 +6,7 @@ import type { Server } from 'http';
 import { ConfigModule } from '../src/config/config.module.js';
 import { ClsConfigModule } from '../src/shared/infrastructure/cls/cls.module.js';
 import { LoggingModule } from '../src/shared/infrastructure/logging/logging.module.js';
-import { WebhookController } from '../src/webhook/presentation/webhook.controller.js';
+import { WebhookController } from '../src/webhook/presenters/http/webhook.controller.js';
 import { WebhookDispatcherService } from '../src/webhook/application/services/webhook-dispatcher.service.js';
 import { HmacSignatureGuard } from '../src/webhook/infrastructure/guards/hmac-signature.guard.js';
 import { IdempotencyStorePort } from '../src/webhook/domain/ports/idempotency-store.port.js';

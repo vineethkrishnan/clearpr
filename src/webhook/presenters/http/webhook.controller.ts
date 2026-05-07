@@ -9,8 +9,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import type { Request } from 'express';
-import { HmacSignatureGuard } from '../infrastructure/guards/hmac-signature.guard.js';
-import { WebhookDispatcherService } from '../application/services/webhook-dispatcher.service.js';
+import { HmacSignatureGuard } from '../../infrastructure/guards/hmac-signature.guard.js';
+import { WebhookDispatcherService } from '../../application/services/webhook-dispatcher.service.js';
 
 @Controller('webhook')
 export class WebhookController {

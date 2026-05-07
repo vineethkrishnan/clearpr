@@ -10,8 +10,8 @@ import {
   type HealthIndicatorResult,
 } from '@nestjs/terminus';
 import Redis from 'ioredis';
-import { REDIS_CLIENT } from '../../shared/infrastructure/redis/redis.module.js';
-import { QUEUE_NAMES } from '../../queue/types/job-payload.types.js';
+import { REDIS_CLIENT } from '../../../shared/infrastructure/redis/redis.module.js';
+import { QUEUE_NAMES } from '../../../queue/types/job-payload.types.js';
 
 interface QueueStats {
   waiting: number;
