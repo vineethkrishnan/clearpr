@@ -65,7 +65,7 @@ import {
   MemoryRepositoryPort,
   type SimilarMemoryResult,
 } from '../src/memory/domain/ports/memory-repository.port.js';
-import { MemoryRetrieverService } from '../src/memory/application/use-cases/memory-retriever.use-case.js';
+import { RetrieveMemoryUseCase } from '../src/memory/application/use-cases/retrieve-memory.use-case.js';
 
 import { REDIS_CLIENT } from '../src/shared/infrastructure/redis/redis.module.js';
 
@@ -418,7 +418,7 @@ const prFiles: FileInput[] = [
     // Memory (real retriever wrapping fake external providers)
     { provide: EmbeddingProviderPort, useClass: FakeEmbeddingProvider },
     { provide: MemoryRepositoryPort, useClass: FakeMemoryRepo },
-    MemoryRetrieverService,
+    RetrieveMemoryUseCase,
 
     // Review pipeline (real)
     PromptSanitizer,

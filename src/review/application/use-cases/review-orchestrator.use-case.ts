@@ -17,7 +17,7 @@ import { IgnoreListService } from './ignore-list.use-case.js';
 import { ParseLlmResponseUseCase } from './parse-llm-response.use-case.js';
 import { BuildReviewSummaryUseCase } from './build-review-summary.use-case.js';
 import { matchesAnyPattern } from './glob-match.util.js';
-import { MemoryRetrieverService } from '../../../memory/application/use-cases/memory-retriever.use-case.js';
+import { RetrieveMemoryUseCase } from '../../../memory/application/use-cases/retrieve-memory.use-case.js';
 import type { ReviewContext } from '../../domain/types/review-context.types.js';
 import { type Result, ok, err } from '../../../shared/types/result.types.js';
 import { type DomainError } from '../../../shared/domain/errors/domain-error.base.js';
@@ -34,7 +34,7 @@ export class ReviewOrchestratorService {
     private readonly reviewRepo: ReviewRepositoryPort,
     private readonly reviewPoster: ReviewPosterPort,
     private readonly prFileListProvider: PrFileListProviderPort,
-    private readonly memoryRetriever: MemoryRetrieverService,
+    private readonly memoryRetriever: RetrieveMemoryUseCase,
     private readonly ignoreList: IgnoreListService,
     private readonly parseLlmResponse: ParseLlmResponseUseCase,
     private readonly buildReviewSummary: BuildReviewSummaryUseCase,
