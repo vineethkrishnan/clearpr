@@ -1,11 +1,7 @@
 import { ChangeType, type DiffHunk } from '../value-objects/diff-hunk.vo.js';
 
-/**
- * Compute hunks describing how `head` differs from `base`, using LCS so that
- * insertions and deletions don't shift everything that follows them into a
- * single mega-hunk. Hunks are anchored to head-side line numbers (1-based);
- * pure deletions take the line position where the deletion would land.
- */
+// Hunks are 1-based on head-side line numbers; pure deletions anchor at the
+// head line where the deletion would land.
 export function computeLineDiffHunks(base: string, head: string): DiffHunk[] {
   const baseLines = splitLines(base);
   const headLines = splitLines(head);
@@ -63,18 +59,11 @@ function walkBack(table: Uint32Array[], base: string[], head: string[]): Op[] {
     }
     const up = i > 0 ? table[i - 1]![j]! : -1;
     const left = j > 0 ? table[i]![j - 1]! : -1;
-    // Prefer remove on a tie: this anchors substitutions (remove + add) at
-    // the head-side line of the new content, matching unified-diff intuition
-    // and keeping startLine on the line a reader sees in the new file.
+    // Tie -> prefer remove so substitutions anchor at the head-side line.
     if (j > 0 && (i === 0 || left > up)) {
       ops.push({ kind: 'add', headLine: j, text: head[j - 1]! });
       j--;
     } else {
-      // For removals, the conceptual head anchor is the line position where
-      // the deleted text used to sit relative to the new file. j+1 puts the
-      // hunk on the line that follows the deletion in head-space, but when
-      // a remove comes immediately before an add at the same logical spot
-      // we want them to share startLine, so we use j (current head index).
       ops.push({ kind: 'remove', headLine: Math.max(j, 1), text: base[i - 1]! });
       i--;
     }
@@ -125,9 +114,6 @@ function collapseToHunks(ops: Op[]): DiffHunk[] {
       active.hasAdd = true;
     } else {
       active.hasRemove = true;
-      // For pure deletions we still want to record the surrounding context
-      // line counts; capturing the removed text gives the LLM something to
-      // anchor on without inflating semantic line totals.
       if (active.lines.length === 0) {
         active.lines.push('');
       }

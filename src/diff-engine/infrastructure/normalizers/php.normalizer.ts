@@ -1,13 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import type { LanguageNormalizer } from './language-normalizer.interface.js';
 
-/**
- * String-aware PHP normalizer. We tokenize PHP at a coarse level (string vs.
- * comment vs. code) so that quote/whitespace rewriting only touches code
- * regions, never the inside of strings. A full PHP AST parser would be
- * better but tree-sitter-php is a native binding we want to defer until
- * we're ready to build it across platforms.
- */
+// Coarse string/comment/code tokenizer so quote rewriting never touches
+// the inside of strings.
 @Injectable()
 export class PhpNormalizer implements LanguageNormalizer {
   normalize(source: string): string {
@@ -93,12 +88,8 @@ export class PhpNormalizer implements LanguageNormalizer {
     return source.length;
   }
 
-  /**
-   * Canonicalizes string literals: a double-quoted string with no
-   * interpolation, escapes, or special chars becomes single-quoted. Anything
-   * with `$`, `\`, or unusual content is left alone — PHP's interpolation
-   * semantics differ between quote styles.
-   */
+  // Only rewrite double quotes when the string can't interpolate; PHP's
+  // interpolation semantics differ between quote styles.
   private canonicalizeString(literal: string): string {
     if (literal.length < 2) return literal;
     const quote = literal[0];

@@ -39,7 +39,6 @@ export class IndexingConsumer extends WorkerHost {
       return;
     }
 
-    // Incremental — index a single repository
     if (!payload.repositoryId) {
       this.logger.warn(
         { correlationId: payload.correlationId, jobId: job.id },

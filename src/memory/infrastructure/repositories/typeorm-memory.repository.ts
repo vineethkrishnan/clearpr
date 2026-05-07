@@ -41,10 +41,7 @@ export class TypeOrmMemoryRepository extends MemoryRepositoryPort {
     limit: number,
     threshold: number,
   ): Promise<SimilarMemoryResult[]> {
-    // Cosine distance via pgvector's <=> operator (range 0..2; 0 = identical).
-    // similarity = 1 - distance, so we filter where similarity >= threshold,
-    // i.e. distance <= 1 - threshold. We also pre-filter by repository_id so
-    // the ivfflat index can be used effectively per repo.
+    // pgvector cosine distance is 0..2; similarity = 1 - distance.
     const maxDistance = 1 - threshold;
     const queryEmbedding = toVectorSql(embedding);
 

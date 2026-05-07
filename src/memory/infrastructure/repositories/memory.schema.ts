@@ -8,8 +8,7 @@ export interface PrMemoryRow {
   comment_text: string;
   code_context: string;
   outcome: string;
-  // Stored as pgvector — TypeORM treats it as string ('[0.1,0.2,...]') in
-  // both directions; the repository converts to/from number[] via pgvector.toSql.
+  // pgvector serializes as '[0.1,0.2,...]'; conversion is in the repository.
   embedding: string;
   created_at: Date;
 }

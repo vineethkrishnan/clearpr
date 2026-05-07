@@ -266,9 +266,7 @@ export class GitHubClientService {
         for (const entry of data) {
           const committed = entry.commit.committer?.date ?? entry.commit.author?.date;
           if (!committed) continue;
-          // The commits endpoint doesn't return changed files; fetch each
-          // commit's file list. This is the costly bit and is bounded by
-          // HISTORY_DEPTH at the caller.
+          // listCommits omits changed files; fetch each commit individually.
           const { data: detail, headers: detailHeaders } = await octokit.rest.repos.getCommit({
             owner,
             repo,

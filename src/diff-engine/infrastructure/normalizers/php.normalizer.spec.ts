@@ -24,8 +24,6 @@ describe('PhpNormalizer', () => {
   it('does not corrupt content of strings while normalizing whitespace', () => {
     const source = `<?php\n$x = "  spaced  string  ";`;
     const result = normalizer.normalize(source);
-    // Content (the spaces inside the string) must be preserved verbatim,
-    // even though the quote style itself may be canonicalized.
     expect(result).toContain('  spaced  string  ');
   });
 

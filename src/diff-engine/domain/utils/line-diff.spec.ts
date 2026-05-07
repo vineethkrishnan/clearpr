@@ -43,8 +43,6 @@ describe('computeLineDiffHunks', () => {
   });
 
   it('does not return a fake hunk when an early insertion shifts later lines', () => {
-    // The naive index-aligned algorithm would mark every line after the
-    // insertion as changed; LCS should detect only one real hunk.
     const base = 'a\nb\nc\nd\ne\nf';
     const head = 'a\nINSERTED\nb\nc\nd\ne\nf';
     const hunks = computeLineDiffHunks(base, head);
