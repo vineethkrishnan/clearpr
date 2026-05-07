@@ -58,12 +58,15 @@ src/<module>/
 │   ├── ports/            Abstract classes (interfaces) for outside collaborators
 │   └── errors/           Domain-specific error types
 ├── application/
-│   └── services/         Use cases / orchestration
+│   ├── use-cases/        One use case per business operation (*.use-case.ts)
+│   ├── ports/            Cross-module ports (bound via useExisting)
+│   └── dtos/             class-validator DTOs at the HTTP/queue boundary
 ├── infrastructure/
 │   ├── adapters/         Concrete implementations of ports
-│   └── repositories/     TypeORM schemas + mappers
-└── presentation/         (only modules that have an HTTP surface)
-    └── *.controller.ts
+│   └── repositories/     TypeORM records + mappers + repository
+└── presenters/
+    └── http/             Controllers (only modules with an HTTP surface)
+        └── *.controller.ts
 ```
 
 The arrows always point inward. `application` may depend on `domain`. `infrastructure` may depend on `domain` (to implement a port). Nothing in `domain` ever imports from `application` or `infrastructure`.
@@ -78,9 +81,12 @@ memory/
 │   ├── entities/pr-memory-entry.entity.ts        ← plain class
 │   └── ports/memory-repository.port.ts           ← abstract class
 ├── application/
-│   └── services/memory-retriever.service.ts      ← uses the port
+│   └── use-cases/retrieve-memory.use-case.ts     ← uses the port
 └── infrastructure/
-    └── repositories/typeorm-memory.repository.ts ← implements the port
+    └── repositories/
+        ├── pr-memory.record.ts                   ← @Entity-decorated record
+        ├── pr-memory.mapper.ts                   ← static toDomain / toRecord
+        └── typeorm-memory.repository.ts          ← implements the port
 ```
 
 `MemoryRepositoryPort` is an abstract class in the domain layer:
@@ -98,9 +104,9 @@ export abstract class MemoryRepositoryPort {
 }
 ```
 
-`TypeOrmMemoryRepository` lives in `infrastructure/` and `extends MemoryRepositoryPort`. It knows about `pgvector`, raw SQL, and TypeORM `Repository<T>`. The domain layer knows none of that.
+`TypeOrmMemoryRepository` lives in `infrastructure/` and `extends MemoryRepositoryPort`. It knows about `pgvector`, raw SQL, and TypeORM `Repository<T>`. The domain layer knows none of that. Regular field mapping (snake_case columns, timestamps, enums) happens in `PrMemoryMapper`; the repository keeps only what mapping cannot express, mainly `pgvector` serialization and similarity-search SQL.
 
-The use case in `application/services/memory-retriever.service.ts` only ever sees `MemoryRepositoryPort` injected by Nest. Same for `EmbeddingProviderPort`. Swap pgvector for FAISS, swap OpenAI embeddings for a local model, and the use case is untouched.
+The use case in `application/use-cases/retrieve-memory.use-case.ts` only ever sees `MemoryRepositoryPort` injected by Nest. Same for `EmbeddingProviderPort`. Swap pgvector for FAISS, swap OpenAI embeddings for a local model, and the use case is untouched.
 
 ## Why hexagonal here
 
@@ -116,12 +122,12 @@ This shape is overkill for a 200-line script. ClearPR has earned it because:
 
 | Module | Responsibility | Where to look |
 |---|---|---|
-| **Webhook** | Receive GitHub events, validate HMAC, dedupe by `X-GitHub-Delivery`, dispatch to actions | `src/webhook/` |
+| **Webhook** | Receive GitHub events, validate HMAC, dedupe by `X-GitHub-Delivery`, fan out via per-action use cases (`DispatchWebhookUseCase`, `EnqueueJobUseCase`, `HandleCommandUseCase`, `ManageIgnorePatternsUseCase`, `CleanupInstallationUseCase`) | `src/webhook/` |
 | **Queue** | BullMQ producers and thin consumer shells; one job per ClearPR action | `src/queue/` |
-| **Review** | Orchestrate the pipeline: load guidelines, fetch memory, build prompt, call LLM, post comments | `src/review/` |
-| **Diff Engine** | Parse files, normalize ASTs per language, return semantic diff | `src/diff-engine/` |
-| **Memory** | Index past PR feedback, embed it, find similar past comments at review time | `src/memory/` |
-| **GitHub** | Shared kernel: API client, App auth, installation tokens, repo metadata | `src/github/` |
+| **Review** | `OrchestrateReviewUseCase` composes the pipeline: load guidelines, fetch memory, build prompt, call LLM, parse + summarize, post comments | `src/review/` |
+| **Diff Engine** | `ComputeSemanticDiffUseCase` + `ProcessFileDiffUseCase`; AST normalizers per language | `src/diff-engine/` |
+| **Memory** | `IndexMemoryUseCase`, `IndexRepositoryUseCase`, `RetrieveMemoryUseCase`, `DetectFeedbackOutcomeUseCase`; embeddings + pgvector | `src/memory/` |
+| **GitHub** | Shared kernel: `GitHubClientService`, `RateLimiterService`, `InstallationTokenService` (infrastructure adapters keep the `*Service` suffix) | `src/github/` |
 | **Health** | Liveness and readiness endpoints for orchestrators | `src/health/` |
 
 Each module owns its slice end-to-end. Cross-module imports go through ports, not concrete classes. The closest thing to a shared kernel is the `github/` module, used by everything that needs to call the GitHub API.
@@ -133,14 +139,14 @@ Each module owns its slice end-to-end. Cross-module imports go through ports, no
 3. Delivery ID looked up in Redis; duplicates dropped
 4. Dispatcher maps event type to an action (e.g. `pull_request.opened` → `ReviewPrAction`)
 5. Producer enqueues with a 30s debounce key (e.g. `review:owner/repo#42`) so a flurry of pushes collapses to one review
-6. Consumer pops the job, calls `ReviewOrchestratorService.run(...)`
-7. Orchestrator runs the pipeline:
-   1. Diff Engine returns a semantic diff
-   2. Guideline Loader reads `claude.md` / `agent.md` / `.reviewconfig`
-   3. Memory Retriever finds accepted past feedback similar to the diff
-   4. Prompt Builder assembles the final prompt with a token budget
-   5. LLM Provider generates the review
-   6. Review Poster writes inline + summary comments back to GitHub
+6. Consumer pops the job, calls `OrchestrateReviewUseCase.execute(...)`
+7. The orchestrator runs the pipeline by composing focused use cases:
+   1. `ComputeSemanticDiffUseCase` returns the AST-normalized diff (per file via `ProcessFileDiffUseCase`)
+   2. `LoadGuidelinesUseCase` reads `claude.md` / `agent.md` / `.reviewconfig`
+   3. `RetrieveMemoryUseCase` finds accepted past feedback similar to the diff
+   4. `BuildPromptUseCase` assembles the final prompt with a token budget
+   5. `LlmProviderPort` generates the review; `ParseLlmResponseUseCase` validates the structured output
+   6. `BuildReviewSummaryUseCase` posts inline + summary comments back to GitHub
 
 ## Key patterns
 
