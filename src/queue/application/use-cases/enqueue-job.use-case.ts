@@ -12,8 +12,8 @@ import {
 } from '../../types/job-payload.types.js';
 
 @Injectable()
-export class JobProducerService {
-  private readonly logger = new Logger(JobProducerService.name);
+export class EnqueueJobUseCase {
+  private readonly logger = new Logger(EnqueueJobUseCase.name);
 
   constructor(
     @InjectQueue(QUEUE_NAMES.REVIEWS) private readonly reviewQueue: Queue,

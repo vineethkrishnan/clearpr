@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import { EnqueueCommandUseCase } from './enqueue-command.use-case.js';
-import { JobProducerService } from '../../../queue/application/use-cases/job-producer.use-case.js';
+import { EnqueueJobUseCase } from '../../../queue/application/use-cases/enqueue-job.use-case.js';
 import { RepositoryRepositoryPort } from '../../../github/domain/ports/repository-repository.port.js';
 import { Repository } from '../../../github/domain/entities/repository.entity.js';
 
 describe('EnqueueCommandUseCase', () => {
   let useCase: EnqueueCommandUseCase;
-  let jobProducer: jest.Mocked<JobProducerService>;
+  let jobProducer: jest.Mocked<EnqueueJobUseCase>;
   let repositoryRepo: jest.Mocked<RepositoryRepositoryPort>;
 
   beforeEach(() => {
@@ -14,7 +14,7 @@ describe('EnqueueCommandUseCase', () => {
       enqueueReview: jest.fn().mockResolvedValue(undefined),
       enqueueCommand: jest.fn().mockResolvedValue(undefined),
       enqueueIndexing: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<JobProducerService>;
+    } as unknown as jest.Mocked<EnqueueJobUseCase>;
 
     repositoryRepo = {
       save: jest.fn(),

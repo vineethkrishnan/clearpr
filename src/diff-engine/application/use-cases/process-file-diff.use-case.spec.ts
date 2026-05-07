@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import { FileProcessorService } from './file-processor.use-case.js';
+import { ProcessFileDiffUseCase } from './process-file-diff.use-case.js';
 import { AstNormalizerPort } from '../../domain/ports/ast-normalizer.port.js';
 import { FileContentProviderPort } from '../../domain/ports/file-content-provider.port.js';
 import { AppConfig } from '../../../config/app.config.js';
 import type { FileInput } from '../types/diff-result.types.js';
 
-describe('FileProcessorService', () => {
-  let service: FileProcessorService;
+describe('ProcessFileDiffUseCase', () => {
+  let service: ProcessFileDiffUseCase;
   let normalizer: jest.Mocked<AstNormalizerPort>;
   let fileProvider: jest.Mocked<FileContentProviderPort>;
   let config: AppConfig;
@@ -21,7 +21,7 @@ describe('FileProcessorService', () => {
     };
 
     config = { MAX_FILE_SIZE_KB: 1 } as AppConfig;
-    service = new FileProcessorService(normalizer, fileProvider, config);
+    service = new ProcessFileDiffUseCase(normalizer, fileProvider, config);
   });
 
   function makeFile(filename: string): FileInput {

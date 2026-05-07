@@ -20,7 +20,7 @@ import { RemoveRepositoriesUseCase } from '../src/webhook/application/use-cases/
 import { HmacSignatureGuard } from '../src/webhook/infrastructure/guards/hmac-signature.guard.js';
 import { IdempotencyStorePort } from '../src/webhook/domain/ports/idempotency-store.port.js';
 
-import { JobProducerService } from '../src/queue/application/use-cases/job-producer.use-case.js';
+import { EnqueueJobUseCase } from '../src/queue/application/use-cases/enqueue-job.use-case.js';
 import {
   type CommandJobPayload,
   type IndexingJobPayload,
@@ -439,7 +439,7 @@ const prFiles: FileInput[] = [
 
     // Fake job producer bridging dispatcher → orchestrator synchronously
     {
-      provide: JobProducerService,
+      provide: EnqueueJobUseCase,
       inject: [OrchestrateReviewUseCase],
       useFactory: (orchestrator: OrchestrateReviewUseCase): SyncJobProducer =>
         new SyncJobProducer(orchestrator, TRACKED_REPO.fullName),

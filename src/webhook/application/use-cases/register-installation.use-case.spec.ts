@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import { RegisterInstallationUseCase } from './register-installation.use-case.js';
-import { JobProducerService } from '../../../queue/application/use-cases/job-producer.use-case.js';
+import { EnqueueJobUseCase } from '../../../queue/application/use-cases/enqueue-job.use-case.js';
 import { InstallationRepositoryPort } from '../../../github/domain/ports/installation-repository.port.js';
 import { RepositoryRepositoryPort } from '../../../github/domain/ports/repository-repository.port.js';
 import { Installation } from '../../../github/domain/entities/installation.entity.js';
@@ -8,7 +8,7 @@ import { Repository } from '../../../github/domain/entities/repository.entity.js
 
 describe('RegisterInstallationUseCase', () => {
   let useCase: RegisterInstallationUseCase;
-  let jobProducer: jest.Mocked<JobProducerService>;
+  let jobProducer: jest.Mocked<EnqueueJobUseCase>;
   let installationRepo: jest.Mocked<InstallationRepositoryPort>;
   let repositoryRepo: jest.Mocked<RepositoryRepositoryPort>;
 
@@ -17,7 +17,7 @@ describe('RegisterInstallationUseCase', () => {
       enqueueReview: jest.fn().mockResolvedValue(undefined),
       enqueueCommand: jest.fn().mockResolvedValue(undefined),
       enqueueIndexing: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<JobProducerService>;
+    } as unknown as jest.Mocked<EnqueueJobUseCase>;
 
     installationRepo = {
       save: jest.fn().mockImplementation((inst: Installation) => Promise.resolve(inst)),

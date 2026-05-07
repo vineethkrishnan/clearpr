@@ -32,7 +32,10 @@ const BINARY_EXTENSIONS = new Set([
 export class ComputeSemanticDiffUseCase {
   private readonly logger = new Logger(ComputeSemanticDiffUseCase.name);
 
-  constructor(private readonly fileProcessor: ProcessFileDiffUseCase) {}
+  constructor(
+    private readonly fileProcessor: ProcessFileDiffUseCase,
+    private readonly config: AppConfig,
+  ) {}
 
   async computeDiff(input: DiffInput): Promise<SemanticDiffResult> {
     const skippedFiles: string[] = [];

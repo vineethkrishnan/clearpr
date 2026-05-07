@@ -9,6 +9,8 @@ import { ReviewSkippedError } from '../../domain/errors/review.errors.js';
 import { RESPONSE_TOKENS } from '../../domain/value-objects/token-budget.vo.js';
 import { PrFileListProviderPort } from '../../domain/ports/pr-file-list-provider.port.js';
 import { ComputeSemanticDiffUseCase } from '../../../diff-engine/application/use-cases/compute-semantic-diff.use-case.js';
+import { DiffTooLargeError } from '../../../diff-engine/domain/errors/diff-engine.errors.js';
+import type { SemanticDiffResult } from '../../../diff-engine/application/types/diff-result.types.js';
 import { LoadGuidelinesUseCase } from './load-guidelines.use-case.js';
 import { BuildPromptUseCase } from './build-prompt.use-case.js';
 import { ManageIgnorePatternsUseCase } from './manage-ignore-patterns.use-case.js';
