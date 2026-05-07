@@ -4,7 +4,6 @@ import { ReviewRepositoryPort } from '../../domain/ports/review-repository.port.
 import { ReviewPosterPort } from '../../domain/ports/review-poster.port.js';
 import { Review } from '../../domain/entities/review.entity.js';
 import { ReviewComment } from '../../domain/entities/review-comment.entity.js';
-import { Severity } from '../../domain/value-objects/severity.vo.js';
 import { ReviewTrigger } from '../../domain/value-objects/review-trigger.vo.js';
 import { ReviewSkippedError } from '../../domain/errors/review.errors.js';
 import { RESPONSE_TOKENS } from '../../domain/value-objects/token-budget.vo.js';
@@ -14,10 +13,10 @@ import { GuidelineLoaderService } from './guideline-loader.use-case.js';
 import { PromptBuilderService } from './prompt-builder.use-case.js';
 import { IgnoreListService } from './ignore-list.use-case.js';
 import { ParseLlmResponseUseCase } from './parse-llm-response.use-case.js';
+import { BuildReviewSummaryUseCase } from './build-review-summary.use-case.js';
 import { matchesAnyPattern } from './glob-match.util.js';
 import { MemoryRetrieverService } from '../../../memory/application/use-cases/memory-retriever.use-case.js';
 import type { ReviewContext } from '../../domain/types/review-context.types.js';
-import type { ParsedReview } from '../../application/types/review-result.types.js';
 import { type Result, ok, err } from '../../../shared/types/result.types.js';
 import { type DomainError } from '../../../shared/domain/errors/domain-error.base.js';
 import { AppConfig } from '../../../config/app.config.js';
@@ -37,6 +36,7 @@ export class ReviewOrchestratorService {
     private readonly memoryRetriever: MemoryRetrieverService,
     private readonly ignoreList: IgnoreListService,
     private readonly parseLlmResponse: ParseLlmResponseUseCase,
+    private readonly buildReviewSummary: BuildReviewSummaryUseCase,
     private readonly config: AppConfig,
   ) {}
 
@@ -153,7 +153,11 @@ export class ReviewOrchestratorService {
       }
 
       // Build and post summary
-      const summary = this.buildSummary(diffResult, parsed, guidelines !== null);
+      const summary = this.buildReviewSummary.execute({
+        diff: diffResult,
+        parsed,
+        hasGuidelines: guidelines !== null,
+      });
       await this.reviewPoster.postSummary(context, summary);
 
       // Mark completed
@@ -186,39 +190,5 @@ export class ReviewOrchestratorService {
       );
       throw error;
     }
-  }
-
-  private buildSummary(
-    diff: { totalRawLines: number; totalSemanticLines: number; noiseReductionPct: number },
-    parsed: ParsedReview,
-    hasGuidelines: boolean,
-  ): string {
-    const criticals = parsed.comments.filter((c) => c.severity === Severity.CRITICAL).length;
-    const warnings = parsed.comments.filter((c) => c.severity === Severity.WARNING).length;
-    const infos = parsed.comments.filter((c) => c.severity === Severity.INFO).length;
-
-    const lines = [
-      '## ClearPR Review',
-      '',
-      `**Diff stats:** ${diff.totalRawLines.toLocaleString()} raw lines → ${diff.totalSemanticLines.toLocaleString()} semantic lines (${diff.noiseReductionPct}% noise filtered)`,
-      '',
-    ];
-
-    if (parsed.comments.length > 0) {
-      lines.push('### Findings');
-      if (criticals > 0) lines.push(`- ${criticals} critical`);
-      if (warnings > 0) lines.push(`- ${warnings} warning${warnings > 1 ? 's' : ''}`);
-      if (infos > 0) lines.push(`- ${infos} info`);
-      lines.push('');
-    } else {
-      lines.push('No issues found.');
-      lines.push('');
-    }
-
-    if (hasGuidelines) {
-      lines.push('> Reviewed against project guidelines.');
-    }
-
-    return lines.join('\n');
   }
 }

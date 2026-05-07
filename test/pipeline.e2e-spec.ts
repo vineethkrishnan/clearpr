@@ -52,6 +52,7 @@ import { ReviewOrchestratorService } from '../src/review/application/use-cases/r
 import { IgnoreListService } from '../src/review/application/use-cases/ignore-list.use-case.js';
 import { InstallationCleanupService } from '../src/review/application/use-cases/installation-cleanup.use-case.js';
 import { ParseLlmResponseUseCase } from '../src/review/application/use-cases/parse-llm-response.use-case.js';
+import { BuildReviewSummaryUseCase } from '../src/review/application/use-cases/build-review-summary.use-case.js';
 
 import { EmbeddingProviderPort } from '../src/memory/domain/ports/embedding-provider.port.js';
 import {
@@ -413,6 +414,7 @@ const prFiles: FileInput[] = [
     PromptBuilderService,
     IgnoreListService,
     ParseLlmResponseUseCase,
+    BuildReviewSummaryUseCase,
     { provide: REDIS_CLIENT, useValue: new FakeRedis() },
     { provide: PrFileListProviderPort, useValue: new FakePrFileListProvider(prFiles) },
     { provide: LlmProviderPort, useClass: FakeLlmProvider },

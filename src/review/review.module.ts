@@ -19,6 +19,7 @@ import { IgnoreListService } from './application/use-cases/ignore-list.use-case.
 import { CommandHandlerService } from './application/use-cases/command-handler.use-case.js';
 import { InstallationCleanupService } from './application/use-cases/installation-cleanup.use-case.js';
 import { ParseLlmResponseUseCase } from './application/use-cases/parse-llm-response.use-case.js';
+import { BuildReviewSummaryUseCase } from './application/use-cases/build-review-summary.use-case.js';
 
 @Module({
   imports: [TypeOrmModule.forFeature([ReviewSchema]), GitHubModule, DiffEngineModule, MemoryModule],
@@ -41,6 +42,7 @@ import { ParseLlmResponseUseCase } from './application/use-cases/parse-llm-respo
     PromptBuilderService,
     IgnoreListService,
     ParseLlmResponseUseCase,
+    BuildReviewSummaryUseCase,
     ReviewOrchestratorService,
     CommandHandlerService,
     InstallationCleanupService,
