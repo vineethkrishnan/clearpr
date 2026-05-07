@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { AppConfig } from '../../../config/app.config.js';
 import { GitHubClientService } from '../../../github/application/use-cases/github-client.use-case.js';
-import { SemanticDiffService } from '../../../diff-engine/application/use-cases/semantic-diff.use-case.js';
+import { ComputeSemanticDiffUseCase } from '../../../diff-engine/application/use-cases/compute-semantic-diff.use-case.js';
 import { PrFileListProviderPort } from '../../domain/ports/pr-file-list-provider.port.js';
 import { GuidelineLoaderService } from './guideline-loader.use-case.js';
 import { IgnoreListService } from './ignore-list.use-case.js';
@@ -17,7 +17,7 @@ export class CommandHandlerService {
 
   constructor(
     private readonly githubClient: GitHubClientService,
-    private readonly diffService: SemanticDiffService,
+    private readonly diffService: ComputeSemanticDiffUseCase,
     private readonly prFileListProvider: PrFileListProviderPort,
     private readonly guidelineLoader: GuidelineLoaderService,
     private readonly ignoreList: IgnoreListService,

@@ -9,7 +9,7 @@ import { PhpNormalizer } from './infrastructure/normalizers/php.normalizer.js';
 import { JsonNormalizer } from './infrastructure/normalizers/json.normalizer.js';
 import { YamlNormalizer } from './infrastructure/normalizers/yaml.normalizer.js';
 import { FileProcessorService } from './application/use-cases/file-processor.use-case.js';
-import { SemanticDiffService } from './application/use-cases/semantic-diff.use-case.js';
+import { ComputeSemanticDiffUseCase } from './application/use-cases/compute-semantic-diff.use-case.js';
 
 @Module({
   imports: [GitHubModule],
@@ -27,8 +27,8 @@ import { SemanticDiffService } from './application/use-cases/semantic-diff.use-c
       useClass: GitHubFileContentAdapter,
     },
     FileProcessorService,
-    SemanticDiffService,
+    ComputeSemanticDiffUseCase,
   ],
-  exports: [SemanticDiffService],
+  exports: [ComputeSemanticDiffUseCase],
 })
 export class DiffEngineModule {}

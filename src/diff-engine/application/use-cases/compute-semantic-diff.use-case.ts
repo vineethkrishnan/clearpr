@@ -29,8 +29,8 @@ const BINARY_EXTENSIONS = new Set([
 ]);
 
 @Injectable()
-export class SemanticDiffService {
-  private readonly logger = new Logger(SemanticDiffService.name);
+export class ComputeSemanticDiffUseCase {
+  private readonly logger = new Logger(ComputeSemanticDiffUseCase.name);
 
   constructor(
     private readonly fileProcessor: FileProcessorService,
