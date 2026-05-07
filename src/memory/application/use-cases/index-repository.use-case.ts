@@ -8,7 +8,7 @@ import {
 } from '../../../github/domain/entities/repository.entity.js';
 import { AppConfig } from '../../../config/app.config.js';
 import { IndexMemoryUseCase, type IndexableComment } from './index-memory.use-case.js';
-import { OutcomeDetectorService } from './outcome-detector.use-case.js';
+import { DetectFeedbackOutcomeUseCase } from './detect-feedback-outcome.use-case.js';
 
 @Injectable()
 export class IndexRepositoryUseCase {
@@ -18,7 +18,7 @@ export class IndexRepositoryUseCase {
     private readonly githubClient: GitHubClientService,
     private readonly installationRepo: InstallationRepositoryPort,
     private readonly repositoryRepo: RepositoryRepositoryPort,
-    private readonly outcomeDetector: OutcomeDetectorService,
+    private readonly outcomeDetector: DetectFeedbackOutcomeUseCase,
     private readonly memoryIndexer: IndexMemoryUseCase,
     private readonly config: AppConfig,
   ) {}

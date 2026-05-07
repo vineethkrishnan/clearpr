@@ -7,7 +7,7 @@ import { VoyageEmbeddingAdapter } from './infrastructure/adapters/voyage-embeddi
 import { TypeOrmMemoryRepository } from './infrastructure/repositories/typeorm-memory.repository.js';
 import { IndexMemoryUseCase } from './application/use-cases/index-memory.use-case.js';
 import { RetrieveMemoryUseCase } from './application/use-cases/retrieve-memory.use-case.js';
-import { OutcomeDetectorService } from './application/use-cases/outcome-detector.use-case.js';
+import { DetectFeedbackOutcomeUseCase } from './application/use-cases/detect-feedback-outcome.use-case.js';
 import { IndexRepositoryUseCase } from './application/use-cases/index-repository.use-case.js';
 import { GitHubModule } from '../github/github.module.js';
 
@@ -24,7 +24,7 @@ import { GitHubModule } from '../github/github.module.js';
     },
     IndexMemoryUseCase,
     RetrieveMemoryUseCase,
-    OutcomeDetectorService,
+    DetectFeedbackOutcomeUseCase,
     IndexRepositoryUseCase,
   ],
   exports: [

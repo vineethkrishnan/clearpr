@@ -12,7 +12,7 @@ export interface CommentOutcomeInput {
 }
 
 @Injectable()
-export class OutcomeDetectorService {
+export class DetectFeedbackOutcomeUseCase {
   detect(input: CommentOutcomeInput): FeedbackOutcome {
     // Find commits after the comment within the same PR
     const commitsAfterComment = input.subsequentCommits.filter(

@@ -4,7 +4,7 @@ jest.mock('../../../github/application/use-cases/github-client.use-case.js', () 
 
 import { IndexRepositoryUseCase } from './index-repository.use-case.js';
 import { IndexMemoryUseCase } from './index-memory.use-case.js';
-import { OutcomeDetectorService } from './outcome-detector.use-case.js';
+import { DetectFeedbackOutcomeUseCase } from './detect-feedback-outcome.use-case.js';
 import type { GitHubClientService } from '../../../github/application/use-cases/github-client.use-case.js';
 import { InstallationRepositoryPort } from '../../../github/domain/ports/installation-repository.port.js';
 import { RepositoryRepositoryPort } from '../../../github/domain/ports/repository-repository.port.js';
@@ -19,7 +19,7 @@ describe('IndexRepositoryUseCase', () => {
   let installationRepo: jest.Mocked<InstallationRepositoryPort>;
   let repositoryRepo: jest.Mocked<RepositoryRepositoryPort>;
   let memoryIndexer: jest.Mocked<IndexMemoryUseCase>;
-  let outcomeDetector: OutcomeDetectorService;
+  let outcomeDetector: DetectFeedbackOutcomeUseCase;
 
   const installation = Installation.create({
     githubInstallationId: 4242,
@@ -57,7 +57,7 @@ describe('IndexRepositoryUseCase', () => {
       indexComments: jest.fn().mockResolvedValue(0),
     } as unknown as jest.Mocked<IndexMemoryUseCase>;
 
-    outcomeDetector = new OutcomeDetectorService();
+    outcomeDetector = new DetectFeedbackOutcomeUseCase();
 
     const config = { HISTORY_DEPTH: 50 } as AppConfig;
 
