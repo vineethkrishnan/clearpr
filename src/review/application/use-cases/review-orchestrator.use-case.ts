@@ -6,23 +6,18 @@ import { Review } from '../../domain/entities/review.entity.js';
 import { ReviewComment } from '../../domain/entities/review-comment.entity.js';
 import { Severity } from '../../domain/value-objects/severity.vo.js';
 import { ReviewTrigger } from '../../domain/value-objects/review-trigger.vo.js';
-import {
-  MalformedLlmResponseError,
-  ReviewSkippedError,
-} from '../../domain/errors/review.errors.js';
+import { ReviewSkippedError } from '../../domain/errors/review.errors.js';
 import { RESPONSE_TOKENS } from '../../domain/value-objects/token-budget.vo.js';
 import { PrFileListProviderPort } from '../../domain/ports/pr-file-list-provider.port.js';
 import { SemanticDiffService } from '../../../diff-engine/application/use-cases/semantic-diff.use-case.js';
 import { GuidelineLoaderService } from './guideline-loader.use-case.js';
 import { PromptBuilderService } from './prompt-builder.use-case.js';
 import { IgnoreListService } from './ignore-list.use-case.js';
+import { ParseLlmResponseUseCase } from './parse-llm-response.use-case.js';
 import { matchesAnyPattern } from './glob-match.util.js';
 import { MemoryRetrieverService } from '../../../memory/application/use-cases/memory-retriever.use-case.js';
 import type { ReviewContext } from '../../domain/types/review-context.types.js';
-import type {
-  ParsedReview,
-  ParsedReviewComment,
-} from '../../application/types/review-result.types.js';
+import type { ParsedReview } from '../../application/types/review-result.types.js';
 import { type Result, ok, err } from '../../../shared/types/result.types.js';
 import { type DomainError } from '../../../shared/domain/errors/domain-error.base.js';
 import { AppConfig } from '../../../config/app.config.js';
@@ -41,6 +36,7 @@ export class ReviewOrchestratorService {
     private readonly prFileListProvider: PrFileListProviderPort,
     private readonly memoryRetriever: MemoryRetrieverService,
     private readonly ignoreList: IgnoreListService,
+    private readonly parseLlmResponse: ParseLlmResponseUseCase,
     private readonly config: AppConfig,
   ) {}
 
@@ -134,7 +130,7 @@ export class ReviewOrchestratorService {
       const llmResponse = await this.llmProvider.generateReview(prompt, RESPONSE_TOKENS);
 
       // Parse response
-      const parsed = this.parseResponse(llmResponse.content);
+      const parsed = this.parseLlmResponse.execute(llmResponse.content);
 
       // Create review comments
       const comments = parsed.comments.map(
@@ -189,52 +185,6 @@ export class ReviewOrchestratorService {
         `Review failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
       throw error;
-    }
-  }
-
-  private parseResponse(content: string): ParsedReview {
-    try {
-      // Extract JSON from response (may have markdown wrapping)
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error('No JSON found in response');
-
-      const parsed = JSON.parse(jsonMatch[0]) as {
-        comments?: Array<{
-          path?: string;
-          line?: number;
-          side?: string;
-          severity?: string;
-          body?: string;
-        }>;
-        summary?: string;
-      };
-
-      const comments: ParsedReviewComment[] = (parsed.comments ?? [])
-        .filter(
-          (c): c is { path: string; line: number; severity: string; body: string; side?: string } =>
-            typeof c.path === 'string' &&
-            typeof c.line === 'number' &&
-            typeof c.severity === 'string' &&
-            typeof c.body === 'string',
-        )
-        .map((c) => ({
-          path: c.path,
-          line: c.line,
-          side: c.side === 'LEFT' ? 'LEFT' : 'RIGHT',
-          severity: (Object.values(Severity).includes(c.severity as Severity)
-            ? c.severity
-            : Severity.INFO) as Severity,
-          body: c.body,
-        }));
-
-      return {
-        comments,
-        summary: parsed.summary ?? 'No summary provided.',
-      };
-    } catch (error) {
-      throw new MalformedLlmResponseError(
-        error instanceof Error ? error.message : 'Unknown parse error',
-      );
     }
   }
 
