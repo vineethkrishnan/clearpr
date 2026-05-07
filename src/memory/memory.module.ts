@@ -8,9 +8,11 @@ import { TypeOrmMemoryRepository } from './infrastructure/repositories/typeorm-m
 import { MemoryIndexerService } from './application/services/memory-indexer.service.js';
 import { MemoryRetrieverService } from './application/services/memory-retriever.service.js';
 import { OutcomeDetectorService } from './application/services/outcome-detector.service.js';
+import { RepositoryIndexerService } from './application/services/repository-indexer.service.js';
+import { GitHubModule } from '../github/github.module.js';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([PrMemorySchema])],
+  imports: [TypeOrmModule.forFeature([PrMemorySchema]), GitHubModule],
   providers: [
     {
       provide: EmbeddingProviderPort,
@@ -23,7 +25,13 @@ import { OutcomeDetectorService } from './application/services/outcome-detector.
     MemoryIndexerService,
     MemoryRetrieverService,
     OutcomeDetectorService,
+    RepositoryIndexerService,
   ],
-  exports: [MemoryRetrieverService, MemoryIndexerService, MemoryRepositoryPort],
+  exports: [
+    MemoryRetrieverService,
+    MemoryIndexerService,
+    MemoryRepositoryPort,
+    RepositoryIndexerService,
+  ],
 })
 export class MemoryModule {}

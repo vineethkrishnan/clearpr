@@ -58,7 +58,11 @@ export class InitialSchema1712700000000 implements MigrationInterface {
       'CREATE INDEX idx_reviews_repo_pr_sha ON reviews (repository_id, pr_number, pr_sha)',
     );
 
-    // PR Memory
+    // Embedding dimension must match the chosen embedding model.
+    const embeddingDimensions = parseInt(process.env['EMBEDDING_DIMENSIONS'] ?? '512', 10);
+    if (!Number.isInteger(embeddingDimensions) || embeddingDimensions < 64) {
+      throw new Error('EMBEDDING_DIMENSIONS must be an integer >= 64');
+    }
     await queryRunner.query(`
       CREATE TABLE pr_memory (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -68,10 +72,16 @@ export class InitialSchema1712700000000 implements MigrationInterface {
         comment_text TEXT NOT NULL,
         code_context TEXT NOT NULL,
         outcome VARCHAR(20) NOT NULL,
-        embedding TEXT NOT NULL,
+        embedding vector(${embeddingDimensions}) NOT NULL,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )
     `);
+    await queryRunner.query(
+      'CREATE INDEX idx_pr_memory_repo ON pr_memory (repository_id, created_at DESC)',
+    );
+    await queryRunner.query(
+      'CREATE INDEX idx_pr_memory_embedding ON pr_memory USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100)',
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

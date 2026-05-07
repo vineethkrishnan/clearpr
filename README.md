@@ -20,16 +20,17 @@ ClearPR fixes this. It parses your code into an AST, strips everything that does
 
 ### Semantic Diff Filtering
 
-ClearPR uses [tree-sitter](https://tree-sitter.github.io/tree-sitter/) to parse your code into an Abstract Syntax Tree and compare the actual structure — not the text. This strips out:
+ClearPR parses your code with the TypeScript compiler API (for TS/JS) and structural parsers (for PHP, JSON, YAML), then compares canonical AST forms instead of raw text. This strips out:
 
 - Whitespace and indentation changes
 - Prettier/formatter line rewraps
 - Trailing comma additions/removals
 - Quote style changes (`'` to `"` and back)
+- Comment-only changes
 - Import reordering (same imports, different order)
 - Semicolon additions/removals
 
-What's left is the real diff — the code that actually changed in behavior.
+What's left is the real diff — the code that actually changed in behavior. For unsupported languages, ClearPR falls back to whitespace-only normalization.
 
 ### AI-Powered Review with Project Context
 
@@ -211,8 +212,8 @@ GitHub PR Webhook
               ┌────────┘    │    └────────┐
               ▼             ▼             ▼
      ┌──────────────┐ ┌────────────┐ ┌──────────────┐
-     │  tree-sitter  │ │  pgvector  │ │  Claude API  │
-     │  Diff Engine  │ │  PR Memory │ │   Review     │
+     │  AST-based   │ │  pgvector  │ │  LLM API     │
+     │  Diff Engine │ │  PR Memory │ │   Review     │
      └──────────────┘ └────────────┘ └──────────────┘
               │             │             │
               └─────────────┴─────────────┘
@@ -224,7 +225,7 @@ GitHub PR Webhook
                 └───────────────────┘
 ```
 
-**Stack:** NestJS, PostgreSQL + pgvector, Redis + BullMQ, tree-sitter, Anthropic Claude API
+**Stack:** NestJS, PostgreSQL + pgvector, Redis + BullMQ, TypeScript compiler API, Anthropic Claude / OpenAI / Ollama / Mistral / Gemini
 
 ---
 
@@ -232,16 +233,16 @@ GitHub PR Webhook
 
 | Language | Diff Filtering | Status |
 |----------|:-:|:-:|
-| TypeScript / JavaScript | AST-based | Supported |
-| PHP | AST-based | Supported |
-| JSON | Structural | Supported |
-| YAML | Structural | Supported |
+| TypeScript / JavaScript | AST-based (TypeScript compiler) | Supported |
+| PHP | Structural (string-aware) | Supported |
+| JSON | Canonical (key-sorted) | Supported |
+| YAML | Canonical (js-yaml roundtrip) | Supported |
 | Python | AST-based | Planned |
 | Go | AST-based | Planned |
 | Java | AST-based | Planned |
 | Other languages | Whitespace-only | Fallback |
 
-Want support for another language? tree-sitter has [parsers for 100+ languages](https://tree-sitter.github.io/tree-sitter/#parsers). PRs welcome.
+Want support for another language? PRs welcome.
 
 ---
 
@@ -315,14 +316,15 @@ clearpr/
 
 ## Roadmap
 
-- [x] Semantic diff engine with tree-sitter
+- [x] Semantic diff engine (TypeScript compiler API for TS/JS, structural normalizers for PHP/JSON/YAML)
 - [x] AI review with project guidelines
-- [x] Past PR memory with pgvector
+- [x] Past PR memory with pgvector cosine similarity
+- [x] Multi-provider LLM support (Anthropic, OpenAI, Ollama, Mistral, Gemini)
+- [ ] tree-sitter-based AST diff for Python, Go, Java
 - [ ] Auto-fix suggestions via GitHub suggested changes
 - [ ] Team analytics dashboard
 - [ ] Multi-repo support with shared guidelines
 - [ ] Slack/Teams notifications
-- [ ] Custom LLM providers (OpenAI, Ollama)
 - [ ] IDE plugin for pre-push review
 - [ ] GitLab/Bitbucket support
 
@@ -349,7 +351,7 @@ ClearPR processes code in memory during review and discards it. Only review comm
 **Can ClearPR block my PRs from merging?**
 No. ClearPR is advisory only. It posts comments but never approves or requests changes. Your existing review workflow stays intact.
 
-**What if tree-sitter can't parse a file?**
+**What if the parser can't handle a file?**
 ClearPR falls back to whitespace-only filtering. You'll still get a cleaner diff than GitHub's default, just not as precise as AST-based filtering.
 
 **Can I use a different LLM instead of Claude?**

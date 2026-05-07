@@ -80,6 +80,13 @@ export class AppConfig {
   @IsOptional()
   EMBEDDING_MODEL: string = 'voyage-3-lite';
 
+  @Transform(({ value }: { value: string }) => parseInt(value, 10))
+  @IsInt()
+  @Min(64)
+  @Max(4096)
+  @IsOptional()
+  EMBEDDING_DIMENSIONS: number = 512;
+
   // ===========================================================================
   // Database & Redis
   // ===========================================================================

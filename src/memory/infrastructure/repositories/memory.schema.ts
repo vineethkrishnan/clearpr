@@ -8,6 +8,7 @@ export interface PrMemoryRow {
   comment_text: string;
   code_context: string;
   outcome: string;
+  // pgvector serializes as '[0.1,0.2,...]'; conversion is in the repository.
   embedding: string;
   created_at: Date;
 }
@@ -23,7 +24,7 @@ export const PrMemorySchema = new EntitySchema<PrMemoryRow>({
     comment_text: { type: 'text' },
     code_context: { type: 'text' },
     outcome: { type: 'varchar', length: 20 },
-    embedding: { type: 'text' },
+    embedding: { type: 'varchar' },
     created_at: { type: 'timestamptz', createDate: true },
   },
 });

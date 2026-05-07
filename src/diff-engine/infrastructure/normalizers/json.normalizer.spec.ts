@@ -19,4 +19,10 @@ describe('JsonNormalizer', () => {
     const invalid = '{not valid json}';
     expect(normalizer.normalize(invalid)).toBe(invalid.trim());
   });
+
+  it('should sort nested keys recursively', () => {
+    const v1 = '{"outer": {"b": 2, "a": 1}}';
+    const v2 = '{"outer": {"a": 1, "b": 2}}';
+    expect(normalizer.normalize(v1)).toBe(normalizer.normalize(v2));
+  });
 });

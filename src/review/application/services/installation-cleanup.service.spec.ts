@@ -18,10 +18,12 @@ describe('InstallationCleanupService', () => {
   beforeEach(() => {
     installationRepo = {
       save: jest.fn().mockImplementation((inst: Installation) => Promise.resolve(inst)),
+      findById: jest.fn().mockResolvedValue(null),
       findByGithubId: jest.fn().mockResolvedValue(null),
     };
     repositoryRepo = {
       save: jest.fn(),
+      findById: jest.fn().mockResolvedValue(null),
       findByGithubId: jest.fn(),
       findByInstallationId: jest.fn().mockResolvedValue([]),
       deleteByInstallationId: jest.fn().mockResolvedValue(0),

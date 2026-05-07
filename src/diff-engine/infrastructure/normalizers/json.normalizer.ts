@@ -6,11 +6,20 @@ export class JsonNormalizer implements LanguageNormalizer {
   normalize(source: string): string {
     try {
       const parsed: unknown = JSON.parse(source);
-      const isPlainObject = typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed);
-      const sortedKeys = isPlainObject ? Object.keys(parsed).sort() : undefined;
-      return JSON.stringify(parsed, sortedKeys, 0);
+      return JSON.stringify(this.sortKeysDeep(parsed));
     } catch {
       return source.trim();
     }
+  }
+
+  private sortKeysDeep(value: unknown): unknown {
+    if (Array.isArray(value)) return value.map((entry) => this.sortKeysDeep(entry));
+    if (value === null || typeof value !== 'object') return value;
+    const record = value as Record<string, unknown>;
+    const sorted: Record<string, unknown> = {};
+    for (const key of Object.keys(record).sort()) {
+      sorted[key] = this.sortKeysDeep(record[key]);
+    }
+    return sorted;
   }
 }

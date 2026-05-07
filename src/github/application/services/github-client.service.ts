@@ -3,7 +3,13 @@ import { Octokit } from 'octokit';
 import { InstallationTokenService } from './installation-token.service.js';
 import { RateLimiterService } from './rate-limiter.service.js';
 import { GitHubApiError } from '../../domain/errors/github.errors.js';
-import type { GitHubPrFile, GitHubPr } from '../types/github-types.js';
+import type {
+  GitHubPrFile,
+  GitHubPr,
+  GitHubMergedPr,
+  GitHubReviewComment,
+  GitHubPrCommit,
+} from '../types/github-types.js';
 
 @Injectable()
 export class GitHubClientService {
@@ -140,6 +146,144 @@ export class GitHubClientService {
         })),
       });
       this.updateRateLimit(headers as Record<string, string | undefined>);
+    } catch (error) {
+      throw this.wrapError(error);
+    }
+  }
+
+  async listMergedPullRequests(
+    installationId: number,
+    owner: string,
+    repo: string,
+    limit: number,
+  ): Promise<GitHubMergedPr[]> {
+    try {
+      const octokit = await this.getOctokit(installationId);
+      const merged: GitHubMergedPr[] = [];
+      const perPage = Math.min(limit, 100);
+      let page = 1;
+
+      while (merged.length < limit) {
+        const { data, headers } = await octokit.rest.pulls.list({
+          owner,
+          repo,
+          state: 'closed',
+          sort: 'updated',
+          direction: 'desc',
+          per_page: perPage,
+          page,
+        });
+        this.updateRateLimit(headers as Record<string, string | undefined>);
+        if (data.length === 0) break;
+
+        for (const pr of data) {
+          if (!pr.merged_at) continue;
+          merged.push({
+            number: pr.number,
+            mergedAt: new Date(pr.merged_at),
+            mergeCommitSha: pr.merge_commit_sha,
+            title: pr.title,
+          });
+          if (merged.length >= limit) break;
+        }
+        if (data.length < perPage) break;
+        page++;
+      }
+
+      return merged;
+    } catch (error) {
+      throw this.wrapError(error);
+    }
+  }
+
+  async listPullRequestReviewComments(
+    installationId: number,
+    owner: string,
+    repo: string,
+    prNumber: number,
+  ): Promise<GitHubReviewComment[]> {
+    try {
+      const octokit = await this.getOctokit(installationId);
+      const collected: GitHubReviewComment[] = [];
+      const perPage = 100;
+      let page = 1;
+
+      while (true) {
+        const { data, headers } = await octokit.rest.pulls.listReviewComments({
+          owner,
+          repo,
+          pull_number: prNumber,
+          per_page: perPage,
+          page,
+        });
+        this.updateRateLimit(headers as Record<string, string | undefined>);
+
+        for (const comment of data) {
+          collected.push({
+            id: comment.id,
+            prNumber,
+            authorLogin: comment.user?.login ?? 'unknown',
+            body: comment.body,
+            filePath: comment.path,
+            startLine: comment.start_line ?? null,
+            line: comment.line ?? null,
+            diffHunk: comment.diff_hunk,
+            createdAt: new Date(comment.created_at),
+          });
+        }
+        if (data.length < perPage) break;
+        page++;
+      }
+
+      return collected;
+    } catch (error) {
+      throw this.wrapError(error);
+    }
+  }
+
+  async listPullRequestCommits(
+    installationId: number,
+    owner: string,
+    repo: string,
+    prNumber: number,
+  ): Promise<GitHubPrCommit[]> {
+    try {
+      const octokit = await this.getOctokit(installationId);
+      const collected: GitHubPrCommit[] = [];
+      const perPage = 100;
+      let page = 1;
+
+      while (true) {
+        const { data, headers } = await octokit.rest.pulls.listCommits({
+          owner,
+          repo,
+          pull_number: prNumber,
+          per_page: perPage,
+          page,
+        });
+        this.updateRateLimit(headers as Record<string, string | undefined>);
+
+        for (const entry of data) {
+          const committed = entry.commit.committer?.date ?? entry.commit.author?.date;
+          if (!committed) continue;
+          // listCommits omits changed files; fetch each commit individually.
+          const { data: detail, headers: detailHeaders } = await octokit.rest.repos.getCommit({
+            owner,
+            repo,
+            ref: entry.sha,
+          });
+          this.updateRateLimit(detailHeaders as Record<string, string | undefined>);
+          collected.push({
+            sha: entry.sha,
+            committedAt: new Date(committed),
+            changedFiles: (detail.files ?? []).map((file) => file.filename),
+          });
+        }
+        if (data.length < perPage) break;
+        page++;
+      }
+
+      return collected;
     } catch (error) {
       throw this.wrapError(error);
     }

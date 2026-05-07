@@ -15,3 +15,28 @@ export interface GitHubPr {
   title: string;
   body: string | null;
 }
+
+export interface GitHubMergedPr {
+  number: number;
+  mergedAt: Date;
+  mergeCommitSha: string | null;
+  title: string;
+}
+
+export interface GitHubReviewComment {
+  id: number;
+  prNumber: number;
+  authorLogin: string;
+  body: string;
+  filePath: string;
+  startLine: number | null;
+  line: number | null;
+  diffHunk: string;
+  createdAt: Date;
+}
+
+export interface GitHubPrCommit {
+  sha: string;
+  committedAt: Date;
+  changedFiles: string[];
+}

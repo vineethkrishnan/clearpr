@@ -3,7 +3,8 @@ import { AstNormalizerPort } from '../../domain/ports/ast-normalizer.port.js';
 import { FileContentProviderPort } from '../../domain/ports/file-content-provider.port.js';
 import { FileDiff, type DiffStrategy } from '../../domain/entities/file-diff.entity.js';
 import { Language } from '../../domain/value-objects/language.vo.js';
-import { ChangeType, type DiffHunk } from '../../domain/value-objects/diff-hunk.vo.js';
+import type { DiffHunk } from '../../domain/value-objects/diff-hunk.vo.js';
+import { computeLineDiffHunks } from '../../domain/utils/line-diff.js';
 import type { FileInput } from '../types/diff-result.types.js';
 import { AppConfig } from '../../../config/app.config.js';
 
@@ -146,42 +147,6 @@ export class FileProcessorService {
   }
 
   private computeHunks(base: string, head: string): DiffHunk[] {
-    const baseLines = base.split('\n');
-    const headLines = head.split('\n');
-    const hunks: DiffHunk[] = [];
-    const maxLen = Math.max(baseLines.length, headLines.length);
-
-    let hunkStart = -1;
-    let hunkContent: string[] = [];
-
-    for (let i = 0; i < maxLen; i++) {
-      const baseLine = baseLines[i];
-      const headLine = headLines[i];
-
-      if (baseLine !== headLine) {
-        if (hunkStart === -1) hunkStart = i + 1;
-        hunkContent.push(headLine ?? '');
-      } else if (hunkStart !== -1) {
-        hunks.push({
-          startLine: hunkStart,
-          endLine: hunkStart + hunkContent.length - 1,
-          content: hunkContent.join('\n'),
-          changeType: ChangeType.MODIFIED,
-        });
-        hunkStart = -1;
-        hunkContent = [];
-      }
-    }
-
-    if (hunkStart !== -1) {
-      hunks.push({
-        startLine: hunkStart,
-        endLine: hunkStart + hunkContent.length - 1,
-        content: hunkContent.join('\n'),
-        changeType: ChangeType.MODIFIED,
-      });
-    }
-
-    return hunks;
+    return computeLineDiffHunks(base, head);
   }
 }

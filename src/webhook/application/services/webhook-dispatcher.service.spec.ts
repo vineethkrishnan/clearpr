@@ -38,10 +38,12 @@ describe('WebhookDispatcherService', () => {
     } as unknown as jest.Mocked<JobProducerService>;
     installationRepo = {
       save: jest.fn().mockImplementation((inst: Installation) => Promise.resolve(inst)),
+      findById: jest.fn().mockResolvedValue(null),
       findByGithubId: jest.fn().mockResolvedValue(null),
     };
     repositoryRepo = {
       save: jest.fn().mockImplementation((repo: Repository) => Promise.resolve(repo)),
+      findById: jest.fn().mockResolvedValue(null),
       findByGithubId: jest.fn().mockResolvedValue(null),
       findByInstallationId: jest.fn().mockResolvedValue([]),
       deleteByInstallationId: jest.fn().mockResolvedValue(0),
