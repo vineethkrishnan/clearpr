@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository as TypeOrmRepo } from 'typeorm';
+import pgvector from 'pgvector';
+
+const toVectorSql = (vector: number[]): string => pgvector.toSql(vector) as string;
+const fromVectorSql = (raw: string): number[] => (pgvector.fromSql(raw) as number[] | null) ?? [];
 import {
   MemoryRepositoryPort,
   type SimilarMemoryResult,
@@ -8,6 +12,10 @@ import {
 import { PrMemoryEntry } from '../../domain/entities/pr-memory-entry.entity.js';
 import { type FeedbackOutcome } from '../../domain/value-objects/feedback-outcome.vo.js';
 import { PrMemorySchema, type PrMemoryRow } from './memory.schema.js';
+
+interface SimilarityRow extends PrMemoryRow {
+  similarity: string;
+}
 
 @Injectable()
 export class TypeOrmMemoryRepository extends MemoryRepositoryPort {
@@ -23,6 +31,7 @@ export class TypeOrmMemoryRepository extends MemoryRepositoryPort {
   }
 
   async saveBatch(entries: PrMemoryEntry[]): Promise<void> {
+    if (entries.length === 0) return;
     await this.repo.save(entries.map((e) => this.toRow(e)));
   }
 
@@ -30,29 +39,31 @@ export class TypeOrmMemoryRepository extends MemoryRepositoryPort {
     repositoryId: string,
     embedding: number[],
     limit: number,
-    _threshold: number,
+    threshold: number,
   ): Promise<SimilarMemoryResult[]> {
-    // pgvector cosine distance query
-    // Note: This uses raw SQL because TypeORM doesn't natively support vector operations.
-    // The embedding column stores vectors as text (JSON array) for portability.
-    // In production with pgvector extension, this would use: embedding <=> $1
-    const rows = await this.repo
-      .createQueryBuilder('pm')
-      .where('pm.repository_id = :repositoryId', { repositoryId })
-      .orderBy('pm.created_at', 'DESC')
-      .limit(limit)
-      .getMany();
+    // Cosine distance via pgvector's <=> operator (range 0..2; 0 = identical).
+    // similarity = 1 - distance, so we filter where similarity >= threshold,
+    // i.e. distance <= 1 - threshold. We also pre-filter by repository_id so
+    // the ivfflat index can be used effectively per repo.
+    const maxDistance = 1 - threshold;
+    const queryEmbedding = toVectorSql(embedding);
 
-    // Simple in-memory cosine similarity (pgvector would do this natively)
-    return rows
-      .map((row) => {
-        const entry = this.toDomain(row);
-        const similarity = this.cosineSimilarity(embedding, entry.embedding);
-        return { entry, similarity };
-      })
-      .filter((r) => r.similarity >= _threshold)
-      .sort((a, b) => b.similarity - a.similarity)
-      .slice(0, limit);
+    const rows: SimilarityRow[] = await this.repo.query(
+      `SELECT id, repository_id, pr_number, comment_author, comment_text,
+              code_context, outcome, embedding, created_at,
+              1 - (embedding <=> $1::vector) AS similarity
+       FROM pr_memory
+       WHERE repository_id = $2
+         AND (embedding <=> $1::vector) <= $3
+       ORDER BY embedding <=> $1::vector
+       LIMIT $4`,
+      [queryEmbedding, repositoryId, maxDistance, limit],
+    );
+
+    return rows.map((row) => ({
+      entry: this.toDomain(row),
+      similarity: parseFloat(row.similarity),
+    }));
   }
 
   async deleteByRepositoryId(repositoryId: string): Promise<number> {
@@ -70,20 +81,6 @@ export class TypeOrmMemoryRepository extends MemoryRepositoryPort {
     return result.affected ?? 0;
   }
 
-  private cosineSimilarity(a: number[], b: number[]): number {
-    if (a.length !== b.length || a.length === 0) return 0;
-    let dotProduct = 0;
-    let normA = 0;
-    let normB = 0;
-    for (let i = 0; i < a.length; i++) {
-      dotProduct += (a[i] ?? 0) * (b[i] ?? 0);
-      normA += (a[i] ?? 0) ** 2;
-      normB += (b[i] ?? 0) ** 2;
-    }
-    const denominator = Math.sqrt(normA) * Math.sqrt(normB);
-    return denominator === 0 ? 0 : dotProduct / denominator;
-  }
-
   private toRow(entry: PrMemoryEntry): PrMemoryRow {
     return {
       id: entry.id,
@@ -93,7 +90,7 @@ export class TypeOrmMemoryRepository extends MemoryRepositoryPort {
       comment_text: entry.commentText,
       code_context: entry.codeContext,
       outcome: entry.outcome,
-      embedding: JSON.stringify(entry.embedding),
+      embedding: toVectorSql(entry.embedding),
       created_at: entry.createdAt,
     };
   }
@@ -107,7 +104,7 @@ export class TypeOrmMemoryRepository extends MemoryRepositoryPort {
       commentText: row.comment_text,
       codeContext: row.code_context,
       outcome: row.outcome as FeedbackOutcome,
-      embedding: JSON.parse(row.embedding) as number[],
+      embedding: fromVectorSql(row.embedding),
     });
   }
 }

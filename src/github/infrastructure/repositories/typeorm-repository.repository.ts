@@ -19,6 +19,11 @@ export class TypeOrmRepositoryRepository extends RepositoryRepositoryPort {
     return repository;
   }
 
+  async findById(id: string): Promise<Repository | null> {
+    const row = await this.repo.findOneBy({ id });
+    return row ? this.toDomain(row) : null;
+  }
+
   async findByGithubId(githubRepoId: number): Promise<Repository | null> {
     const row = await this.repo.findOneBy({ github_repo_id: githubRepoId });
     return row ? this.toDomain(row) : null;

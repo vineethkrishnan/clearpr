@@ -8,6 +8,8 @@ export interface PrMemoryRow {
   comment_text: string;
   code_context: string;
   outcome: string;
+  // Stored as pgvector — TypeORM treats it as string ('[0.1,0.2,...]') in
+  // both directions; the repository converts to/from number[] via pgvector.toSql.
   embedding: string;
   created_at: Date;
 }
@@ -23,7 +25,7 @@ export const PrMemorySchema = new EntitySchema<PrMemoryRow>({
     comment_text: { type: 'text' },
     code_context: { type: 'text' },
     outcome: { type: 'varchar', length: 20 },
-    embedding: { type: 'text' },
+    embedding: { type: 'varchar' },
     created_at: { type: 'timestamptz', createDate: true },
   },
 });

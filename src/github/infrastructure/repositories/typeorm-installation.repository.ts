@@ -20,6 +20,11 @@ export class TypeOrmInstallationRepository extends InstallationRepositoryPort {
     return installation;
   }
 
+  async findById(id: string): Promise<Installation | null> {
+    const row = await this.repo.findOneBy({ id });
+    return row ? this.toDomain(row) : null;
+  }
+
   async findByGithubId(githubInstallationId: number): Promise<Installation | null> {
     const row = await this.repo.findOneBy({
       github_installation_id: githubInstallationId,

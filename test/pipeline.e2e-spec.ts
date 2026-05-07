@@ -115,6 +115,10 @@ class FakeInstallationRepo extends InstallationRepositoryPort {
     this.stored = installation;
     return installation;
   }
+  async findById(_id: string): Promise<Installation | null> {
+    await Promise.resolve();
+    return this.stored;
+  }
   async findByGithubId(_githubInstallationId: number): Promise<Installation | null> {
     await Promise.resolve();
     return this.stored;
@@ -128,6 +132,10 @@ class FakeRepositoryRepo extends RepositoryRepositoryPort {
   async save(r: Repository): Promise<Repository> {
     await Promise.resolve();
     return r;
+  }
+  async findById(_id: string): Promise<Repository | null> {
+    await Promise.resolve();
+    return this.repo;
   }
   async findByGithubId(_githubRepoId: number): Promise<Repository | null> {
     await Promise.resolve();

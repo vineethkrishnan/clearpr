@@ -1,0 +1,15 @@
+{
+  "threshold": 5,
+  "reporters": ["console"],
+  "minLines": 10,
+  "minTokens": 80,
+  "format": ["typescript"],
+  "absolute": true,
+  "ignore": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/*.spec.ts",
+    "**/*.e2e-spec.ts",
+    "**/migrations/**"
+  ]
+}

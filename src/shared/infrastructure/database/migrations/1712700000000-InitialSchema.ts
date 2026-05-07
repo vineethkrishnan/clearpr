@@ -58,7 +58,13 @@ export class InitialSchema1712700000000 implements MigrationInterface {
       'CREATE INDEX idx_reviews_repo_pr_sha ON reviews (repository_id, pr_number, pr_sha)',
     );
 
-    // PR Memory
+    // PR Memory — embedding column uses pgvector. Dimension comes from
+    // EMBEDDING_DIMENSIONS (default 512 for voyage-3-lite). Changing model
+    // requires recreating the column with a matching dimension.
+    const embeddingDimensions = parseInt(process.env['EMBEDDING_DIMENSIONS'] ?? '512', 10);
+    if (!Number.isInteger(embeddingDimensions) || embeddingDimensions < 64) {
+      throw new Error('EMBEDDING_DIMENSIONS must be an integer >= 64');
+    }
     await queryRunner.query(`
       CREATE TABLE pr_memory (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -68,10 +74,18 @@ export class InitialSchema1712700000000 implements MigrationInterface {
         comment_text TEXT NOT NULL,
         code_context TEXT NOT NULL,
         outcome VARCHAR(20) NOT NULL,
-        embedding TEXT NOT NULL,
+        embedding vector(${embeddingDimensions}) NOT NULL,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )
     `);
+    await queryRunner.query(
+      'CREATE INDEX idx_pr_memory_repo ON pr_memory (repository_id, created_at DESC)',
+    );
+    // ivfflat index for cosine distance — speeds up <=> queries once the
+    // table has enough rows for the planner to prefer it.
+    await queryRunner.query(
+      'CREATE INDEX idx_pr_memory_embedding ON pr_memory USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100)',
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
