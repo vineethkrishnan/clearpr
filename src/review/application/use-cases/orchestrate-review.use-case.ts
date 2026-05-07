@@ -8,6 +8,8 @@ import { ReviewTrigger } from '../../domain/value-objects/review-trigger.vo.js';
 import { ReviewSkippedError } from '../../domain/errors/review.errors.js';
 import { RESPONSE_TOKENS } from '../../domain/value-objects/token-budget.vo.js';
 import { PrFileListProviderPort } from '../../domain/ports/pr-file-list-provider.port.js';
+import { DiffTooLargeError } from '../../../diff-engine/domain/errors/diff-engine.errors.js';
+import type { SemanticDiffResult } from '../../../diff-engine/application/types/diff-result.types.js';
 import { DiffComputerPort } from '../ports/diff-computer.port.js';
 import { LoadGuidelinesUseCase } from './load-guidelines.use-case.js';
 import { BuildPromptUseCase } from './build-prompt.use-case.js';

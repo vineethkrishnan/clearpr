@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { CleanupInstallationUseCase } from '../../../review/application/use-cases/cleanup-installation.use-case.js';
+import { InstallationCleanupPort } from '../ports/installation-cleanup.port.js';
 import type { WebhookPayload } from '../types/webhook-event.types.js';
 
 @Injectable()
 export class RemoveRepositoriesUseCase {
   private readonly logger = new Logger(RemoveRepositoriesUseCase.name);
 
-  constructor(private readonly cleanupService: CleanupInstallationUseCase) {}
+  constructor(private readonly cleanupService: InstallationCleanupPort) {}
 
   async execute(payload: WebhookPayload): Promise<void> {
     const repositoriesRemoved = payload.body.repositories_removed;

@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import { RemoveInstallationUseCase } from './remove-installation.use-case.js';
 import { InstallationRepositoryPort } from '../../../github/domain/ports/installation-repository.port.js';
-import { CleanupInstallationUseCase } from '../../../review/application/use-cases/cleanup-installation.use-case.js';
+import { InstallationCleanupPort } from '../ports/installation-cleanup.port.js';
 import { Installation } from '../../../github/domain/entities/installation.entity.js';
 
 describe('RemoveInstallationUseCase', () => {
   let useCase: RemoveInstallationUseCase;
   let installationRepo: jest.Mocked<InstallationRepositoryPort>;
-  let cleanupService: jest.Mocked<CleanupInstallationUseCase>;
+  let cleanupService: jest.Mocked<InstallationCleanupPort>;
 
   beforeEach(() => {
     installationRepo = {
@@ -23,7 +23,7 @@ describe('RemoveInstallationUseCase', () => {
         memoryEntriesDeleted: 12,
       }),
       cleanupRepository: jest.fn().mockResolvedValue(null),
-    } as unknown as jest.Mocked<CleanupInstallationUseCase>;
+    };
 
     useCase = new RemoveInstallationUseCase(installationRepo, cleanupService);
   });

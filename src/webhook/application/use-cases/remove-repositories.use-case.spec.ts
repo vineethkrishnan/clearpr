@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import { RemoveRepositoriesUseCase } from './remove-repositories.use-case.js';
-import { CleanupInstallationUseCase } from '../../../review/application/use-cases/cleanup-installation.use-case.js';
+import { InstallationCleanupPort } from '../ports/installation-cleanup.port.js';
 
 describe('RemoveRepositoriesUseCase', () => {
   let useCase: RemoveRepositoriesUseCase;
-  let cleanupService: jest.Mocked<CleanupInstallationUseCase>;
+  let cleanupService: jest.Mocked<InstallationCleanupPort>;
 
   beforeEach(() => {
     cleanupService = {
       cleanupInstallation: jest.fn(),
       cleanupRepository: jest.fn().mockResolvedValue(null),
-    } as unknown as jest.Mocked<CleanupInstallationUseCase>;
+    };
 
     useCase = new RemoveRepositoriesUseCase(cleanupService);
   });
