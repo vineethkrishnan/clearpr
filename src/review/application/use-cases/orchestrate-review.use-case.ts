@@ -8,9 +8,7 @@ import { ReviewTrigger } from '../../domain/value-objects/review-trigger.vo.js';
 import { ReviewSkippedError } from '../../domain/errors/review.errors.js';
 import { RESPONSE_TOKENS } from '../../domain/value-objects/token-budget.vo.js';
 import { PrFileListProviderPort } from '../../domain/ports/pr-file-list-provider.port.js';
-import { ComputeSemanticDiffUseCase } from '../../../diff-engine/application/use-cases/compute-semantic-diff.use-case.js';
-import { DiffTooLargeError } from '../../../diff-engine/domain/errors/diff-engine.errors.js';
-import type { SemanticDiffResult } from '../../../diff-engine/application/types/diff-result.types.js';
+import { DiffComputerPort } from '../ports/diff-computer.port.js';
 import { LoadGuidelinesUseCase } from './load-guidelines.use-case.js';
 import { BuildPromptUseCase } from './build-prompt.use-case.js';
 import { ManageIgnorePatternsUseCase } from './manage-ignore-patterns.use-case.js';
@@ -27,7 +25,7 @@ export class OrchestrateReviewUseCase {
   private readonly logger = new Logger(OrchestrateReviewUseCase.name);
 
   constructor(
-    private readonly diffService: ComputeSemanticDiffUseCase,
+    private readonly diffService: DiffComputerPort,
     private readonly guidelineLoader: LoadGuidelinesUseCase,
     private readonly promptBuilder: BuildPromptUseCase,
     private readonly llmProvider: LlmProviderPort,
