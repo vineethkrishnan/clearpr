@@ -39,7 +39,7 @@ import { TypeScriptNormalizer } from '../src/diff-engine/infrastructure/normaliz
 import { PhpNormalizer } from '../src/diff-engine/infrastructure/normalizers/php.normalizer.js';
 import { JsonNormalizer } from '../src/diff-engine/infrastructure/normalizers/json.normalizer.js';
 import { YamlNormalizer } from '../src/diff-engine/infrastructure/normalizers/yaml.normalizer.js';
-import { FileProcessorService } from '../src/diff-engine/application/use-cases/file-processor.use-case.js';
+import { ProcessFileDiffUseCase } from '../src/diff-engine/application/use-cases/process-file-diff.use-case.js';
 import { ComputeSemanticDiffUseCase } from '../src/diff-engine/application/use-cases/compute-semantic-diff.use-case.js';
 
 import { LlmProviderPort } from '../src/review/domain/ports/llm-provider.port.js';
@@ -412,7 +412,7 @@ const prFiles: FileInput[] = [
     YamlNormalizer,
     { provide: AstNormalizerPort, useClass: NormalizerRegistryAdapter },
     { provide: FileContentProviderPort, useValue: new FakeFileContentProvider(fileContents) },
-    FileProcessorService,
+    ProcessFileDiffUseCase,
     ComputeSemanticDiffUseCase,
 
     // Memory (real retriever wrapping fake external providers)

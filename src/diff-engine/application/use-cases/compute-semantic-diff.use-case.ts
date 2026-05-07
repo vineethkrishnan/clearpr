@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { FileProcessorService } from './file-processor.use-case.js';
+import { ProcessFileDiffUseCase } from './process-file-diff.use-case.js';
 import { calculateNoiseReductionPct } from '../../domain/utils/noise-reduction.js';
 import { DiffTooLargeError } from '../../domain/errors/diff-engine.errors.js';
 import type { DiffInput, SemanticDiffResult } from '../types/diff-result.types.js';
@@ -32,10 +32,7 @@ const BINARY_EXTENSIONS = new Set([
 export class ComputeSemanticDiffUseCase {
   private readonly logger = new Logger(ComputeSemanticDiffUseCase.name);
 
-  constructor(
-    private readonly fileProcessor: FileProcessorService,
-    private readonly config: AppConfig,
-  ) {}
+  constructor(private readonly fileProcessor: ProcessFileDiffUseCase) {}
 
   async computeDiff(input: DiffInput): Promise<SemanticDiffResult> {
     const skippedFiles: string[] = [];

@@ -8,7 +8,7 @@ import { TypeScriptNormalizer } from './infrastructure/normalizers/typescript.no
 import { PhpNormalizer } from './infrastructure/normalizers/php.normalizer.js';
 import { JsonNormalizer } from './infrastructure/normalizers/json.normalizer.js';
 import { YamlNormalizer } from './infrastructure/normalizers/yaml.normalizer.js';
-import { FileProcessorService } from './application/use-cases/file-processor.use-case.js';
+import { ProcessFileDiffUseCase } from './application/use-cases/process-file-diff.use-case.js';
 import { ComputeSemanticDiffUseCase } from './application/use-cases/compute-semantic-diff.use-case.js';
 
 @Module({
@@ -26,7 +26,7 @@ import { ComputeSemanticDiffUseCase } from './application/use-cases/compute-sema
       provide: FileContentProviderPort,
       useClass: GitHubFileContentAdapter,
     },
-    FileProcessorService,
+    ProcessFileDiffUseCase,
     ComputeSemanticDiffUseCase,
   ],
   exports: [ComputeSemanticDiffUseCase],
