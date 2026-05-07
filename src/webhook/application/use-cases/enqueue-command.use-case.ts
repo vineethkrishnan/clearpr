@@ -1,11 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { EnqueueJobUseCase } from '../../../queue/application/use-cases/enqueue-job.use-case.js';
 import { RepositoryRepositoryPort } from '../../../github/domain/ports/repository-repository.port.js';
+import { parseClearPrCommand } from '../dtos/clearpr-command.dto.js';
 import type { WebhookPayload } from '../types/webhook-event.types.js';
-
-type SupportedCommand = 'review' | 'diff' | 'ignore' | 'config';
-
-const SUPPORTED_COMMANDS: ReadonlyArray<SupportedCommand> = ['review', 'diff', 'ignore', 'config'];
 
 @Injectable()
 export class EnqueueCommandUseCase {
@@ -20,12 +17,8 @@ export class EnqueueCommandUseCase {
     const repository = payload.body.repository;
     if (!comment || !issue || !repository) return;
 
-    const body = comment.body.trim().toLowerCase();
-    if (!body.startsWith('@clearpr')) return;
-
-    const parts = body.split(/\s+/);
-    const command = parts[1] as SupportedCommand | undefined;
-    if (!command || !SUPPORTED_COMMANDS.includes(command)) return;
+    const parsed = parseClearPrCommand(comment.body);
+    if (!parsed) return;
 
     const dbRepo = await this.repositoryRepo.findByGithubId(repository.id);
     if (!dbRepo) return;
@@ -36,8 +29,8 @@ export class EnqueueCommandUseCase {
       repositoryId: dbRepo.id,
       repoFullName: repository.full_name,
       prNumber: issue.number,
-      command,
-      args: parts.slice(2).join(' ') || undefined,
+      command: parsed.command,
+      args: parsed.args,
       commentId: comment.id,
     });
   }
