@@ -8,7 +8,7 @@ import { TypeOrmMemoryRepository } from './infrastructure/repositories/typeorm-m
 import { IndexMemoryUseCase } from './application/use-cases/index-memory.use-case.js';
 import { RetrieveMemoryUseCase } from './application/use-cases/retrieve-memory.use-case.js';
 import { OutcomeDetectorService } from './application/use-cases/outcome-detector.use-case.js';
-import { RepositoryIndexerService } from './application/use-cases/repository-indexer.use-case.js';
+import { IndexRepositoryUseCase } from './application/use-cases/index-repository.use-case.js';
 import { GitHubModule } from '../github/github.module.js';
 
 @Module({
@@ -25,13 +25,13 @@ import { GitHubModule } from '../github/github.module.js';
     IndexMemoryUseCase,
     RetrieveMemoryUseCase,
     OutcomeDetectorService,
-    RepositoryIndexerService,
+    IndexRepositoryUseCase,
   ],
   exports: [
     RetrieveMemoryUseCase,
     IndexMemoryUseCase,
     MemoryRepositoryPort,
-    RepositoryIndexerService,
+    IndexRepositoryUseCase,
   ],
 })
 export class MemoryModule {}

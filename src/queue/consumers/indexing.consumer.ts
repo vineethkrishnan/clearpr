@@ -1,7 +1,7 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
-import { RepositoryIndexerService } from '../../memory/application/use-cases/repository-indexer.use-case.js';
+import { IndexRepositoryUseCase } from '../../memory/application/use-cases/index-repository.use-case.js';
 import { RepositoryRepositoryPort } from '../../github/domain/ports/repository-repository.port.js';
 import { QUEUE_NAMES, type IndexingJobPayload } from '../types/job-payload.types.js';
 
@@ -10,7 +10,7 @@ export class IndexingConsumer extends WorkerHost {
   private readonly logger = new Logger(IndexingConsumer.name);
 
   constructor(
-    private readonly repositoryIndexer: RepositoryIndexerService,
+    private readonly repositoryIndexer: IndexRepositoryUseCase,
     private readonly repositoryRepo: RepositoryRepositoryPort,
   ) {
     super();

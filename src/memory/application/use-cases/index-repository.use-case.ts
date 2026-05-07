@@ -11,8 +11,8 @@ import { IndexMemoryUseCase, type IndexableComment } from './index-memory.use-ca
 import { OutcomeDetectorService } from './outcome-detector.use-case.js';
 
 @Injectable()
-export class RepositoryIndexerService {
-  private readonly logger = new Logger(RepositoryIndexerService.name);
+export class IndexRepositoryUseCase {
+  private readonly logger = new Logger(IndexRepositoryUseCase.name);
 
   constructor(
     private readonly githubClient: GitHubClientService,
