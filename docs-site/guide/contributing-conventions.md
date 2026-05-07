@@ -10,18 +10,22 @@ Every module under `src/<module>/` uses the same hexagonal layout:
 
 ```
 src/<module>/
+├── SUMMARY.md           (module purpose + boundary, see CONTRIBUTING.md)
 ├── domain/
 │   ├── entities/
 │   ├── value-objects/
 │   ├── ports/
 │   └── errors/
 ├── application/
-│   └── services/        (use cases)
+│   ├── use-cases/       (*.use-case.ts, one per business operation)
+│   ├── ports/           (cross-module ports, bound via useExisting)
+│   └── dtos/            (class-validator DTOs at the HTTP/queue boundary)
 ├── infrastructure/
 │   ├── adapters/
-│   └── repositories/
-├── presentation/        (HTTP-facing modules only)
-│   └── *.controller.ts
+│   └── repositories/    (*.record.ts + *.mapper.ts + typeorm-*.repository.ts)
+├── presenters/
+│   └── http/            (HTTP-facing modules only)
+│       └── *.controller.ts
 └── <module>.module.ts
 ```
 
@@ -30,9 +34,9 @@ Allowed contents per layer:
 | Layer | What lives here | What does NOT live here |
 |---|---|---|
 | `domain/` | Entities, value objects, ports (abstract classes), domain errors | NestJS decorators, ORM types, HTTP types, vendor SDKs |
-| `application/` | Use cases (one per business operation), DTOs with `class-validator`, application-level errors | TypeORM entities, raw SQL, vendor clients |
-| `infrastructure/` | Adapters that implement domain ports, TypeORM schemas, mappers, vendor SDK calls | Business rules, branching on domain logic |
-| `presentation/` | Controllers, request DTOs, guards specific to HTTP | Use case logic |
+| `application/` | Use cases (one per business operation), DTOs with `class-validator`, cross-module ports, application-level errors | TypeORM records, raw SQL, vendor clients |
+| `infrastructure/` | Adapters that implement domain ports, TypeORM records + mappers, vendor SDK calls | Business rules, branching on domain logic |
+| `presenters/http/` | Controllers, request DTOs, guards specific to HTTP | Use case logic |
 
 ## Domain layer rules
 
@@ -56,15 +60,20 @@ That's the entire contract. Five different vendor adapters implement it.
 
 ## Application layer rules
 
-- **One use case per business operation.** Don't pile unrelated methods onto one service. `MemoryRetrieverService.findRelevant()` is its own thing; indexing lives in `MemoryIndexerService`.
+- **One use case per business operation.** Don't pile unrelated methods onto one class. `RetrieveMemoryUseCase.execute()` is its own thing; indexing lives in `IndexMemoryUseCase`. Files are named `*.use-case.ts` and live under `application/use-cases/`.
+- **Class naming follows `<Verb><Noun>UseCase`.** Examples: `OrchestrateReviewUseCase`, `BuildPromptUseCase`, `DispatchWebhookUseCase`, `HandleCommandUseCase`. Infrastructure adapters keep the `*Service` suffix when they wrap a third-party SDK and have no business operation of their own (`GitHubClientService`, `RateLimiterService`, `InstallationTokenService`).
 - **Inject ports, not concretes.** A use case constructor takes `MemoryRepositoryPort`, never `TypeOrmMemoryRepository`. The Nest module wires the binding.
-- **DTOs use `class-validator`.** Anything coming in from the outside (HTTP body, queue payload, env config) gets validated at the boundary.
+- **DTOs live in `application/dtos/` and use `class-validator`.** Anything coming in from the outside (HTTP body, queue payload, env config) gets validated at the boundary. Examples: `WebhookEventDto`, `ClearPrCommandDto`, `IgnorePatternDto`. Always set an explicit `type` on nullable `@ApiProperty` so Orval emits a usable client type.
+- **Cross-module dependencies go through abstract ports defined in `application/ports/`.** The provider module supplies the concrete implementation and the consumer module binds the port via `{ provide: SomePort, useExisting: ConcreteUseCase }`. This keeps module-to-module imports type-only.
 - **Use cases return plain values or `Result<T, E>`** for expected failures. Throw only for genuinely exceptional conditions.
-- **Logging happens here**, not in the domain. Use the Nest `Logger` with the service class name as context.
+- **Logging happens here**, not in the domain. Use the Nest `Logger` with the use case class name as context.
 
 ## Infrastructure layer rules
 
-- **TypeORM records are separate from domain entities.** A `PrMemoryRow` (snake_case columns, vector serialization, `created_at` defaults) is not a `PrMemoryEntry`. Repositories convert between them via private `toRow` / `toDomain` mappers.
+- **TypeORM records are separate from domain entities.** A `PrMemoryRecord` (snake_case columns, vector serialization, `created_at` defaults) is not a `PrMemoryEntry`. Records are `@Entity`-decorated classes (no `EntitySchema`) and live next to a `*.mapper.ts` and the repository implementation under `infrastructure/repositories/`.
+- **Records use `@PrimaryColumn('uuid')`, never `@PrimaryGeneratedColumn`.** IDs come from the domain layer (factory methods on entities, value objects like `DeliveryId`). Letting the database mint the ID would split identity across two layers.
+- **Mappers are stateless classes with static `toDomain` and `toRecord` methods.** They are not `@Injectable`. The repository owns the only field that mapping cannot express in pure code (e.g. `pgvector` serialization, similarity-search SQL).
+- **Round-trip tests are required for every mapper.** A test must build a domain entity, run `toRecord` then `toDomain`, and assert structural equality. This catches lossy mappings before they hit production data.
 - **Adapters implement exactly one port.** Don't extend a port and add public methods that aren't on the port. Other modules consume the port; new methods on the adapter are invisible to them by design.
 - **Vendor SDK quirks are translated at the boundary.** Anthropic's `APIError.status === 429` becomes a domain `LlmRateLimitError` inside the adapter. Higher layers never see a vendor error type.
 - **Adapters are dumb pipes.** They don't decide *whether* to call the vendor; they just call it and translate the result.
@@ -95,7 +104,10 @@ The port returns a domain `LlmResponse`. The vendor type never escapes.
 
 These are enforced in CI; PRs that drop below the bar get bounced.
 
-- **Cognitive complexity <= 15** per function (sonarjs rule). If a function is too complex, extract a helper or split the use case.
+- **Cognitive complexity <= 15** per function (`sonarjs/cognitive-complexity`, error). If a function is too complex, extract a helper or split the use case.
+- **No identical functions** (`sonarjs/no-identical-functions`, error). Two functions with the same body get flagged; extract to a shared helper.
+- **No collapsible `if`** (`sonarjs/no-collapsible-if`, warn). Merge nested conditions or extract a boolean.
+- **No duplicated string literals** (`sonarjs/no-duplicate-string`, warn, threshold 4). The same literal appearing four or more times wants a constant.
 - **No `any`.** Use `unknown` and narrow, or define the type. The lint rule is `@typescript-eslint/no-explicit-any: 'error'`.
 - **No floating promises.** `@typescript-eslint/no-floating-promises` is on; await everything or explicitly mark fire-and-forget with `void`.
 - **Use `Logger` from `@nestjs/common`**, never `console.*`. Pino is wired underneath via `nestjs-pino`.
