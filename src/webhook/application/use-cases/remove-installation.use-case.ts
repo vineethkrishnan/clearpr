@@ -13,7 +13,7 @@ export class RemoveInstallationUseCase {
   ) {}
 
   async execute(payload: WebhookPayload): Promise<void> {
-    const ghInstallation = payload.body['installation'] as { id: number } | undefined;
+    const ghInstallation = payload.body.installation;
     if (!ghInstallation) return;
 
     const installation = await this.installationRepo.findByGithubId(ghInstallation.id);

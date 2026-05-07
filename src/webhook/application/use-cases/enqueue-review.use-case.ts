@@ -11,24 +11,22 @@ export class EnqueueReviewUseCase {
   ) {}
 
   async execute(payload: WebhookPayload): Promise<void> {
-    const pr = payload.body['pull_request'] as
-      | { number: number; head: { sha: string }; base: { ref: string } }
-      | undefined;
-    const repo = payload.body['repository'] as { id: number; full_name: string } | undefined;
-    if (!pr || !repo) return;
+    const pullRequest = payload.body.pull_request;
+    const repository = payload.body.repository;
+    if (!pullRequest || !repository) return;
 
-    const dbRepo = await this.repositoryRepo.findByGithubId(repo.id);
+    const dbRepo = await this.repositoryRepo.findByGithubId(repository.id);
     if (!dbRepo) return;
 
     await this.jobProducer.enqueueReview({
       correlationId: payload.deliveryId,
       installationId: String(payload.installationId),
       repositoryId: dbRepo.id,
-      repoFullName: repo.full_name,
-      prNumber: pr.number,
-      prSha: pr.head.sha,
+      repoFullName: repository.full_name,
+      prNumber: pullRequest.number,
+      prSha: pullRequest.head.sha,
       trigger: 'auto',
-      baseBranch: pr.base.ref,
+      baseBranch: pullRequest.base.ref,
     });
   }
 }

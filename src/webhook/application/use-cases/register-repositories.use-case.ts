@@ -12,26 +12,24 @@ export class RegisterRepositoriesUseCase {
   ) {}
 
   async execute(payload: WebhookPayload): Promise<void> {
-    const repos = payload.body['repositories_added'] as
-      | Array<{ id: number; full_name: string }>
-      | undefined;
-    if (!repos) return;
+    const repositoriesAdded = payload.body.repositories_added;
+    if (!repositoriesAdded) return;
 
-    const ghInstallation = payload.body['installation'] as { id: number } | undefined;
+    const ghInstallation = payload.body.installation;
     if (!ghInstallation) return;
 
     const installation = await this.installationRepo.findByGithubId(ghInstallation.id);
     if (!installation) return;
 
-    for (const repo of repos) {
-      const existing = await this.repositoryRepo.findByGithubId(repo.id);
+    for (const repository of repositoriesAdded) {
+      const existing = await this.repositoryRepo.findByGithubId(repository.id);
       if (!existing) {
-        const repository = Repository.create({
+        const repositoryEntity = Repository.create({
           installationId: installation.id,
-          githubRepoId: repo.id,
-          fullName: repo.full_name,
+          githubRepoId: repository.id,
+          fullName: repository.full_name,
         });
-        await this.repositoryRepo.save(repository);
+        await this.repositoryRepo.save(repositoryEntity);
       }
     }
   }

@@ -7,10 +7,13 @@ import {
   Post,
   Req,
   UseGuards,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { HmacSignatureGuard } from '../../infrastructure/guards/hmac-signature.guard.js';
-import { DispatchWebhookUseCase } from '../../application/use-cases/dispatch-webhook.use-case.js';
+import { WebhookDispatcherService } from '../../application/use-cases/webhook-dispatcher.use-case.js';
+import { WebhookEventDto } from '../../application/dtos/webhook-event.dto.js';
 
 @Controller('webhook')
 export class WebhookController {
@@ -21,30 +24,31 @@ export class WebhookController {
   @Post()
   @HttpCode(HttpStatus.OK)
   @UseGuards(HmacSignatureGuard)
+  // Override the global pipe: GitHub sends many fields the DTO does not
+  // declare. Use `whitelist: true` to strip the rest instead of rejecting.
+  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   async handleWebhook(
     @Req() request: Request,
-    @Body() body: Record<string, unknown>,
+    @Body() body: WebhookEventDto,
   ): Promise<{ received: boolean }> {
     const event = request.headers['x-github-event'] as string | undefined;
     const deliveryId = request.headers['x-github-delivery'] as string | undefined;
-    const action = (body['action'] as string) ?? '';
-    const installation = body['installation'] as { id: number } | undefined;
 
     if (!event || !deliveryId) {
       this.logger.warn('Webhook missing required headers');
       return { received: false };
     }
 
-    if (!installation?.id) {
+    if (!body.installation?.id) {
       this.logger.warn({ event, deliveryId }, 'Webhook missing installation ID');
       return { received: false };
     }
 
     await this.dispatcher.dispatch({
       event,
-      action,
+      action: body.action ?? '',
       deliveryId,
-      installationId: installation.id,
+      installationId: body.installation.id,
       body,
     });
 
