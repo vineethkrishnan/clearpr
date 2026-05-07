@@ -13,8 +13,8 @@ export interface IndexableComment {
 }
 
 @Injectable()
-export class MemoryIndexerService {
-  private readonly logger = new Logger(MemoryIndexerService.name);
+export class IndexMemoryUseCase {
+  private readonly logger = new Logger(IndexMemoryUseCase.name);
 
   constructor(
     private readonly embeddingProvider: EmbeddingProviderPort,

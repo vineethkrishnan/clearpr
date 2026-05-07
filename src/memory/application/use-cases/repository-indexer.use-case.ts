@@ -7,7 +7,7 @@ import {
   type Repository,
 } from '../../../github/domain/entities/repository.entity.js';
 import { AppConfig } from '../../../config/app.config.js';
-import { MemoryIndexerService, type IndexableComment } from './memory-indexer.use-case.js';
+import { IndexMemoryUseCase, type IndexableComment } from './index-memory.use-case.js';
 import { OutcomeDetectorService } from './outcome-detector.use-case.js';
 
 @Injectable()
@@ -19,7 +19,7 @@ export class RepositoryIndexerService {
     private readonly installationRepo: InstallationRepositoryPort,
     private readonly repositoryRepo: RepositoryRepositoryPort,
     private readonly outcomeDetector: OutcomeDetectorService,
-    private readonly memoryIndexer: MemoryIndexerService,
+    private readonly memoryIndexer: IndexMemoryUseCase,
     private readonly config: AppConfig,
   ) {}
 
