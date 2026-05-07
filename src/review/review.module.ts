@@ -13,7 +13,7 @@ import { GitHubPrFileListAdapter } from './infrastructure/adapters/github-pr-fil
 import { createLlmProvider } from './infrastructure/llm/llm-provider.registry.js';
 import { PromptSanitizer } from './application/use-cases/prompt-sanitizer.use-case.js';
 import { LoadGuidelinesUseCase } from './application/use-cases/load-guidelines.use-case.js';
-import { PromptBuilderService } from './application/use-cases/prompt-builder.use-case.js';
+import { BuildPromptUseCase } from './application/use-cases/build-prompt.use-case.js';
 import { ReviewOrchestratorService } from './application/use-cases/review-orchestrator.use-case.js';
 import { ManageIgnorePatternsUseCase } from './application/use-cases/manage-ignore-patterns.use-case.js';
 import { HandleCommandUseCase } from './application/use-cases/handle-command.use-case.js';
@@ -39,7 +39,7 @@ import { BuildReviewSummaryUseCase } from './application/use-cases/build-review-
     },
     PromptSanitizer,
     LoadGuidelinesUseCase,
-    PromptBuilderService,
+    BuildPromptUseCase,
     ManageIgnorePatternsUseCase,
     ParseLlmResponseUseCase,
     BuildReviewSummaryUseCase,
