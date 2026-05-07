@@ -12,7 +12,7 @@ import { GitHubReviewPosterAdapter } from './infrastructure/adapters/github-revi
 import { GitHubPrFileListAdapter } from './infrastructure/adapters/github-pr-file-list.adapter.js';
 import { createLlmProvider } from './infrastructure/llm/llm-provider.registry.js';
 import { PromptSanitizer } from './application/use-cases/prompt-sanitizer.use-case.js';
-import { GuidelineLoaderService } from './application/use-cases/guideline-loader.use-case.js';
+import { LoadGuidelinesUseCase } from './application/use-cases/load-guidelines.use-case.js';
 import { PromptBuilderService } from './application/use-cases/prompt-builder.use-case.js';
 import { ReviewOrchestratorService } from './application/use-cases/review-orchestrator.use-case.js';
 import { IgnoreListService } from './application/use-cases/ignore-list.use-case.js';
@@ -38,7 +38,7 @@ import { BuildReviewSummaryUseCase } from './application/use-cases/build-review-
       useClass: GitHubPrFileListAdapter,
     },
     PromptSanitizer,
-    GuidelineLoaderService,
+    LoadGuidelinesUseCase,
     PromptBuilderService,
     IgnoreListService,
     ParseLlmResponseUseCase,

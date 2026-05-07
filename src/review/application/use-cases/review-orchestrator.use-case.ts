@@ -9,7 +9,7 @@ import { ReviewSkippedError } from '../../domain/errors/review.errors.js';
 import { RESPONSE_TOKENS } from '../../domain/value-objects/token-budget.vo.js';
 import { PrFileListProviderPort } from '../../domain/ports/pr-file-list-provider.port.js';
 import { ComputeSemanticDiffUseCase } from '../../../diff-engine/application/use-cases/compute-semantic-diff.use-case.js';
-import { GuidelineLoaderService } from './guideline-loader.use-case.js';
+import { LoadGuidelinesUseCase } from './load-guidelines.use-case.js';
 import { PromptBuilderService } from './prompt-builder.use-case.js';
 import { IgnoreListService } from './ignore-list.use-case.js';
 import { ParseLlmResponseUseCase } from './parse-llm-response.use-case.js';
@@ -26,7 +26,7 @@ export class ReviewOrchestratorService {
 
   constructor(
     private readonly diffService: ComputeSemanticDiffUseCase,
-    private readonly guidelineLoader: GuidelineLoaderService,
+    private readonly guidelineLoader: LoadGuidelinesUseCase,
     private readonly promptBuilder: PromptBuilderService,
     private readonly llmProvider: LlmProviderPort,
     private readonly reviewRepo: ReviewRepositoryPort,

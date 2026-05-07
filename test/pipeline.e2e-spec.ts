@@ -53,7 +53,7 @@ import { type LlmResponse } from '../src/review/domain/types/llm-response.types.
 import { type FileInput } from '../src/diff-engine/application/types/diff-result.types.js';
 import { PromptSanitizer } from '../src/review/application/use-cases/prompt-sanitizer.use-case.js';
 import { PromptBuilderService } from '../src/review/application/use-cases/prompt-builder.use-case.js';
-import { GuidelineLoaderService } from '../src/review/application/use-cases/guideline-loader.use-case.js';
+import { LoadGuidelinesUseCase } from '../src/review/application/use-cases/load-guidelines.use-case.js';
 import { ReviewOrchestratorService } from '../src/review/application/use-cases/review-orchestrator.use-case.js';
 import { IgnoreListService } from '../src/review/application/use-cases/ignore-list.use-case.js';
 import { InstallationCleanupService } from '../src/review/application/use-cases/installation-cleanup.use-case.js';
@@ -422,7 +422,7 @@ const prFiles: FileInput[] = [
 
     // Review pipeline (real)
     PromptSanitizer,
-    GuidelineLoaderService,
+    LoadGuidelinesUseCase,
     PromptBuilderService,
     IgnoreListService,
     ParseLlmResponseUseCase,

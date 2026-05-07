@@ -3,7 +3,7 @@ import { AppConfig } from '../../../config/app.config.js';
 import { GitHubClientService } from '../../../github/application/use-cases/github-client.use-case.js';
 import { ComputeSemanticDiffUseCase } from '../../../diff-engine/application/use-cases/compute-semantic-diff.use-case.js';
 import { PrFileListProviderPort } from '../../domain/ports/pr-file-list-provider.port.js';
-import { GuidelineLoaderService } from './guideline-loader.use-case.js';
+import { LoadGuidelinesUseCase } from './load-guidelines.use-case.js';
 import { IgnoreListService } from './ignore-list.use-case.js';
 import { ReviewOrchestratorService } from './review-orchestrator.use-case.js';
 import { matchesAnyPattern } from './glob-match.util.js';
@@ -19,7 +19,7 @@ export class CommandHandlerService {
     private readonly githubClient: GitHubClientService,
     private readonly diffService: ComputeSemanticDiffUseCase,
     private readonly prFileListProvider: PrFileListProviderPort,
-    private readonly guidelineLoader: GuidelineLoaderService,
+    private readonly guidelineLoader: LoadGuidelinesUseCase,
     private readonly ignoreList: IgnoreListService,
     private readonly orchestrator: ReviewOrchestratorService,
     private readonly config: AppConfig,
