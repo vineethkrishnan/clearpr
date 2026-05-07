@@ -4,7 +4,7 @@ import { GitHubClientService } from '../../../github/application/use-cases/githu
 import { ComputeSemanticDiffUseCase } from '../../../diff-engine/application/use-cases/compute-semantic-diff.use-case.js';
 import { PrFileListProviderPort } from '../../domain/ports/pr-file-list-provider.port.js';
 import { LoadGuidelinesUseCase } from './load-guidelines.use-case.js';
-import { IgnoreListService } from './ignore-list.use-case.js';
+import { ManageIgnorePatternsUseCase } from './manage-ignore-patterns.use-case.js';
 import { ReviewOrchestratorService } from './review-orchestrator.use-case.js';
 import { matchesAnyPattern } from './glob-match.util.js';
 import type { ReviewContext } from '../../domain/types/review-context.types.js';
@@ -20,7 +20,7 @@ export class CommandHandlerService {
     private readonly diffService: ComputeSemanticDiffUseCase,
     private readonly prFileListProvider: PrFileListProviderPort,
     private readonly guidelineLoader: LoadGuidelinesUseCase,
-    private readonly ignoreList: IgnoreListService,
+    private readonly ignoreList: ManageIgnorePatternsUseCase,
     private readonly orchestrator: ReviewOrchestratorService,
     private readonly config: AppConfig,
   ) {}

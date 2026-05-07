@@ -11,7 +11,7 @@ import { PrFileListProviderPort } from '../../domain/ports/pr-file-list-provider
 import { ComputeSemanticDiffUseCase } from '../../../diff-engine/application/use-cases/compute-semantic-diff.use-case.js';
 import { LoadGuidelinesUseCase } from './load-guidelines.use-case.js';
 import { PromptBuilderService } from './prompt-builder.use-case.js';
-import { IgnoreListService } from './ignore-list.use-case.js';
+import { ManageIgnorePatternsUseCase } from './manage-ignore-patterns.use-case.js';
 import { ParseLlmResponseUseCase } from './parse-llm-response.use-case.js';
 import { BuildReviewSummaryUseCase } from './build-review-summary.use-case.js';
 import { matchesAnyPattern } from './glob-match.util.js';
@@ -33,7 +33,7 @@ export class ReviewOrchestratorService {
     private readonly reviewPoster: ReviewPosterPort,
     private readonly prFileListProvider: PrFileListProviderPort,
     private readonly memoryRetriever: RetrieveMemoryUseCase,
-    private readonly ignoreList: IgnoreListService,
+    private readonly ignoreList: ManageIgnorePatternsUseCase,
     private readonly parseLlmResponse: ParseLlmResponseUseCase,
     private readonly buildReviewSummary: BuildReviewSummaryUseCase,
   ) {}

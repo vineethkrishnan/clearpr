@@ -55,7 +55,7 @@ import { PromptSanitizer } from '../src/review/application/use-cases/prompt-sani
 import { PromptBuilderService } from '../src/review/application/use-cases/prompt-builder.use-case.js';
 import { LoadGuidelinesUseCase } from '../src/review/application/use-cases/load-guidelines.use-case.js';
 import { ReviewOrchestratorService } from '../src/review/application/use-cases/review-orchestrator.use-case.js';
-import { IgnoreListService } from '../src/review/application/use-cases/ignore-list.use-case.js';
+import { ManageIgnorePatternsUseCase } from '../src/review/application/use-cases/manage-ignore-patterns.use-case.js';
 import { InstallationCleanupService } from '../src/review/application/use-cases/installation-cleanup.use-case.js';
 import { ParseLlmResponseUseCase } from '../src/review/application/use-cases/parse-llm-response.use-case.js';
 import { BuildReviewSummaryUseCase } from '../src/review/application/use-cases/build-review-summary.use-case.js';
@@ -282,7 +282,7 @@ class FakeReviewPoster extends ReviewPosterPort {
   }
 }
 
-// Minimal Redis stub covering the methods IgnoreListService uses.
+// Minimal Redis stub covering the methods ManageIgnorePatternsUseCase uses.
 class FakeRedis {
   private sets = new Map<string, Set<string>>();
   async sadd(key: string, ...members: string[]): Promise<number> {
@@ -424,7 +424,7 @@ const prFiles: FileInput[] = [
     PromptSanitizer,
     LoadGuidelinesUseCase,
     PromptBuilderService,
-    IgnoreListService,
+    ManageIgnorePatternsUseCase,
     ParseLlmResponseUseCase,
     BuildReviewSummaryUseCase,
     { provide: REDIS_CLIENT, useValue: new FakeRedis() },

@@ -15,7 +15,7 @@ import { PromptSanitizer } from './application/use-cases/prompt-sanitizer.use-ca
 import { LoadGuidelinesUseCase } from './application/use-cases/load-guidelines.use-case.js';
 import { PromptBuilderService } from './application/use-cases/prompt-builder.use-case.js';
 import { ReviewOrchestratorService } from './application/use-cases/review-orchestrator.use-case.js';
-import { IgnoreListService } from './application/use-cases/ignore-list.use-case.js';
+import { ManageIgnorePatternsUseCase } from './application/use-cases/manage-ignore-patterns.use-case.js';
 import { CommandHandlerService } from './application/use-cases/command-handler.use-case.js';
 import { InstallationCleanupService } from './application/use-cases/installation-cleanup.use-case.js';
 import { ParseLlmResponseUseCase } from './application/use-cases/parse-llm-response.use-case.js';
@@ -40,7 +40,7 @@ import { BuildReviewSummaryUseCase } from './application/use-cases/build-review-
     PromptSanitizer,
     LoadGuidelinesUseCase,
     PromptBuilderService,
-    IgnoreListService,
+    ManageIgnorePatternsUseCase,
     ParseLlmResponseUseCase,
     BuildReviewSummaryUseCase,
     ReviewOrchestratorService,
@@ -49,7 +49,7 @@ import { BuildReviewSummaryUseCase } from './application/use-cases/build-review-
   ],
   exports: [
     ReviewOrchestratorService,
-    IgnoreListService,
+    ManageIgnorePatternsUseCase,
     CommandHandlerService,
     InstallationCleanupService,
   ],
