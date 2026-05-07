@@ -23,8 +23,8 @@ interface ActionHandler {
 }
 
 @Injectable()
-export class WebhookDispatcherService {
-  private readonly logger = new Logger(WebhookDispatcherService.name);
+export class DispatchWebhookUseCase {
+  private readonly logger = new Logger(DispatchWebhookUseCase.name);
   private readonly handlers: Partial<Record<ClearPrAction, ActionHandler>>;
 
   constructor(

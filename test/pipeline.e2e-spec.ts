@@ -10,7 +10,7 @@ import { ConfigModule } from '../src/config/config.module.js';
 import { ClsConfigModule } from '../src/shared/infrastructure/cls/cls.module.js';
 import { LoggingModule } from '../src/shared/infrastructure/logging/logging.module.js';
 import { WebhookController } from '../src/webhook/presenters/http/webhook.controller.js';
-import { WebhookDispatcherService } from '../src/webhook/application/use-cases/webhook-dispatcher.use-case.js';
+import { DispatchWebhookUseCase } from '../src/webhook/application/use-cases/dispatch-webhook.use-case.js';
 import { EnqueueReviewUseCase } from '../src/webhook/application/use-cases/enqueue-review.use-case.js';
 import { EnqueueCommandUseCase } from '../src/webhook/application/use-cases/enqueue-command.use-case.js';
 import { RegisterInstallationUseCase } from '../src/webhook/application/use-cases/register-installation.use-case.js';
@@ -390,7 +390,7 @@ const prFiles: FileInput[] = [
   controllers: [WebhookController],
   providers: [
     // Webhook layer
-    WebhookDispatcherService,
+    DispatchWebhookUseCase,
     EnqueueReviewUseCase,
     EnqueueCommandUseCase,
     RegisterInstallationUseCase,
