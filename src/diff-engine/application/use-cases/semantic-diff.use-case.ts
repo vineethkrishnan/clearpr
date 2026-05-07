@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { FileProcessorService } from './file-processor.service.js';
+import { FileProcessorService } from './file-processor.use-case.js';
 import { calculateNoiseReductionPct } from '../../domain/utils/noise-reduction.js';
 import type { DiffInput, SemanticDiffResult } from '../types/diff-result.types.js';
 

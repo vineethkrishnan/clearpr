@@ -1,11 +1,11 @@
-jest.mock('../../../github/application/services/github-client.service.js', () => ({
+jest.mock('../../../github/application/use-cases/github-client.use-case.js', () => ({
   GitHubClientService: class {},
 }));
 
-import { RepositoryIndexerService } from './repository-indexer.service.js';
-import { MemoryIndexerService } from './memory-indexer.service.js';
-import { OutcomeDetectorService } from './outcome-detector.service.js';
-import type { GitHubClientService } from '../../../github/application/services/github-client.service.js';
+import { RepositoryIndexerService } from './repository-indexer.use-case.js';
+import { MemoryIndexerService } from './memory-indexer.use-case.js';
+import { OutcomeDetectorService } from './outcome-detector.use-case.js';
+import type { GitHubClientService } from '../../../github/application/use-cases/github-client.use-case.js';
 import { InstallationRepositoryPort } from '../../../github/domain/ports/installation-repository.port.js';
 import { RepositoryRepositoryPort } from '../../../github/domain/ports/repository-repository.port.js';
 import { Installation } from '../../../github/domain/entities/installation.entity.js';

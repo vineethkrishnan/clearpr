@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { GitHubClientService } from '../../../github/application/services/github-client.service.js';
+import { GitHubClientService } from '../../../github/application/use-cases/github-client.use-case.js';
 import { InstallationRepositoryPort } from '../../../github/domain/ports/installation-repository.port.js';
 import { RepositoryRepositoryPort } from '../../../github/domain/ports/repository-repository.port.js';
 import {
@@ -7,8 +7,8 @@ import {
   type Repository,
 } from '../../../github/domain/entities/repository.entity.js';
 import { AppConfig } from '../../../config/app.config.js';
-import { MemoryIndexerService, type IndexableComment } from './memory-indexer.service.js';
-import { OutcomeDetectorService } from './outcome-detector.service.js';
+import { MemoryIndexerService, type IndexableComment } from './memory-indexer.use-case.js';
+import { OutcomeDetectorService } from './outcome-detector.use-case.js';
 
 @Injectable()
 export class RepositoryIndexerService {

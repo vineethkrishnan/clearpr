@@ -7,13 +7,13 @@ import { ConfigModule } from '../src/config/config.module.js';
 import { ClsConfigModule } from '../src/shared/infrastructure/cls/cls.module.js';
 import { LoggingModule } from '../src/shared/infrastructure/logging/logging.module.js';
 import { WebhookController } from '../src/webhook/presenters/http/webhook.controller.js';
-import { WebhookDispatcherService } from '../src/webhook/application/services/webhook-dispatcher.service.js';
+import { WebhookDispatcherService } from '../src/webhook/application/use-cases/webhook-dispatcher.use-case.js';
 import { HmacSignatureGuard } from '../src/webhook/infrastructure/guards/hmac-signature.guard.js';
 import { IdempotencyStorePort } from '../src/webhook/domain/ports/idempotency-store.port.js';
-import { JobProducerService } from '../src/queue/producers/job-producer.service.js';
+import { JobProducerService } from '../src/queue/application/use-cases/job-producer.use-case.js';
 import { InstallationRepositoryPort } from '../src/github/domain/ports/installation-repository.port.js';
 import { RepositoryRepositoryPort } from '../src/github/domain/ports/repository-repository.port.js';
-import { InstallationCleanupService } from '../src/review/application/services/installation-cleanup.service.js';
+import { InstallationCleanupService } from '../src/review/application/use-cases/installation-cleanup.use-case.js';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 

@@ -4,12 +4,12 @@ import {
   mapWebhookEvent,
   ClearPrAction,
 } from '../../domain/value-objects/webhook-event-type.vo.js';
-import { JobProducerService } from '../../../queue/producers/job-producer.service.js';
+import { JobProducerService } from '../../../queue/application/use-cases/job-producer.use-case.js';
 import { InstallationRepositoryPort } from '../../../github/domain/ports/installation-repository.port.js';
 import { RepositoryRepositoryPort } from '../../../github/domain/ports/repository-repository.port.js';
 import { Installation } from '../../../github/domain/entities/installation.entity.js';
 import { Repository } from '../../../github/domain/entities/repository.entity.js';
-import { InstallationCleanupService } from '../../../review/application/services/installation-cleanup.service.js';
+import { InstallationCleanupService } from '../../../review/application/use-cases/installation-cleanup.use-case.js';
 import type { WebhookPayload } from '../types/webhook-event.types.js';
 
 export interface DispatchResult {

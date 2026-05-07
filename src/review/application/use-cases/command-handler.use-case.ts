@@ -1,11 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { AppConfig } from '../../../config/app.config.js';
-import { GitHubClientService } from '../../../github/application/services/github-client.service.js';
-import { SemanticDiffService } from '../../../diff-engine/application/services/semantic-diff.service.js';
+import { GitHubClientService } from '../../../github/application/use-cases/github-client.use-case.js';
+import { SemanticDiffService } from '../../../diff-engine/application/use-cases/semantic-diff.use-case.js';
 import { PrFileListProviderPort } from '../../domain/ports/pr-file-list-provider.port.js';
-import { GuidelineLoaderService } from './guideline-loader.service.js';
-import { IgnoreListService } from './ignore-list.service.js';
-import { ReviewOrchestratorService } from './review-orchestrator.service.js';
+import { GuidelineLoaderService } from './guideline-loader.use-case.js';
+import { IgnoreListService } from './ignore-list.use-case.js';
+import { ReviewOrchestratorService } from './review-orchestrator.use-case.js';
 import { matchesAnyPattern } from './glob-match.util.js';
 import type { ReviewContext } from '../../domain/types/review-context.types.js';
 import type { CommandJobPayload } from '../../../queue/types/job-payload.types.js';

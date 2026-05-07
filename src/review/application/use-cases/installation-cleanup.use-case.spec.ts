@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import { InstallationCleanupService } from './installation-cleanup.service.js';
+import { InstallationCleanupService } from './installation-cleanup.use-case.js';
 import { InstallationRepositoryPort } from '../../../github/domain/ports/installation-repository.port.js';
 import { RepositoryRepositoryPort } from '../../../github/domain/ports/repository-repository.port.js';
 import { MemoryRepositoryPort } from '../../../memory/domain/ports/memory-repository.port.js';

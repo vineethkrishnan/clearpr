@@ -1,4 +1,4 @@
-import { OutcomeDetectorService } from './outcome-detector.service.js';
+import { OutcomeDetectorService } from './outcome-detector.use-case.js';
 import { FeedbackOutcome } from '../../domain/value-objects/feedback-outcome.vo.js';
 
 describe('OutcomeDetectorService', () => {

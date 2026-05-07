@@ -12,12 +12,12 @@ import {
 } from '../../domain/errors/review.errors.js';
 import { RESPONSE_TOKENS } from '../../domain/value-objects/token-budget.vo.js';
 import { PrFileListProviderPort } from '../../domain/ports/pr-file-list-provider.port.js';
-import { SemanticDiffService } from '../../../diff-engine/application/services/semantic-diff.service.js';
-import { GuidelineLoaderService } from './guideline-loader.service.js';
-import { PromptBuilderService } from './prompt-builder.service.js';
-import { IgnoreListService } from './ignore-list.service.js';
+import { SemanticDiffService } from '../../../diff-engine/application/use-cases/semantic-diff.use-case.js';
+import { GuidelineLoaderService } from './guideline-loader.use-case.js';
+import { PromptBuilderService } from './prompt-builder.use-case.js';
+import { IgnoreListService } from './ignore-list.use-case.js';
 import { matchesAnyPattern } from './glob-match.util.js';
-import { MemoryRetrieverService } from '../../../memory/application/services/memory-retriever.service.js';
+import { MemoryRetrieverService } from '../../../memory/application/use-cases/memory-retriever.use-case.js';
 import type { ReviewContext } from '../../domain/types/review-context.types.js';
 import type {
   ParsedReview,

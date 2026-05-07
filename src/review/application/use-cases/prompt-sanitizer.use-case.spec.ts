@@ -1,4 +1,4 @@
-import { PromptSanitizer } from './prompt-sanitizer.service.js';
+import { PromptSanitizer } from './prompt-sanitizer.use-case.js';
 
 describe('PromptSanitizer', () => {
   const sanitizer = new PromptSanitizer();

@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { HmacSignatureGuard } from '../../infrastructure/guards/hmac-signature.guard.js';
-import { WebhookDispatcherService } from '../../application/services/webhook-dispatcher.service.js';
+import { WebhookDispatcherService } from '../../application/use-cases/webhook-dispatcher.use-case.js';
 
 @Controller('webhook')
 export class WebhookController {

@@ -2,7 +2,7 @@ import { Module, forwardRef } from '@nestjs/common';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { WebhookController } from './presenters/http/webhook.controller.js';
-import { WebhookDispatcherService } from './application/services/webhook-dispatcher.service.js';
+import { WebhookDispatcherService } from './application/use-cases/webhook-dispatcher.use-case.js';
 import { HmacSignatureGuard } from './infrastructure/guards/hmac-signature.guard.js';
 import { IdempotencyStorePort } from './domain/ports/idempotency-store.port.js';
 import { RedisIdempotencyStoreAdapter } from './infrastructure/adapters/redis-idempotency-store.adapter.js';

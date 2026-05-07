@@ -2,14 +2,14 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import Redis from 'ioredis';
-import { REDIS_CLIENT } from '../../shared/infrastructure/redis/redis.module.js';
-import { AppConfig } from '../../config/app.config.js';
+import { REDIS_CLIENT } from '../../../shared/infrastructure/redis/redis.module.js';
+import { AppConfig } from '../../../config/app.config.js';
 import {
   QUEUE_NAMES,
   type ReviewJobPayload,
   type CommandJobPayload,
   type IndexingJobPayload,
-} from '../types/job-payload.types.js';
+} from '../../types/job-payload.types.js';
 
 @Injectable()
 export class JobProducerService {
