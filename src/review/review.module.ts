@@ -17,7 +17,7 @@ import { PromptBuilderService } from './application/use-cases/prompt-builder.use
 import { ReviewOrchestratorService } from './application/use-cases/review-orchestrator.use-case.js';
 import { ManageIgnorePatternsUseCase } from './application/use-cases/manage-ignore-patterns.use-case.js';
 import { CommandHandlerService } from './application/use-cases/command-handler.use-case.js';
-import { InstallationCleanupService } from './application/use-cases/installation-cleanup.use-case.js';
+import { CleanupInstallationUseCase } from './application/use-cases/cleanup-installation.use-case.js';
 import { ParseLlmResponseUseCase } from './application/use-cases/parse-llm-response.use-case.js';
 import { BuildReviewSummaryUseCase } from './application/use-cases/build-review-summary.use-case.js';
 
@@ -45,13 +45,13 @@ import { BuildReviewSummaryUseCase } from './application/use-cases/build-review-
     BuildReviewSummaryUseCase,
     ReviewOrchestratorService,
     CommandHandlerService,
-    InstallationCleanupService,
+    CleanupInstallationUseCase,
   ],
   exports: [
     ReviewOrchestratorService,
     ManageIgnorePatternsUseCase,
     CommandHandlerService,
-    InstallationCleanupService,
+    CleanupInstallationUseCase,
   ],
 })
 export class ReviewModule {}

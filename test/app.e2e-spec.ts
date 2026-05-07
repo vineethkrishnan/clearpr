@@ -19,7 +19,7 @@ import { IdempotencyStorePort } from '../src/webhook/domain/ports/idempotency-st
 import { JobProducerService } from '../src/queue/application/use-cases/job-producer.use-case.js';
 import { InstallationRepositoryPort } from '../src/github/domain/ports/installation-repository.port.js';
 import { RepositoryRepositoryPort } from '../src/github/domain/ports/repository-repository.port.js';
-import { InstallationCleanupService } from '../src/review/application/use-cases/installation-cleanup.use-case.js';
+import { CleanupInstallationUseCase } from '../src/review/application/use-cases/cleanup-installation.use-case.js';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 
@@ -91,7 +91,7 @@ function signPayload(body: string): string {
     { provide: JobProducerService, useValue: mockJobProducer },
     { provide: InstallationRepositoryPort, useValue: mockInstallationRepo },
     { provide: RepositoryRepositoryPort, useValue: mockRepositoryRepo },
-    { provide: InstallationCleanupService, useValue: mockCleanupService },
+    { provide: CleanupInstallationUseCase, useValue: mockCleanupService },
     { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],
 })

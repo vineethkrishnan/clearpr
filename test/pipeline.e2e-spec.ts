@@ -56,7 +56,7 @@ import { PromptBuilderService } from '../src/review/application/use-cases/prompt
 import { LoadGuidelinesUseCase } from '../src/review/application/use-cases/load-guidelines.use-case.js';
 import { ReviewOrchestratorService } from '../src/review/application/use-cases/review-orchestrator.use-case.js';
 import { ManageIgnorePatternsUseCase } from '../src/review/application/use-cases/manage-ignore-patterns.use-case.js';
-import { InstallationCleanupService } from '../src/review/application/use-cases/installation-cleanup.use-case.js';
+import { CleanupInstallationUseCase } from '../src/review/application/use-cases/cleanup-installation.use-case.js';
 import { ParseLlmResponseUseCase } from '../src/review/application/use-cases/parse-llm-response.use-case.js';
 import { BuildReviewSummaryUseCase } from '../src/review/application/use-cases/build-review-summary.use-case.js';
 
@@ -435,7 +435,7 @@ const prFiles: FileInput[] = [
     ReviewOrchestratorService,
 
     // Cleanup service (unused in this path but wired to satisfy dispatcher DI)
-    InstallationCleanupService,
+    CleanupInstallationUseCase,
 
     // Fake job producer bridging dispatcher → orchestrator synchronously
     {
