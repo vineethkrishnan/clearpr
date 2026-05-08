@@ -1,7 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { FileProcessorService } from './file-processor.service.js';
 import { calculateNoiseReductionPct } from '../../domain/utils/noise-reduction.js';
+import { DiffTooLargeError } from '../../domain/errors/diff-engine.errors.js';
 import type { DiffInput, SemanticDiffResult } from '../types/diff-result.types.js';
+import { AppConfig } from '../../../config/app.config.js';
 
 const BINARY_EXTENSIONS = new Set([
   '.png',
@@ -30,7 +32,10 @@ const BINARY_EXTENSIONS = new Set([
 export class SemanticDiffService {
   private readonly logger = new Logger(SemanticDiffService.name);
 
-  constructor(private readonly fileProcessor: FileProcessorService) {}
+  constructor(
+    private readonly fileProcessor: FileProcessorService,
+    private readonly config: AppConfig,
+  ) {}
 
   async computeDiff(input: DiffInput): Promise<SemanticDiffResult> {
     const skippedFiles: string[] = [];
@@ -79,6 +84,12 @@ export class SemanticDiffService {
       },
       `Semantic diff computed: ${totalRawLines} raw → ${totalSemanticLines} semantic (${noiseReductionPct}% noise removed)`,
     );
+
+    // Enforce diff-size budget here so the diff engine owns the policy. Callers
+    // catch this error and translate it into their own skip handling.
+    if (totalSemanticLines > this.config.MAX_DIFF_LINES) {
+      throw new DiffTooLargeError(totalSemanticLines, this.config.MAX_DIFF_LINES);
+    }
 
     return {
       files: results,

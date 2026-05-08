@@ -13,6 +13,8 @@ import {
 import { RESPONSE_TOKENS } from '../../domain/value-objects/token-budget.vo.js';
 import { PrFileListProviderPort } from '../../domain/ports/pr-file-list-provider.port.js';
 import { SemanticDiffService } from '../../../diff-engine/application/services/semantic-diff.service.js';
+import { DiffTooLargeError } from '../../../diff-engine/domain/errors/diff-engine.errors.js';
+import type { SemanticDiffResult } from '../../../diff-engine/application/types/diff-result.types.js';
 import { GuidelineLoaderService } from './guideline-loader.service.js';
 import { PromptBuilderService } from './prompt-builder.service.js';
 import { IgnoreListService } from './ignore-list.service.js';
@@ -25,7 +27,6 @@ import type {
 } from '../../application/types/review-result.types.js';
 import { type Result, ok, err } from '../../../shared/types/result.types.js';
 import { type DomainError } from '../../../shared/domain/errors/domain-error.base.js';
-import { AppConfig } from '../../../config/app.config.js';
 
 @Injectable()
 export class ReviewOrchestratorService {
@@ -41,7 +42,6 @@ export class ReviewOrchestratorService {
     private readonly prFileListProvider: PrFileListProviderPort,
     private readonly memoryRetriever: MemoryRetrieverService,
     private readonly ignoreList: IgnoreListService,
-    private readonly config: AppConfig,
   ) {}
 
   async execute(
@@ -80,28 +80,31 @@ export class ReviewOrchestratorService {
           ? prFiles.filter((f) => !matchesAnyPattern(f.filename, ignorePatterns))
           : prFiles;
 
-      // Compute semantic diff
-      const diffResult = await this.diffService.computeDiff({
-        installationId: context.installationId,
-        repositoryId: context.repositoryId,
-        owner: context.owner,
-        repo: context.repo,
-        baseSha: context.baseBranch,
-        headSha: context.prSha,
-        files: filteredFiles,
-      });
-
-      // Check size limit
-      const isDiffTooLarge = diffResult.totalSemanticLines > this.config.MAX_DIFF_LINES;
-      if (isDiffTooLarge) {
-        const skipReason = `Semantic diff has ${diffResult.totalSemanticLines} lines, exceeding limit of ${this.config.MAX_DIFF_LINES}`;
-        review.markSkipped(skipReason);
-        await this.reviewRepo.save(review);
-        await this.reviewPoster.postSummary(
-          context,
-          `**ClearPR** — Review skipped: this PR has ${diffResult.totalSemanticLines} semantic diff lines, exceeding the ${this.config.MAX_DIFF_LINES} line limit.`,
-        );
-        return err(new ReviewSkippedError(skipReason));
+      // Compute semantic diff. The diff engine throws DiffTooLargeError when
+      // the configured MAX_DIFF_LINES budget is exceeded; we translate that
+      // into the orchestrator's skip-and-comment path.
+      let diffResult: SemanticDiffResult;
+      try {
+        diffResult = await this.diffService.computeDiff({
+          installationId: context.installationId,
+          repositoryId: context.repositoryId,
+          owner: context.owner,
+          repo: context.repo,
+          baseSha: context.baseBranch,
+          headSha: context.prSha,
+          files: filteredFiles,
+        });
+      } catch (diffError) {
+        if (diffError instanceof DiffTooLargeError) {
+          review.markSkipped(diffError.message);
+          await this.reviewRepo.save(review);
+          await this.reviewPoster.postSummary(
+            context,
+            `**ClearPR** — Review skipped: ${diffError.message.toLowerCase()}.`,
+          );
+          return err(new ReviewSkippedError(diffError.message));
+        }
+        throw diffError;
       }
 
       // Load guidelines
