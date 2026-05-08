@@ -43,6 +43,8 @@ export default defineConfig({
           items: [
             { text: 'Overview', link: '/guide/architecture' },
             { text: 'Domain Model', link: '/guide/domain-model' },
+            { text: 'Contributing Conventions', link: '/guide/contributing-conventions' },
+            { text: 'Dev Workflow', link: '/guide/dev-workflow' },
           ],
         },
         {
