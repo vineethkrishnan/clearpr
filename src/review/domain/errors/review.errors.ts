@@ -37,3 +37,12 @@ export class MalformedLlmResponseError extends DomainError {
     super(`LLM response could not be parsed: ${reason}`);
   }
 }
+
+export class UnknownLlmProviderError extends DomainError {
+  readonly code = 'LLM_PROVIDER_UNKNOWN';
+  readonly isTransient = false;
+
+  constructor(provider: string) {
+    super(`Unknown LLM_PROVIDER: ${provider}`);
+  }
+}

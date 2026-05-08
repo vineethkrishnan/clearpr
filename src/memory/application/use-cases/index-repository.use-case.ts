@@ -9,6 +9,10 @@ import {
 import { AppConfig } from '../../../config/app.config.js';
 import { IndexMemoryUseCase, type IndexableComment } from './index-memory.use-case.js';
 import { DetectFeedbackOutcomeUseCase } from './detect-feedback-outcome.use-case.js';
+import {
+  InstallationNotFoundError,
+  InvalidRepositoryFullNameError,
+} from '../../domain/errors/memory.errors.js';
 
 @Injectable()
 export class IndexRepositoryUseCase {
@@ -48,7 +52,7 @@ export class IndexRepositoryUseCase {
   async indexRepository(repository: Repository): Promise<{ commentsIndexed: number }> {
     const installation = await this.installationRepo.findById(repository.installationId);
     if (!installation) {
-      throw new Error(`Installation ${repository.installationId} not found`);
+      throw new InstallationNotFoundError(repository.installationId);
     }
     return this.indexRepositoryWithInstallation(repository, installation.githubInstallationId);
   }
@@ -59,7 +63,7 @@ export class IndexRepositoryUseCase {
   ): Promise<{ commentsIndexed: number }> {
     const [owner, repo] = repository.fullName.split('/');
     if (!owner || !repo) {
-      throw new Error(`Invalid repository fullName: ${repository.fullName}`);
+      throw new InvalidRepositoryFullNameError(repository.fullName);
     }
 
     repository.indexingStatus = IndexingStatus.IN_PROGRESS;
