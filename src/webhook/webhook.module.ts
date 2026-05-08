@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
+import type Redis from 'ioredis';
 import { APP_GUARD } from '@nestjs/core';
 import { WebhookController } from './presenters/http/webhook.controller.js';
 import { DispatchWebhookUseCase } from './application/use-cases/dispatch-webhook.use-case.js';
@@ -19,10 +21,19 @@ import { GitHubModule } from '../github/github.module.js';
 import { ReviewModule } from '../review/review.module.js';
 import { CleanupInstallationUseCase } from '../review/application/use-cases/cleanup-installation.use-case.js';
 import { EnqueueJobUseCase } from '../queue/application/use-cases/enqueue-job.use-case.js';
+import { REDIS_CLIENT } from '../shared/infrastructure/redis/redis.module.js';
 
 @Module({
   imports: [
-    ThrottlerModule.forRoot([{ name: 'webhook', ttl: 60000, limit: 100 }]),
+    // Redis-backed throttler so the rate limit is shared across replicas
+    // instead of being counted per-process.
+    ThrottlerModule.forRootAsync({
+      inject: [REDIS_CLIENT],
+      useFactory: (redis: Redis) => ({
+        throttlers: [{ name: 'webhook', ttl: 60000, limit: 100 }],
+        storage: new ThrottlerStorageRedisService(redis),
+      }),
+    }),
     QueueModule,
     GitHubModule,
     ReviewModule,
