@@ -57,6 +57,15 @@ export class IndexRepositoryUseCase {
     return this.indexRepositoryWithInstallation(repository, installation.githubInstallationId);
   }
 
+  async indexRepositoryById(repositoryId: string): Promise<{ commentsIndexed: number } | null> {
+    const repository = await this.repositoryRepo.findById(repositoryId);
+    if (!repository) {
+      this.logger.warn({ repositoryId }, 'Indexing requested for unknown repository');
+      return null;
+    }
+    return this.indexRepository(repository);
+  }
+
   private async indexRepositoryWithInstallation(
     repository: Repository,
     githubInstallationId: number,

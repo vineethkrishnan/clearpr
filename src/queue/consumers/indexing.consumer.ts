@@ -2,17 +2,13 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { RepositoryIndexerPort } from '../application/ports/repository-indexer.port.js';
-import { RepositoryRepositoryPort } from '../../github/domain/ports/repository-repository.port.js';
 import { QUEUE_NAMES, type IndexingJobPayload } from '../types/job-payload.types.js';
 
 @Processor(QUEUE_NAMES.INDEXING, { concurrency: 2 })
 export class IndexingConsumer extends WorkerHost {
   private readonly logger = new Logger(IndexingConsumer.name);
 
-  constructor(
-    private readonly repositoryIndexer: RepositoryIndexerPort,
-    private readonly repositoryRepo: RepositoryRepositoryPort,
-  ) {
+  constructor(private readonly repositoryIndexer: RepositoryIndexerPort) {
     super();
   }
 
@@ -42,22 +38,20 @@ export class IndexingConsumer extends WorkerHost {
     if (!payload.repositoryId) {
       this.logger.warn(
         { correlationId: payload.correlationId, jobId: job.id },
-        'Incremental indexing job missing repositoryId — skipping',
+        'Incremental indexing job missing repositoryId - skipping',
       );
       return;
     }
 
-    const repo = await this.repositoryRepo.findById(payload.repositoryId);
-
-    if (!repo) {
+    const result = await this.repositoryIndexer.indexRepositoryById(payload.repositoryId);
+    if (!result) {
       this.logger.warn(
         { correlationId: payload.correlationId, repositoryId: payload.repositoryId },
-        'Incremental indexing target repository not found — skipping',
+        'Incremental indexing target repository not found - skipping',
       );
       return;
     }
 
-    const result = await this.repositoryIndexer.indexRepository(repo);
     this.logger.log(
       { correlationId: payload.correlationId, jobId: job.id, ...result },
       `Incremental indexing completed: ${result.commentsIndexed} comments`,

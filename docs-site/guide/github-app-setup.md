@@ -33,7 +33,11 @@ Check these event subscriptions:
 1. Scroll to the bottom of the app settings
 2. Click **Generate a private key**
 3. Save the downloaded `.pem` file
-4. Set `GITHUB_PRIVATE_KEY` in `.env` to the file path or the key content
+4. Set `GITHUB_PRIVATE_KEY` in `.env` to the **contents** of the file (not the path):
+
+```bash
+echo "GITHUB_PRIVATE_KEY=\"$(cat path/to/clearpr.private-key.pem)\"" >> .env
+```
 
 ## Install the App
 

@@ -2,6 +2,12 @@ import { Global, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppConfig, NodeEnv } from '../../../config/app.config.js';
 
+const resolveSslOption = (config: AppConfig): false | { rejectUnauthorized: boolean } => {
+  if (config.DATABASE_SSL === false) return false;
+  if (config.DATABASE_SSL === true) return { rejectUnauthorized: true };
+  return config.NODE_ENV === NodeEnv.PRODUCTION ? { rejectUnauthorized: true } : false;
+};
+
 @Global()
 @Module({
   imports: [
@@ -10,7 +16,7 @@ import { AppConfig, NodeEnv } from '../../../config/app.config.js';
       useFactory: (config: AppConfig) => ({
         type: 'postgres',
         url: config.DATABASE_URL,
-        ssl: config.NODE_ENV === NodeEnv.PRODUCTION ? { rejectUnauthorized: true } : false,
+        ssl: resolveSslOption(config),
         autoLoadEntities: true,
         synchronize: false,
         extra: {

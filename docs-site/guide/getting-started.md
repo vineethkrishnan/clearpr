@@ -28,17 +28,27 @@ Create a `.env` file next to your compose file:
 
 ```env
 # Required
-GITHUB_APP_ID=your_app_id
-GITHUB_PRIVATE_KEY=your_private_key.pem
-GITHUB_WEBHOOK_SECRET=your_webhook_secret
+GITHUB_APP_ID=123456
+GITHUB_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\n...PEM contents on one line, escape newlines as \\n...\n-----END RSA PRIVATE KEY-----"
+GITHUB_WEBHOOK_SECRET=a-strong-random-secret-you-set-when-creating-the-app
 
 # LLM Provider (choose one)
 LLM_PROVIDER=anthropic
 LLM_API_KEY=sk-ant-...
 
+# Embedding (required for PR memory - use Voyage)
+VOYAGE_API_KEY=pa-...
+
 # Database (defaults work with the compose snippet below)
 DATABASE_URL=postgresql://clearpr:clearpr@db:5432/clearpr
 REDIS_URL=redis://redis:6379
+```
+
+`GITHUB_PRIVATE_KEY` holds the **contents** of the `.pem` file you downloaded from GitHub, not a path to it. The easiest way to get it into `.env`:
+
+```bash
+# Bash: read the file and inject as a single env var (newlines preserved by shell)
+echo "GITHUB_PRIVATE_KEY=\"$(cat path/to/clearpr.private-key.pem)\"" >> .env
 ```
 
 ### 3. Run with Docker Compose
