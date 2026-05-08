@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { InstallationSchema } from './infrastructure/repositories/installation.schema.js';
-import { RepositorySchema } from './infrastructure/repositories/repository.schema.js';
+import { InstallationRecord } from './infrastructure/repositories/installation.record.js';
+import { RepositoryRecord } from './infrastructure/repositories/repository.record.js';
 import { TypeOrmInstallationRepository } from './infrastructure/repositories/typeorm-installation.repository.js';
 import { TypeOrmRepositoryRepository } from './infrastructure/repositories/typeorm-repository.repository.js';
 import { InstallationRepositoryPort } from './domain/ports/installation-repository.port.js';
@@ -11,7 +11,7 @@ import { RateLimiterService } from './application/use-cases/rate-limiter.use-cas
 import { GitHubClientService } from './application/use-cases/github-client.use-case.js';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([InstallationSchema, RepositorySchema])],
+  imports: [TypeOrmModule.forFeature([InstallationRecord, RepositoryRecord])],
   providers: [
     {
       provide: InstallationRepositoryPort,

@@ -8,6 +8,17 @@ import { computeLineDiffHunks } from '../../domain/utils/line-diff.js';
 import type { FileInput } from '../types/diff-result.types.js';
 import { AppConfig } from '../../../config/app.config.js';
 
+// Cheap fallback normalization used when a file exceeds MAX_FILE_SIZE_KB.
+// Trims trailing whitespace and collapses runs of blank lines so the line-diff
+// step is not skewed by pure-whitespace churn, without the cost of AST parsing.
+function whitespaceNormalize(source: string): string {
+  return source
+    .split('\n')
+    .map((line) => line.replace(/[\t ]+$/, ''))
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n');
+}
+
 @Injectable()
 export class FileProcessorService {
   private readonly logger = new Logger(FileProcessorService.name);
@@ -102,9 +113,12 @@ export class FileProcessorService {
       });
     }
 
-    // Check file size limit
+    // Check file size limit. When a file blows past MAX_FILE_SIZE_KB we skip
+    // the AST normalizer (which can be O(n) memory-heavy for huge sources) and
+    // fall back to the cheap whitespace strategy to bound CPU/memory cost.
     const fileSizeKb = Math.max(baseContent.length, headContent.length) / 1024;
-    if (fileSizeKb > this.config.MAX_FILE_SIZE_KB) {
+    const isOversized = fileSizeKb > this.config.MAX_FILE_SIZE_KB;
+    if (isOversized) {
       this.logger.warn(
         { filePath: file.filename, sizeKb: Math.round(fileSizeKb) },
         'File exceeds size limit — using whitespace fallback',
@@ -112,9 +126,13 @@ export class FileProcessorService {
     }
 
     // Normalize both versions
-    const strategy: DiffStrategy = language.isSupported ? 'ast' : 'whitespace';
-    const normalizedBase = this.normalizer.normalize(baseContent, language);
-    const normalizedHead = this.normalizer.normalize(headContent, language);
+    const strategy: DiffStrategy = !isOversized && language.isSupported ? 'ast' : 'whitespace';
+    const normalizedBase = isOversized
+      ? whitespaceNormalize(baseContent)
+      : this.normalizer.normalize(baseContent, language);
+    const normalizedHead = isOversized
+      ? whitespaceNormalize(headContent)
+      : this.normalizer.normalize(headContent, language);
 
     // Compare normalized versions
     if (normalizedBase === normalizedHead) {
