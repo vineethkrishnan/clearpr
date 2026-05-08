@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { GitHubClientService } from '../../../github/application/use-cases/github-client.use-case.js';
+import { GitHubClientService } from '../../../github/infrastructure/adapters/github-client.service.js';
 import {
   PrHistoryProviderPort,
   type PrHistoryMergedPr,

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { FileContentProviderPort } from '../../domain/ports/file-content-provider.port.js';
-import { GitHubClientService } from '../../../github/application/use-cases/github-client.use-case.js';
+import { GitHubClientService } from '../../../github/infrastructure/adapters/github-client.service.js';
 
 @Injectable()
 export class GitHubFileContentAdapter extends FileContentProviderPort {

@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { AppConfig } from '../../../config/app.config.js';
-import { GitHubClientService } from '../../../github/application/use-cases/github-client.use-case.js';
+import { GitHubClientService } from '../../../github/infrastructure/adapters/github-client.service.js';
 import { DiffComputerPort } from '../ports/diff-computer.port.js';
 import { PrFileListProviderPort } from '../../domain/ports/pr-file-list-provider.port.js';
 import { LoadGuidelinesUseCase } from './load-guidelines.use-case.js';
