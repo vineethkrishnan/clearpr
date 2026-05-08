@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/vineethkrishnan/clearpr/compare/v0.1.3...v0.1.4) (2026-05-08)
+
+
+### Documentation
+
+* **.docker/README:** point at clearpr-docs.vineethnk.in (LU-33) ([#65](https://github.com/vineethkrishnan/clearpr/issues/65)) ([6c7c622](https://github.com/vineethkrishnan/clearpr/commit/6c7c6226bf8a93ee268668d171918f74df5f5eaf))
+
 ## [0.1.3](https://github.com/vineethkrishnan/clearpr/compare/v0.1.2...v0.1.3) (2026-05-08)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "clearpr",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Self-hosted GitHub App that strips formatting noise from diffs and reviews code with AI",
   "author": "Vineeth N K",
   "private": true,
