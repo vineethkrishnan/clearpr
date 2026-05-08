@@ -5,7 +5,7 @@
 ClearPR is a self-hosted GitHub App that strips formatting noise from diffs, reviews code against your project guidelines, and learns from past PR feedback to catch repeat mistakes.
 
 - **Repository:** https://github.com/vineethkrishnan/clearpr
-- **Documentation:** https://clearpr-docs.pages.dev
+- **Documentation:** https://clearpr-docs.vineethnk.in
 - **License:** MIT
 
 ---
@@ -122,7 +122,7 @@ Install the GitHub App on your repos, open a PR, and ClearPR will review it.
 
 ## Configuration
 
-All configuration is via environment variables. See the [full environment reference](https://clearpr-docs.pages.dev/reference/environment-variables) for every option.
+All configuration is via environment variables. See the [full environment reference](https://clearpr-docs.vineethnk.in/reference/environment-variables) for every option.
 
 Required:
 
@@ -160,6 +160,6 @@ The image itself is stateless. Persistent state lives in the Postgres and Redis 
 ## Links
 
 - **Source & issues:** https://github.com/vineethkrishnan/clearpr
-- **Docs:** https://clearpr-docs.pages.dev
+- **Docs:** https://clearpr-docs.vineethnk.in
 - **Changelog:** https://github.com/vineethkrishnan/clearpr/blob/main/CHANGELOG.md
 - **Security policy:** https://github.com/vineethkrishnan/clearpr/blob/main/SECURITY.md
