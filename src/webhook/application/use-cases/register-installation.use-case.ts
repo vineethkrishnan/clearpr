@@ -17,33 +17,26 @@ export class RegisterInstallationUseCase {
   ) {}
 
   async execute(payload: WebhookPayload): Promise<void> {
-    const account = payload.body['installation'] as
-      | {
-          id: number;
-          account: { login: string; type: string };
-        }
-      | undefined;
-    if (!account) return;
+    const installationBlock = payload.body.installation;
+    if (!installationBlock?.account) return;
 
     const installation = Installation.create({
-      githubInstallationId: account.id,
-      accountLogin: account.account.login,
-      accountType: account.account.type as 'Organization' | 'User',
+      githubInstallationId: installationBlock.id,
+      accountLogin: installationBlock.account.login,
+      accountType: installationBlock.account.type as 'Organization' | 'User',
     });
     await this.installationRepo.save(installation);
 
     // Register initial repositories
-    const repos = payload.body['repositories'] as
-      | Array<{ id: number; full_name: string }>
-      | undefined;
-    if (repos) {
-      for (const repo of repos) {
-        const repository = Repository.create({
+    const initialRepositories = payload.body.repositories;
+    if (initialRepositories) {
+      for (const repository of initialRepositories) {
+        const repositoryEntity = Repository.create({
           installationId: installation.id,
-          githubRepoId: repo.id,
-          fullName: repo.full_name,
+          githubRepoId: repository.id,
+          fullName: repository.full_name,
         });
-        await this.repositoryRepo.save(repository);
+        await this.repositoryRepo.save(repositoryEntity);
       }
     }
 
@@ -60,10 +53,10 @@ export class RegisterInstallationUseCase {
       {
         audit: true,
         event: 'installation_created',
-        ghInstallationId: account.id,
-        accountLogin: account.account.login,
+        ghInstallationId: installationBlock.id,
+        accountLogin: installationBlock.account.login,
       },
-      `Installation created: ${account.account.login}`,
+      `Installation created: ${installationBlock.account.login}`,
     );
   }
 }

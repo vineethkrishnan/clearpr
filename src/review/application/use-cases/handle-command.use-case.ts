@@ -7,6 +7,7 @@ import { LoadGuidelinesUseCase } from './load-guidelines.use-case.js';
 import { ManageIgnorePatternsUseCase } from './manage-ignore-patterns.use-case.js';
 import { OrchestrateReviewUseCase } from './orchestrate-review.use-case.js';
 import { matchesAnyPattern } from './glob-match.util.js';
+import { validateIgnorePattern } from '../dtos/ignore-pattern.dto.js';
 import type { ReviewContext } from '../../domain/types/review-context.types.js';
 import type { CommandJobPayload } from '../../../queue/types/job-payload.types.js';
 import type { FileDiff } from '../../../diff-engine/domain/entities/file-diff.entity.js';
@@ -92,8 +93,8 @@ export class HandleCommandUseCase {
   }
 
   private async handleIgnore(payload: CommandJobPayload): Promise<void> {
-    const pattern = payload.args?.trim();
-    if (!pattern) {
+    const rawPattern = payload.args?.trim();
+    if (!rawPattern) {
       await this.postAck(
         payload,
         '**ClearPR** — `@clearpr ignore` requires a glob pattern. Example: `@clearpr ignore **/*.generated.ts`',
@@ -101,12 +102,20 @@ export class HandleCommandUseCase {
       return;
     }
 
-    await this.ignoreList.addPattern(payload.repositoryId, payload.prNumber, pattern);
+    // Validate at the application boundary (the value entered the system
+    // via an untrusted Github comment and is persisted as-is in Redis).
+    const { dto, errorMessage } = await validateIgnorePattern(rawPattern);
+    if (!dto) {
+      await this.postAck(payload, `**ClearPR** — Invalid ignore pattern: ${errorMessage}.`);
+      return;
+    }
+
+    await this.ignoreList.addPattern(payload.repositoryId, payload.prNumber, dto.pattern);
     const patterns = await this.ignoreList.getPatterns(payload.repositoryId, payload.prNumber);
     const list = patterns.map((p) => `- \`${p}\``).join('\n');
     await this.postAck(
       payload,
-      `**ClearPR** — Added ignore pattern \`${pattern}\` for this PR.\n\n**Active patterns:**\n${list}`,
+      `**ClearPR** — Added ignore pattern \`${dto.pattern}\` for this PR.\n\n**Active patterns:**\n${list}`,
     );
   }
 

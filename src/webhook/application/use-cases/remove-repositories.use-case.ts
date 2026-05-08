@@ -9,22 +9,20 @@ export class RemoveRepositoriesUseCase {
   constructor(private readonly cleanupService: CleanupInstallationUseCase) {}
 
   async execute(payload: WebhookPayload): Promise<void> {
-    const repos = payload.body['repositories_removed'] as
-      | Array<{ id: number; full_name: string }>
-      | undefined;
-    if (!repos || repos.length === 0) return;
+    const repositoriesRemoved = payload.body.repositories_removed;
+    if (!repositoriesRemoved || repositoriesRemoved.length === 0) return;
 
-    for (const repo of repos) {
-      const result = await this.cleanupService.cleanupRepository(repo.id);
+    for (const repository of repositoriesRemoved) {
+      const result = await this.cleanupService.cleanupRepository(repository.id);
       this.logger.log(
         {
           audit: true,
           event: 'repository_removed',
-          githubRepoId: repo.id,
-          fullName: repo.full_name,
+          githubRepoId: repository.id,
+          fullName: repository.full_name,
           ...(result ?? { skipped: true }),
         },
-        `Repository removed: ${repo.full_name}`,
+        `Repository removed: ${repository.full_name}`,
       );
     }
   }

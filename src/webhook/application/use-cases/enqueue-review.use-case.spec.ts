@@ -42,7 +42,11 @@ describe('EnqueueReviewUseCase', () => {
       deliveryId: 'd-1',
       installationId: 999,
       body: {
-        pull_request: { number: 42, head: { sha: 'abc' }, base: { ref: 'main' } },
+        pull_request: {
+          number: 42,
+          head: { sha: 'abc', ref: 'feature' },
+          base: { sha: 'def', ref: 'main' },
+        },
         repository: { id: 555, full_name: 'acme/widgets' },
       },
     });
@@ -68,7 +72,11 @@ describe('EnqueueReviewUseCase', () => {
       deliveryId: 'd-2',
       installationId: 999,
       body: {
-        pull_request: { number: 1, head: { sha: 'x' }, base: { ref: 'main' } },
+        pull_request: {
+          number: 1,
+          head: { sha: 'x', ref: 'feature' },
+          base: { sha: 'y', ref: 'main' },
+        },
         repository: { id: 1, full_name: 'untracked/repo' },
       },
     });
