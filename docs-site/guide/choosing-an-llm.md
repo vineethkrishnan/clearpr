@@ -39,6 +39,8 @@ What the model produced:
 
 This is consistent with what other teams report on small models: **they pattern-match diff structure rather than read the resulting code.** Removed `case` arms in a `switch` lit up the model's "missing return" pattern; an algebraically wrong expression in a brand-new file did not.
 
+A second run against the same PR a few hours later (after permission updates and code changes for the in-progress UX) reproduced the same false-positive on the cosmetic `discount.ts` and the same miss on the `cart.ts` sign bug. So the failure isn't a transient sampling artifact -- it's a stable property of the model class on this kind of diff. Treat it as such.
+
 ## Why it matters
 
 Review noise is asymmetric:
