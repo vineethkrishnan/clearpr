@@ -27,6 +27,7 @@ All configuration is via environment variables. Set them in `.env` or pass direc
 |---|---|---|
 | `EMBEDDING_PROVIDER` | `voyage` | `voyage` or `local` |
 | `EMBEDDING_MODEL` | `voyage-3-lite` | Embedding model ID |
+| `EMBEDDING_DIMENSIONS` | `512` | Vector dimension. Must match the chosen model (`voyage-3-lite` = 512, `voyage-3` = 1024). Drives the `pr_memory.embedding` column type in the initial migration. |
 | `VOYAGE_API_KEY` | — | Voyage AI API key |
 
 ## Application Settings

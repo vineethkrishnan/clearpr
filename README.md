@@ -300,12 +300,14 @@ npm run test
 clearpr/
 ├── src/
 │   ├── webhook/          # GitHub webhook handler
-│   ├── diff/             # Semantic diff engine (tree-sitter)
+│   ├── diff-engine/      # Semantic diff engine
 │   ├── review/           # AI review orchestration
 │   ├── memory/           # Past PR indexing and retrieval
 │   ├── config/           # Project config reader
 │   ├── github/           # GitHub API client
-│   └── queue/            # BullMQ job definitions
+│   ├── queue/            # BullMQ job definitions
+│   ├── health/           # Liveness / readiness endpoints
+│   └── shared/           # Cross-module infrastructure (db, redis, logging)
 ├── docker-compose.yml
 ├── Dockerfile
 ├── .env.example

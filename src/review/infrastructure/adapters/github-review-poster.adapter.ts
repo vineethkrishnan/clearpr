@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ReviewPosterPort } from '../../domain/ports/review-poster.port.js';
 import { type ReviewComment } from '../../domain/entities/review-comment.entity.js';
 import { type ReviewContext } from '../../domain/types/review-context.types.js';
-import { GitHubClientService } from '../../../github/application/use-cases/github-client.use-case.js';
+import { GitHubClientService } from '../../../github/infrastructure/adapters/github-client.service.js';
 
 @Injectable()
 export class GitHubReviewPosterAdapter extends ReviewPosterPort {

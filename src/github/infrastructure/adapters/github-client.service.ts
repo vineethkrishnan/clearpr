@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Octokit } from 'octokit';
-import { InstallationTokenService } from './installation-token.use-case.js';
-import { RateLimiterService } from './rate-limiter.use-case.js';
+import { InstallationTokenService } from './installation-token.service.js';
+import { RateLimiterService } from './rate-limiter.service.js';
 import { GitHubApiError } from '../../domain/errors/github.errors.js';
 import type {
   GitHubPrFile,
@@ -9,7 +9,7 @@ import type {
   GitHubMergedPr,
   GitHubReviewComment,
   GitHubPrCommit,
-} from '../types/github-types.js';
+} from '../../application/types/github-types.js';
 
 @Injectable()
 export class GitHubClientService {

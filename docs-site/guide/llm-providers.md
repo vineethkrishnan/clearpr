@@ -84,7 +84,7 @@ LLM_MODEL=gpt-4-turbo
 
 ## Architecture
 
-All providers implement the same `LlmProviderPort` interface. The `LlmProviderRegistry` selects the right adapter at startup based on `LLM_PROVIDER`. Adding a new provider means creating one adapter file — no changes to domain logic.
+All providers extend the same `LlmProviderPort` abstract class. The `LlmProviderRegistry` selects the right adapter at startup based on `LLM_PROVIDER`. Adding a new provider means creating one adapter file - no changes to domain logic.
 
 ```
 LlmProviderPort (abstract)
