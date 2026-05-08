@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.3](https://github.com/vineethkrishnan/clearpr/compare/v0.1.2...v0.1.3) (2026-05-08)
+
+
+### Features
+
+* in-progress review UX + LLM-choice warning doc (LU-32) ([#63](https://github.com/vineethkrishnan/clearpr/issues/63)) ([4853937](https://github.com/vineethkrishnan/clearpr/commit/4853937d53feedc20a3983229b2fc7261a0add47))
+
+
+### Documentation
+
+* add end-to-end setup walkthrough with screenshots and 6 runtime fixes (LU-31) ([#62](https://github.com/vineethkrishnan/clearpr/issues/62)) ([31eb6fd](https://github.com/vineethkrishnan/clearpr/commit/31eb6fdf1138799806ac322c7af810e0230e2828))
+
 ## [0.1.2](https://github.com/vineethkrishnan/clearpr/compare/v0.1.1...v0.1.2) (2026-05-08)
 
 
