@@ -6,8 +6,8 @@ const TTL_SECONDS = 60 * 60 * 24 * 30;
 const MAX_PATTERNS_PER_PR = 50;
 
 @Injectable()
-export class IgnoreListService {
-  private readonly logger = new Logger(IgnoreListService.name);
+export class ManageIgnorePatternsUseCase {
+  private readonly logger = new Logger(ManageIgnorePatternsUseCase.name);
 
   constructor(@Inject(REDIS_CLIENT) private readonly redis: Redis) {}
 

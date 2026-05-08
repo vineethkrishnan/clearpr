@@ -1,23 +1,23 @@
-import { SemanticDiffService } from './semantic-diff.use-case.js';
-import { FileProcessorService } from './file-processor.use-case.js';
+import { ComputeSemanticDiffUseCase } from './compute-semantic-diff.use-case.js';
+import { ProcessFileDiffUseCase } from './process-file-diff.use-case.js';
 import { DiffTooLargeError } from '../../domain/errors/diff-engine.errors.js';
 import { FileDiff } from '../../domain/entities/file-diff.entity.js';
 import { LanguageValue } from '../../domain/value-objects/language.vo.js';
 import { AppConfig } from '../../../config/app.config.js';
 import type { DiffInput } from '../types/diff-result.types.js';
 
-describe('SemanticDiffService', () => {
-  let service: SemanticDiffService;
-  let fileProcessor: jest.Mocked<FileProcessorService>;
+describe('ComputeSemanticDiffUseCase', () => {
+  let service: ComputeSemanticDiffUseCase;
+  let fileProcessor: jest.Mocked<ProcessFileDiffUseCase>;
   let config: AppConfig;
 
   beforeEach(() => {
     fileProcessor = {
       processFile: jest.fn(),
-    } as unknown as jest.Mocked<FileProcessorService>;
+    } as unknown as jest.Mocked<ProcessFileDiffUseCase>;
 
     config = { MAX_DIFF_LINES: 100 } as AppConfig;
-    service = new SemanticDiffService(fileProcessor, config);
+    service = new ComputeSemanticDiffUseCase(fileProcessor, config);
   });
 
   function makeDiffInput(filenames: string[]): DiffInput {

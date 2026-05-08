@@ -2,7 +2,7 @@ import { Module, forwardRef } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { AppConfig } from '../config/app.config.js';
 import { QUEUE_NAMES } from './types/job-payload.types.js';
-import { JobProducerService } from './application/use-cases/job-producer.use-case.js';
+import { EnqueueJobUseCase } from './application/use-cases/enqueue-job.use-case.js';
 import { ReviewConsumer } from './consumers/review.consumer.js';
 import { IndexingConsumer } from './consumers/indexing.consumer.js';
 import { CommandConsumer } from './consumers/command.consumer.js';
@@ -53,7 +53,7 @@ import { MemoryModule } from '../memory/memory.module.js';
       },
     ),
   ],
-  providers: [JobProducerService, ReviewConsumer, IndexingConsumer, CommandConsumer],
-  exports: [JobProducerService],
+  providers: [EnqueueJobUseCase, ReviewConsumer, IndexingConsumer, CommandConsumer],
+  exports: [EnqueueJobUseCase],
 })
 export class QueueModule {}

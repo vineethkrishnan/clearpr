@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import { WebhookDispatcherService } from './webhook-dispatcher.use-case.js';
+import { DispatchWebhookUseCase } from './dispatch-webhook.use-case.js';
 import { IdempotencyStorePort } from '../../domain/ports/idempotency-store.port.js';
 import { ClearPrAction } from '../../domain/value-objects/webhook-event-type.vo.js';
 import { EnqueueReviewUseCase } from './enqueue-review.use-case.js';
@@ -25,8 +25,8 @@ function makeMockHandler<T>(): jest.Mocked<T> {
   return { execute: jest.fn().mockResolvedValue(undefined) } as unknown as jest.Mocked<T>;
 }
 
-describe('WebhookDispatcherService', () => {
-  let dispatcher: WebhookDispatcherService;
+describe('DispatchWebhookUseCase', () => {
+  let dispatcher: DispatchWebhookUseCase;
   let store: MockIdempotencyStore;
   let enqueueReview: jest.Mocked<EnqueueReviewUseCase>;
   let enqueueCommand: jest.Mocked<EnqueueCommandUseCase>;
@@ -44,7 +44,7 @@ describe('WebhookDispatcherService', () => {
     registerRepositories = makeMockHandler<RegisterRepositoriesUseCase>();
     removeRepositories = makeMockHandler<RemoveRepositoriesUseCase>();
 
-    dispatcher = new WebhookDispatcherService(
+    dispatcher = new DispatchWebhookUseCase(
       store,
       enqueueReview,
       enqueueCommand,

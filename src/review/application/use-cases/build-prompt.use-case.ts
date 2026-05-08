@@ -4,7 +4,7 @@ import { type SemanticDiffResult } from '../../../diff-engine/application/types/
 import { calculateTokenBudget } from '../../domain/value-objects/token-budget.vo.js';
 
 @Injectable()
-export class PromptBuilderService {
+export class BuildPromptUseCase {
   constructor(private readonly sanitizer: PromptSanitizer) {}
 
   build(params: {

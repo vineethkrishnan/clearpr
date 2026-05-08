@@ -11,8 +11,8 @@ export interface CleanupResult {
 }
 
 @Injectable()
-export class InstallationCleanupService {
-  private readonly logger = new Logger(InstallationCleanupService.name);
+export class CleanupInstallationUseCase {
+  private readonly logger = new Logger(CleanupInstallationUseCase.name);
 
   constructor(
     private readonly installationRepo: InstallationRepositoryPort,

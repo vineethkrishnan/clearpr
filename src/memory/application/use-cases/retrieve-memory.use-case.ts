@@ -5,8 +5,8 @@ import { FeedbackOutcome } from '../../domain/value-objects/feedback-outcome.vo.
 import { AppConfig } from '../../../config/app.config.js';
 
 @Injectable()
-export class MemoryRetrieverService {
-  private readonly logger = new Logger(MemoryRetrieverService.name);
+export class RetrieveMemoryUseCase {
+  private readonly logger = new Logger(RetrieveMemoryUseCase.name);
 
   constructor(
     private readonly embeddingProvider: EmbeddingProviderPort,

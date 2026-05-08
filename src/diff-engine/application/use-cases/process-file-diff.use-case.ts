@@ -20,8 +20,8 @@ function whitespaceNormalize(source: string): string {
 }
 
 @Injectable()
-export class FileProcessorService {
-  private readonly logger = new Logger(FileProcessorService.name);
+export class ProcessFileDiffUseCase {
+  private readonly logger = new Logger(ProcessFileDiffUseCase.name);
 
   constructor(
     private readonly normalizer: AstNormalizerPort,

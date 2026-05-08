@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import { InstallationCleanupService } from './installation-cleanup.use-case.js';
+import { CleanupInstallationUseCase } from './cleanup-installation.use-case.js';
 import { InstallationRepositoryPort } from '../../../github/domain/ports/installation-repository.port.js';
 import { RepositoryRepositoryPort } from '../../../github/domain/ports/repository-repository.port.js';
 import { MemoryRepositoryPort } from '../../../memory/domain/ports/memory-repository.port.js';
@@ -8,8 +8,8 @@ import { Installation } from '../../../github/domain/entities/installation.entit
 import { Repository } from '../../../github/domain/entities/repository.entity.js';
 import { InstallationStatusValue } from '../../../github/domain/value-objects/installation-status.vo.js';
 
-describe('InstallationCleanupService', () => {
-  let service: InstallationCleanupService;
+describe('CleanupInstallationUseCase', () => {
+  let service: CleanupInstallationUseCase;
   let installationRepo: jest.Mocked<InstallationRepositoryPort>;
   let repositoryRepo: jest.Mocked<RepositoryRepositoryPort>;
   let reviewRepo: jest.Mocked<ReviewRepositoryPort>;
@@ -43,7 +43,7 @@ describe('InstallationCleanupService', () => {
       deleteByRepositoryIds: jest.fn().mockResolvedValue(0),
     };
 
-    service = new InstallationCleanupService(
+    service = new CleanupInstallationUseCase(
       installationRepo,
       repositoryRepo,
       reviewRepo,

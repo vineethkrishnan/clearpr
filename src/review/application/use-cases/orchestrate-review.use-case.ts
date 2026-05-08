@@ -8,34 +8,34 @@ import { ReviewTrigger } from '../../domain/value-objects/review-trigger.vo.js';
 import { ReviewSkippedError } from '../../domain/errors/review.errors.js';
 import { RESPONSE_TOKENS } from '../../domain/value-objects/token-budget.vo.js';
 import { PrFileListProviderPort } from '../../domain/ports/pr-file-list-provider.port.js';
-import { SemanticDiffService } from '../../../diff-engine/application/use-cases/semantic-diff.use-case.js';
+import { ComputeSemanticDiffUseCase } from '../../../diff-engine/application/use-cases/compute-semantic-diff.use-case.js';
 import { DiffTooLargeError } from '../../../diff-engine/domain/errors/diff-engine.errors.js';
 import type { SemanticDiffResult } from '../../../diff-engine/application/types/diff-result.types.js';
-import { GuidelineLoaderService } from './guideline-loader.use-case.js';
-import { PromptBuilderService } from './prompt-builder.use-case.js';
-import { IgnoreListService } from './ignore-list.use-case.js';
+import { LoadGuidelinesUseCase } from './load-guidelines.use-case.js';
+import { BuildPromptUseCase } from './build-prompt.use-case.js';
+import { ManageIgnorePatternsUseCase } from './manage-ignore-patterns.use-case.js';
 import { ParseLlmResponseUseCase } from './parse-llm-response.use-case.js';
 import { BuildReviewSummaryUseCase } from './build-review-summary.use-case.js';
 import { matchesAnyPattern } from './glob-match.util.js';
-import { MemoryRetrieverService } from '../../../memory/application/use-cases/memory-retriever.use-case.js';
+import { RetrieveMemoryUseCase } from '../../../memory/application/use-cases/retrieve-memory.use-case.js';
 import type { ReviewContext } from '../../domain/types/review-context.types.js';
 import { type Result, ok, err } from '../../../shared/types/result.types.js';
 import { type DomainError } from '../../../shared/domain/errors/domain-error.base.js';
 
 @Injectable()
-export class ReviewOrchestratorService {
-  private readonly logger = new Logger(ReviewOrchestratorService.name);
+export class OrchestrateReviewUseCase {
+  private readonly logger = new Logger(OrchestrateReviewUseCase.name);
 
   constructor(
-    private readonly diffService: SemanticDiffService,
-    private readonly guidelineLoader: GuidelineLoaderService,
-    private readonly promptBuilder: PromptBuilderService,
+    private readonly diffService: ComputeSemanticDiffUseCase,
+    private readonly guidelineLoader: LoadGuidelinesUseCase,
+    private readonly promptBuilder: BuildPromptUseCase,
     private readonly llmProvider: LlmProviderPort,
     private readonly reviewRepo: ReviewRepositoryPort,
     private readonly reviewPoster: ReviewPosterPort,
     private readonly prFileListProvider: PrFileListProviderPort,
-    private readonly memoryRetriever: MemoryRetrieverService,
-    private readonly ignoreList: IgnoreListService,
+    private readonly memoryRetriever: RetrieveMemoryUseCase,
+    private readonly ignoreList: ManageIgnorePatternsUseCase,
     private readonly parseLlmResponse: ParseLlmResponseUseCase,
     private readonly buildReviewSummary: BuildReviewSummaryUseCase,
   ) {}

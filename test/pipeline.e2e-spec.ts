@@ -10,7 +10,7 @@ import { ConfigModule } from '../src/config/config.module.js';
 import { ClsConfigModule } from '../src/shared/infrastructure/cls/cls.module.js';
 import { LoggingModule } from '../src/shared/infrastructure/logging/logging.module.js';
 import { WebhookController } from '../src/webhook/presenters/http/webhook.controller.js';
-import { WebhookDispatcherService } from '../src/webhook/application/use-cases/webhook-dispatcher.use-case.js';
+import { DispatchWebhookUseCase } from '../src/webhook/application/use-cases/dispatch-webhook.use-case.js';
 import { EnqueueReviewUseCase } from '../src/webhook/application/use-cases/enqueue-review.use-case.js';
 import { EnqueueCommandUseCase } from '../src/webhook/application/use-cases/enqueue-command.use-case.js';
 import { RegisterInstallationUseCase } from '../src/webhook/application/use-cases/register-installation.use-case.js';
@@ -20,7 +20,7 @@ import { RemoveRepositoriesUseCase } from '../src/webhook/application/use-cases/
 import { HmacSignatureGuard } from '../src/webhook/infrastructure/guards/hmac-signature.guard.js';
 import { IdempotencyStorePort } from '../src/webhook/domain/ports/idempotency-store.port.js';
 
-import { JobProducerService } from '../src/queue/application/use-cases/job-producer.use-case.js';
+import { EnqueueJobUseCase } from '../src/queue/application/use-cases/enqueue-job.use-case.js';
 import {
   type CommandJobPayload,
   type IndexingJobPayload,
@@ -39,8 +39,8 @@ import { TypeScriptNormalizer } from '../src/diff-engine/infrastructure/normaliz
 import { PhpNormalizer } from '../src/diff-engine/infrastructure/normalizers/php.normalizer.js';
 import { JsonNormalizer } from '../src/diff-engine/infrastructure/normalizers/json.normalizer.js';
 import { YamlNormalizer } from '../src/diff-engine/infrastructure/normalizers/yaml.normalizer.js';
-import { FileProcessorService } from '../src/diff-engine/application/use-cases/file-processor.use-case.js';
-import { SemanticDiffService } from '../src/diff-engine/application/use-cases/semantic-diff.use-case.js';
+import { ProcessFileDiffUseCase } from '../src/diff-engine/application/use-cases/process-file-diff.use-case.js';
+import { ComputeSemanticDiffUseCase } from '../src/diff-engine/application/use-cases/compute-semantic-diff.use-case.js';
 
 import { LlmProviderPort } from '../src/review/domain/ports/llm-provider.port.js';
 import { ReviewRepositoryPort } from '../src/review/domain/ports/review-repository.port.js';
@@ -52,11 +52,11 @@ import { type ReviewContext } from '../src/review/domain/types/review-context.ty
 import { type LlmResponse } from '../src/review/domain/types/llm-response.types.js';
 import { type FileInput } from '../src/diff-engine/application/types/diff-result.types.js';
 import { PromptSanitizer } from '../src/review/application/use-cases/prompt-sanitizer.use-case.js';
-import { PromptBuilderService } from '../src/review/application/use-cases/prompt-builder.use-case.js';
-import { GuidelineLoaderService } from '../src/review/application/use-cases/guideline-loader.use-case.js';
-import { ReviewOrchestratorService } from '../src/review/application/use-cases/review-orchestrator.use-case.js';
-import { IgnoreListService } from '../src/review/application/use-cases/ignore-list.use-case.js';
-import { InstallationCleanupService } from '../src/review/application/use-cases/installation-cleanup.use-case.js';
+import { BuildPromptUseCase } from '../src/review/application/use-cases/build-prompt.use-case.js';
+import { LoadGuidelinesUseCase } from '../src/review/application/use-cases/load-guidelines.use-case.js';
+import { OrchestrateReviewUseCase } from '../src/review/application/use-cases/orchestrate-review.use-case.js';
+import { ManageIgnorePatternsUseCase } from '../src/review/application/use-cases/manage-ignore-patterns.use-case.js';
+import { CleanupInstallationUseCase } from '../src/review/application/use-cases/cleanup-installation.use-case.js';
 import { ParseLlmResponseUseCase } from '../src/review/application/use-cases/parse-llm-response.use-case.js';
 import { BuildReviewSummaryUseCase } from '../src/review/application/use-cases/build-review-summary.use-case.js';
 
@@ -65,7 +65,7 @@ import {
   MemoryRepositoryPort,
   type SimilarMemoryResult,
 } from '../src/memory/domain/ports/memory-repository.port.js';
-import { MemoryRetrieverService } from '../src/memory/application/use-cases/memory-retriever.use-case.js';
+import { RetrieveMemoryUseCase } from '../src/memory/application/use-cases/retrieve-memory.use-case.js';
 
 import { REDIS_CLIENT } from '../src/shared/infrastructure/redis/redis.module.js';
 
@@ -282,7 +282,7 @@ class FakeReviewPoster extends ReviewPosterPort {
   }
 }
 
-// Minimal Redis stub covering the methods IgnoreListService uses.
+// Minimal Redis stub covering the methods ManageIgnorePatternsUseCase uses.
 class FakeRedis {
   private sets = new Map<string, Set<string>>();
   async sadd(key: string, ...members: string[]): Promise<number> {
@@ -325,7 +325,7 @@ class FakeRedis {
 // review pipeline without needing a real queue infrastructure.
 class SyncJobProducer {
   constructor(
-    private readonly orchestrator: ReviewOrchestratorService,
+    private readonly orchestrator: OrchestrateReviewUseCase,
     private readonly repoFullName: string,
   ) {}
 
@@ -390,7 +390,7 @@ const prFiles: FileInput[] = [
   controllers: [WebhookController],
   providers: [
     // Webhook layer
-    WebhookDispatcherService,
+    DispatchWebhookUseCase,
     EnqueueReviewUseCase,
     EnqueueCommandUseCase,
     RegisterInstallationUseCase,
@@ -412,19 +412,19 @@ const prFiles: FileInput[] = [
     YamlNormalizer,
     { provide: AstNormalizerPort, useClass: NormalizerRegistryAdapter },
     { provide: FileContentProviderPort, useValue: new FakeFileContentProvider(fileContents) },
-    FileProcessorService,
-    SemanticDiffService,
+    ProcessFileDiffUseCase,
+    ComputeSemanticDiffUseCase,
 
     // Memory (real retriever wrapping fake external providers)
     { provide: EmbeddingProviderPort, useClass: FakeEmbeddingProvider },
     { provide: MemoryRepositoryPort, useClass: FakeMemoryRepo },
-    MemoryRetrieverService,
+    RetrieveMemoryUseCase,
 
     // Review pipeline (real)
     PromptSanitizer,
-    GuidelineLoaderService,
-    PromptBuilderService,
-    IgnoreListService,
+    LoadGuidelinesUseCase,
+    BuildPromptUseCase,
+    ManageIgnorePatternsUseCase,
     ParseLlmResponseUseCase,
     BuildReviewSummaryUseCase,
     { provide: REDIS_CLIENT, useValue: new FakeRedis() },
@@ -432,16 +432,16 @@ const prFiles: FileInput[] = [
     { provide: LlmProviderPort, useClass: FakeLlmProvider },
     { provide: ReviewPosterPort, useClass: FakeReviewPoster },
     { provide: ReviewRepositoryPort, useClass: FakeReviewRepo },
-    ReviewOrchestratorService,
+    OrchestrateReviewUseCase,
 
     // Cleanup service (unused in this path but wired to satisfy dispatcher DI)
-    InstallationCleanupService,
+    CleanupInstallationUseCase,
 
     // Fake job producer bridging dispatcher → orchestrator synchronously
     {
-      provide: JobProducerService,
-      inject: [ReviewOrchestratorService],
-      useFactory: (orchestrator: ReviewOrchestratorService): SyncJobProducer =>
+      provide: EnqueueJobUseCase,
+      inject: [OrchestrateReviewUseCase],
+      useFactory: (orchestrator: OrchestrateReviewUseCase): SyncJobProducer =>
         new SyncJobProducer(orchestrator, TRACKED_REPO.fullName),
     },
   ],

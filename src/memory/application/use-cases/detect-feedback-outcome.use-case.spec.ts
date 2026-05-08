@@ -1,8 +1,8 @@
-import { OutcomeDetectorService } from './outcome-detector.use-case.js';
+import { DetectFeedbackOutcomeUseCase } from './detect-feedback-outcome.use-case.js';
 import { FeedbackOutcome } from '../../domain/value-objects/feedback-outcome.vo.js';
 
-describe('OutcomeDetectorService', () => {
-  const detector = new OutcomeDetectorService();
+describe('DetectFeedbackOutcomeUseCase', () => {
+  const detector = new DetectFeedbackOutcomeUseCase();
 
   it('should return ACCEPTED when file was changed after comment', () => {
     const result = detector.detect({

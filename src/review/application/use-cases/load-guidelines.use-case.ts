@@ -4,8 +4,8 @@ import { FileContentProviderPort } from '../../../diff-engine/domain/ports/file-
 const GUIDELINE_FILES = ['claude.md', 'agent.md', '.reviewconfig'] as const;
 
 @Injectable()
-export class GuidelineLoaderService {
-  private readonly logger = new Logger(GuidelineLoaderService.name);
+export class LoadGuidelinesUseCase {
+  private readonly logger = new Logger(LoadGuidelinesUseCase.name);
 
   constructor(private readonly fileProvider: FileContentProviderPort) {}
 

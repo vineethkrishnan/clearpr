@@ -2,7 +2,7 @@ import { Module, forwardRef } from '@nestjs/common';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { WebhookController } from './presenters/http/webhook.controller.js';
-import { WebhookDispatcherService } from './application/use-cases/webhook-dispatcher.use-case.js';
+import { DispatchWebhookUseCase } from './application/use-cases/dispatch-webhook.use-case.js';
 import { EnqueueReviewUseCase } from './application/use-cases/enqueue-review.use-case.js';
 import { EnqueueCommandUseCase } from './application/use-cases/enqueue-command.use-case.js';
 import { RegisterInstallationUseCase } from './application/use-cases/register-installation.use-case.js';
@@ -25,7 +25,7 @@ import { ReviewModule } from '../review/review.module.js';
   ],
   controllers: [WebhookController],
   providers: [
-    WebhookDispatcherService,
+    DispatchWebhookUseCase,
     EnqueueReviewUseCase,
     EnqueueCommandUseCase,
     RegisterInstallationUseCase,
