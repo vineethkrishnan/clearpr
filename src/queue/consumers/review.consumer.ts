@@ -1,7 +1,7 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
-import { ReviewOrchestratorService } from '../../review/application/services/review-orchestrator.service.js';
+import { OrchestrateReviewUseCase } from '../../review/application/use-cases/orchestrate-review.use-case.js';
 import { QUEUE_NAMES, type ReviewJobPayload } from '../types/job-payload.types.js';
 import type { ReviewContext } from '../../review/domain/types/review-context.types.js';
 import { DomainError } from '../../shared/domain/errors/domain-error.base.js';
@@ -10,7 +10,7 @@ import { DomainError } from '../../shared/domain/errors/domain-error.base.js';
 export class ReviewConsumer extends WorkerHost {
   private readonly logger = new Logger(ReviewConsumer.name);
 
-  constructor(private readonly orchestrator: ReviewOrchestratorService) {
+  constructor(private readonly orchestrator: OrchestrateReviewUseCase) {
     super();
   }
 

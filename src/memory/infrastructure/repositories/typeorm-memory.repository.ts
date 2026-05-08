@@ -10,29 +10,31 @@ import {
   type SimilarMemoryResult,
 } from '../../domain/ports/memory-repository.port.js';
 import { PrMemoryEntry } from '../../domain/entities/pr-memory-entry.entity.js';
-import { type FeedbackOutcome } from '../../domain/value-objects/feedback-outcome.vo.js';
-import { PrMemorySchema, type PrMemoryRow } from './memory.schema.js';
+import { PrMemoryRecord } from './memory.record.js';
+import { PrMemoryMapper } from './memory.mapper.js';
 
-interface SimilarityRow extends PrMemoryRow {
+interface SimilarityRow extends PrMemoryRecord {
   similarity: string;
 }
 
 @Injectable()
 export class TypeOrmMemoryRepository extends MemoryRepositoryPort {
   constructor(
-    @InjectRepository(PrMemorySchema)
-    private readonly repo: TypeOrmRepo<PrMemoryRow>,
+    @InjectRepository(PrMemoryRecord)
+    private readonly repo: TypeOrmRepo<PrMemoryRecord>,
   ) {
     super();
   }
 
   async save(entry: PrMemoryEntry): Promise<void> {
-    await this.repo.save(this.toRow(entry));
+    await this.repo.save(PrMemoryMapper.toRecord(entry, toVectorSql(entry.embedding)));
   }
 
   async saveBatch(entries: PrMemoryEntry[]): Promise<void> {
     if (entries.length === 0) return;
-    await this.repo.save(entries.map((e) => this.toRow(e)));
+    await this.repo.save(
+      entries.map((entry) => PrMemoryMapper.toRecord(entry, toVectorSql(entry.embedding))),
+    );
   }
 
   async findSimilar(
@@ -58,7 +60,7 @@ export class TypeOrmMemoryRepository extends MemoryRepositoryPort {
     );
 
     return rows.map((row) => ({
-      entry: this.toDomain(row),
+      entry: PrMemoryMapper.toDomain(row, fromVectorSql(row.embedding)),
       similarity: parseFloat(row.similarity),
     }));
   }
@@ -76,32 +78,5 @@ export class TypeOrmMemoryRepository extends MemoryRepositoryPort {
       .where('repository_id IN (:...ids)', { ids: repositoryIds })
       .execute();
     return result.affected ?? 0;
-  }
-
-  private toRow(entry: PrMemoryEntry): PrMemoryRow {
-    return {
-      id: entry.id,
-      repository_id: entry.repositoryId,
-      pr_number: entry.prNumber,
-      comment_author: entry.commentAuthor,
-      comment_text: entry.commentText,
-      code_context: entry.codeContext,
-      outcome: entry.outcome,
-      embedding: toVectorSql(entry.embedding),
-      created_at: entry.createdAt,
-    };
-  }
-
-  private toDomain(row: PrMemoryRow): PrMemoryEntry {
-    return new PrMemoryEntry({
-      id: row.id,
-      repositoryId: row.repository_id,
-      prNumber: row.pr_number,
-      commentAuthor: row.comment_author,
-      commentText: row.comment_text,
-      codeContext: row.code_context,
-      outcome: row.outcome as FeedbackOutcome,
-      embedding: fromVectorSql(row.embedding),
-    });
   }
 }

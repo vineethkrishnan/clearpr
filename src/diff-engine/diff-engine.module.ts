@@ -8,8 +8,8 @@ import { TypeScriptNormalizer } from './infrastructure/normalizers/typescript.no
 import { PhpNormalizer } from './infrastructure/normalizers/php.normalizer.js';
 import { JsonNormalizer } from './infrastructure/normalizers/json.normalizer.js';
 import { YamlNormalizer } from './infrastructure/normalizers/yaml.normalizer.js';
-import { FileProcessorService } from './application/services/file-processor.service.js';
-import { SemanticDiffService } from './application/services/semantic-diff.service.js';
+import { ProcessFileDiffUseCase } from './application/use-cases/process-file-diff.use-case.js';
+import { ComputeSemanticDiffUseCase } from './application/use-cases/compute-semantic-diff.use-case.js';
 
 @Module({
   imports: [GitHubModule],
@@ -26,9 +26,9 @@ import { SemanticDiffService } from './application/services/semantic-diff.servic
       provide: FileContentProviderPort,
       useClass: GitHubFileContentAdapter,
     },
-    FileProcessorService,
-    SemanticDiffService,
+    ProcessFileDiffUseCase,
+    ComputeSemanticDiffUseCase,
   ],
-  exports: [SemanticDiffService],
+  exports: [ComputeSemanticDiffUseCase],
 })
 export class DiffEngineModule {}

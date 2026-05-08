@@ -19,6 +19,7 @@ export class PhpNormalizer implements LanguageNormalizer {
     return this.collapseWhitespace(sortedUses).trim();
   }
 
+  // eslint-disable-next-line sonarjs/cognitive-complexity -- coarse PHP tokenizer; splitting per token kind reduces clarity. Tracked for refactor.
   private tokenize(source: string): Array<{ kind: 'code' | 'string' | 'comment'; text: string }> {
     const segments: Array<{ kind: 'code' | 'string' | 'comment'; text: string }> = [];
     let buffer = '';

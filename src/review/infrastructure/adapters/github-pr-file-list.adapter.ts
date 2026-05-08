@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrFileListProviderPort } from '../../domain/ports/pr-file-list-provider.port.js';
-import { GitHubClientService } from '../../../github/application/services/github-client.service.js';
+import { GitHubClientService } from '../../../github/application/use-cases/github-client.use-case.js';
 import type { FileInput } from '../../../diff-engine/application/types/diff-result.types.js';
 
 @Injectable()

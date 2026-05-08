@@ -6,14 +6,20 @@ import type { Server } from 'http';
 import { ConfigModule } from '../src/config/config.module.js';
 import { ClsConfigModule } from '../src/shared/infrastructure/cls/cls.module.js';
 import { LoggingModule } from '../src/shared/infrastructure/logging/logging.module.js';
-import { WebhookController } from '../src/webhook/presentation/webhook.controller.js';
-import { WebhookDispatcherService } from '../src/webhook/application/services/webhook-dispatcher.service.js';
+import { WebhookController } from '../src/webhook/presenters/http/webhook.controller.js';
+import { DispatchWebhookUseCase } from '../src/webhook/application/use-cases/dispatch-webhook.use-case.js';
+import { EnqueueReviewUseCase } from '../src/webhook/application/use-cases/enqueue-review.use-case.js';
+import { EnqueueCommandUseCase } from '../src/webhook/application/use-cases/enqueue-command.use-case.js';
+import { RegisterInstallationUseCase } from '../src/webhook/application/use-cases/register-installation.use-case.js';
+import { RemoveInstallationUseCase } from '../src/webhook/application/use-cases/remove-installation.use-case.js';
+import { RegisterRepositoriesUseCase } from '../src/webhook/application/use-cases/register-repositories.use-case.js';
+import { RemoveRepositoriesUseCase } from '../src/webhook/application/use-cases/remove-repositories.use-case.js';
 import { HmacSignatureGuard } from '../src/webhook/infrastructure/guards/hmac-signature.guard.js';
 import { IdempotencyStorePort } from '../src/webhook/domain/ports/idempotency-store.port.js';
-import { JobProducerService } from '../src/queue/producers/job-producer.service.js';
+import { EnqueueJobUseCase } from '../src/queue/application/use-cases/enqueue-job.use-case.js';
 import { InstallationRepositoryPort } from '../src/github/domain/ports/installation-repository.port.js';
 import { RepositoryRepositoryPort } from '../src/github/domain/ports/repository-repository.port.js';
-import { InstallationCleanupService } from '../src/review/application/services/installation-cleanup.service.js';
+import { CleanupInstallationUseCase } from '../src/review/application/use-cases/cleanup-installation.use-case.js';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 
@@ -73,13 +79,19 @@ function signPayload(body: string): string {
   ],
   controllers: [WebhookController],
   providers: [
-    WebhookDispatcherService,
+    DispatchWebhookUseCase,
+    EnqueueReviewUseCase,
+    EnqueueCommandUseCase,
+    RegisterInstallationUseCase,
+    RemoveInstallationUseCase,
+    RegisterRepositoriesUseCase,
+    RemoveRepositoriesUseCase,
     HmacSignatureGuard,
     { provide: IdempotencyStorePort, useClass: InMemoryIdempotencyStore },
-    { provide: JobProducerService, useValue: mockJobProducer },
+    { provide: EnqueueJobUseCase, useValue: mockJobProducer },
     { provide: InstallationRepositoryPort, useValue: mockInstallationRepo },
     { provide: RepositoryRepositoryPort, useValue: mockRepositoryRepo },
-    { provide: InstallationCleanupService, useValue: mockCleanupService },
+    { provide: CleanupInstallationUseCase, useValue: mockCleanupService },
     { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],
 })
