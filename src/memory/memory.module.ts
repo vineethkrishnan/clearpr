@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PrMemorySchema } from './infrastructure/repositories/memory.schema.js';
+import { PrMemoryRecord } from './infrastructure/repositories/memory.record.js';
 import { EmbeddingProviderPort } from './domain/ports/embedding-provider.port.js';
 import { MemoryRepositoryPort } from './domain/ports/memory-repository.port.js';
 import { VoyageEmbeddingAdapter } from './infrastructure/adapters/voyage-embedding.adapter.js';
@@ -12,7 +12,7 @@ import { RepositoryIndexerService } from './application/services/repository-inde
 import { GitHubModule } from '../github/github.module.js';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([PrMemorySchema]), GitHubModule],
+  imports: [TypeOrmModule.forFeature([PrMemoryRecord]), GitHubModule],
   providers: [
     {
       provide: EmbeddingProviderPort,

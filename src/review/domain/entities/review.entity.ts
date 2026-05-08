@@ -26,6 +26,14 @@ export class Review extends BaseEntity {
     prSha: string;
     trigger: ReviewTrigger;
     status?: ReviewStatus;
+    rawDiffLines?: number;
+    semanticDiffLines?: number;
+    noiseReductionPct?: number;
+    modelUsed?: string;
+    promptTokens?: number;
+    completionTokens?: number;
+    reviewDurationMs?: number;
+    errorMessage?: string;
   }) {
     super(params.id);
     this.repositoryId = params.repositoryId;
@@ -33,6 +41,14 @@ export class Review extends BaseEntity {
     this.prSha = params.prSha;
     this.trigger = params.trigger;
     this.status = params.status ?? ReviewStatus.QUEUED;
+    this.rawDiffLines = params.rawDiffLines;
+    this.semanticDiffLines = params.semanticDiffLines;
+    this.noiseReductionPct = params.noiseReductionPct;
+    this.modelUsed = params.modelUsed;
+    this.promptTokens = params.promptTokens;
+    this.completionTokens = params.completionTokens;
+    this.reviewDurationMs = params.reviewDurationMs;
+    this.errorMessage = params.errorMessage;
     this.comments = [];
   }
 
@@ -52,6 +68,14 @@ export class Review extends BaseEntity {
     prSha: string;
     trigger: ReviewTrigger;
     status: ReviewStatus;
+    rawDiffLines?: number;
+    semanticDiffLines?: number;
+    noiseReductionPct?: number;
+    modelUsed?: string;
+    promptTokens?: number;
+    completionTokens?: number;
+    reviewDurationMs?: number;
+    errorMessage?: string;
   }): Review {
     return new Review(params);
   }

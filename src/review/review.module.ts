@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { GitHubModule } from '../github/github.module.js';
 import { DiffEngineModule } from '../diff-engine/diff-engine.module.js';
 import { MemoryModule } from '../memory/memory.module.js';
-import { ReviewSchema } from './infrastructure/repositories/review.schema.js';
+import { ReviewRecord } from './infrastructure/repositories/review.record.js';
 import { TypeOrmReviewRepository } from './infrastructure/repositories/typeorm-review.repository.js';
 import { ReviewRepositoryPort } from './domain/ports/review-repository.port.js';
 import { ReviewPosterPort } from './domain/ports/review-poster.port.js';
@@ -20,7 +20,7 @@ import { CommandHandlerService } from './application/services/command-handler.se
 import { InstallationCleanupService } from './application/services/installation-cleanup.service.js';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ReviewSchema]), GitHubModule, DiffEngineModule, MemoryModule],
+  imports: [TypeOrmModule.forFeature([ReviewRecord]), GitHubModule, DiffEngineModule, MemoryModule],
   providers: [
     createLlmProvider(),
     {

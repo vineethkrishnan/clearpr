@@ -2,36 +2,37 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository as TypeOrmRepo } from 'typeorm';
 import { RepositoryRepositoryPort } from '../../domain/ports/repository-repository.port.js';
-import { Repository, IndexingStatus } from '../../domain/entities/repository.entity.js';
-import { RepositorySchema, type RepositoryRow } from './repository.schema.js';
+import { Repository } from '../../domain/entities/repository.entity.js';
+import { RepositoryRecord } from './repository.record.js';
+import { RepositoryMapper } from './repository.mapper.js';
 
 @Injectable()
 export class TypeOrmRepositoryRepository extends RepositoryRepositoryPort {
   constructor(
-    @InjectRepository(RepositorySchema)
-    private readonly repo: TypeOrmRepo<RepositoryRow>,
+    @InjectRepository(RepositoryRecord)
+    private readonly repo: TypeOrmRepo<RepositoryRecord>,
   ) {
     super();
   }
 
   async save(repository: Repository): Promise<Repository> {
-    await this.repo.save(this.toRow(repository));
+    await this.repo.save(RepositoryMapper.toRecord(repository));
     return repository;
   }
 
   async findById(id: string): Promise<Repository | null> {
-    const row = await this.repo.findOneBy({ id });
-    return row ? this.toDomain(row) : null;
+    const record = await this.repo.findOneBy({ id });
+    return record ? RepositoryMapper.toDomain(record) : null;
   }
 
   async findByGithubId(githubRepoId: number): Promise<Repository | null> {
-    const row = await this.repo.findOneBy({ github_repo_id: githubRepoId });
-    return row ? this.toDomain(row) : null;
+    const record = await this.repo.findOneBy({ github_repo_id: githubRepoId });
+    return record ? RepositoryMapper.toDomain(record) : null;
   }
 
   async findByInstallationId(installationId: string): Promise<Repository[]> {
-    const rows = await this.repo.findBy({ installation_id: installationId });
-    return rows.map((row) => this.toDomain(row));
+    const records = await this.repo.findBy({ installation_id: installationId });
+    return records.map((record) => RepositoryMapper.toDomain(record));
   }
 
   async deleteByInstallationId(installationId: string): Promise<number> {
@@ -40,33 +41,9 @@ export class TypeOrmRepositoryRepository extends RepositoryRepositoryPort {
   }
 
   async deleteByGithubId(githubRepoId: number): Promise<Repository | null> {
-    const row = await this.repo.findOneBy({ github_repo_id: githubRepoId });
-    if (!row) return null;
+    const record = await this.repo.findOneBy({ github_repo_id: githubRepoId });
+    if (!record) return null;
     await this.repo.delete({ github_repo_id: githubRepoId });
-    return this.toDomain(row);
-  }
-
-  private toRow(entity: Repository): RepositoryRow {
-    return {
-      id: entity.id,
-      installation_id: entity.installationId,
-      github_repo_id: entity.githubRepoId,
-      full_name: entity.fullName,
-      settings: entity.settings,
-      indexing_status: entity.indexingStatus,
-      created_at: entity.createdAt,
-      updated_at: entity.updatedAt,
-    };
-  }
-
-  private toDomain(row: RepositoryRow): Repository {
-    return Repository.reconstitute({
-      id: row.id,
-      installationId: row.installation_id,
-      githubRepoId: Number(row.github_repo_id),
-      fullName: row.full_name,
-      settings: row.settings,
-      indexingStatus: row.indexing_status as IndexingStatus,
-    });
+    return RepositoryMapper.toDomain(record);
   }
 }
