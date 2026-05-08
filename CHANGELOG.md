@@ -1,5 +1,47 @@
 # Changelog
 
+## [0.1.2](https://github.com/vineethkrishnan/clearpr/compare/v0.1.1...v0.1.2) (2026-05-08)
+
+
+### Features
+
+* **docker:** run migrations on startup and trust reverse proxy (LU-31) ([#60](https://github.com/vineethkrishnan/clearpr/issues/60)) ([41afa2d](https://github.com/vineethkrishnan/clearpr/commit/41afa2d7e304357adfc70788cede0bd73c021650))
+* implement pgvector, AST-based diff, and PR memory indexing ([#40](https://github.com/vineethkrishnan/clearpr/issues/40)) ([812025d](https://github.com/vineethkrishnan/clearpr/commit/812025d8bbf6642c10220107862f481122917613))
+* **webhooks:** typed DTOs at controller boundary (LU-31) ([#48](https://github.com/vineethkrishnan/clearpr/issues/48)) ([8d60e91](https://github.com/vineethkrishnan/clearpr/commit/8d60e913058d428a6d179ad5e1ff54c326d364de))
+* **webhooks:** use Redis-backed throttler for multi-replica safety (LU-31) ([#58](https://github.com/vineethkrishnan/clearpr/issues/58)) ([d6b5fa1](https://github.com/vineethkrishnan/clearpr/commit/d6b5fa14756cd81cbc7b0d6c32860d713c2b0d77))
+
+
+### Bug Fixes
+
+* **diff-engine:** enforce diff size limits and file size cap (LU-31) ([#54](https://github.com/vineethkrishnan/clearpr/issues/54)) ([a4cd04b](https://github.com/vineethkrishnan/clearpr/commit/a4cd04bb943aacef7545fcdbde3bd1acd014c779))
+* **docker:** make production build runnable end-to-end (LU-31) ([#61](https://github.com/vineethkrishnan/clearpr/issues/61)) ([35bfb87](https://github.com/vineethkrishnan/clearpr/commit/35bfb8710d06f0d326ef1151d320761a8dc19502))
+* **docs:** correct GITHUB_PRIVATE_KEY docs and clarify scaling reality (LU-31) ([#59](https://github.com/vineethkrishnan/clearpr/issues/59)) ([b1e88ea](https://github.com/vineethkrishnan/clearpr/commit/b1e88eafbc5389b638335673e8ec415148247e91))
+
+
+### Refactoring
+
+* complete cross-module ports and drop forwardRef cycles (LU-31) ([#55](https://github.com/vineethkrishnan/clearpr/issues/55)) ([f6b82f5](https://github.com/vineethkrishnan/clearpr/commit/f6b82f5a8b669ad534708843a1d0d8be9ad30ce5))
+* **db:** regenerate InitialSchema migration from @Entity records (LU-31) ([#49](https://github.com/vineethkrishnan/clearpr/issues/49)) ([5ae9880](https://github.com/vineethkrishnan/clearpr/commit/5ae98805f2684d657492146ce480b20b8f3d3408))
+* extract cross-module ports for memory and review (LU-31) ([#52](https://github.com/vineethkrishnan/clearpr/issues/52)) ([bddcedc](https://github.com/vineethkrishnan/clearpr/commit/bddcedc2a0898d146e89d1f612613007c07d0c75))
+* **memory:** replace EntitySchema with records and mappers (LU-31) ([#47](https://github.com/vineethkrishnan/clearpr/issues/47)) ([9d25bd7](https://github.com/vineethkrishnan/clearpr/commit/9d25bd705407d4d5f4ac80d6685a2dfacf78df8f))
+* rename single-op service classes to use-cases (LU-31) ([#50](https://github.com/vineethkrishnan/clearpr/issues/50)) ([6ee59d2](https://github.com/vineethkrishnan/clearpr/commit/6ee59d2c440a149b5bb310a43c1c6996a9895eb7))
+* split god services, services to use-cases (LU-31) ([#46](https://github.com/vineethkrishnan/clearpr/issues/46)) ([690750d](https://github.com/vineethkrishnan/clearpr/commit/690750d48276d9d8f3ce079e50079472e8c8e7ca))
+
+
+### Documentation
+
+* add SUMMARY.md to each top-level module ([#44](https://github.com/vineethkrishnan/clearpr/issues/44)) ([8c2cd50](https://github.com/vineethkrishnan/clearpr/commit/8c2cd50272ccc679d0decc37c2fd37c73f9e99f1))
+* post-migration cleanup of architecture docs and infra adapter location (LU-31) ([#57](https://github.com/vineethkrishnan/clearpr/issues/57)) ([bab7fa7](https://github.com/vineethkrishnan/clearpr/commit/bab7fa74b6ed004228677bac14829474c8d5e584))
+* **site:** add architecture guide, contributing conventions, dev workflow ([#45](https://github.com/vineethkrishnan/clearpr/issues/45)) ([c07b399](https://github.com/vineethkrishnan/clearpr/commit/c07b399ce96576004b3d854493c2ba098ca89f6b))
+* sync architecture and conventions with R3 patterns (LU-31) ([#51](https://github.com/vineethkrishnan/clearpr/issues/51)) ([83683ac](https://github.com/vineethkrishnan/clearpr/commit/83683acf976f8a466a55241504ebb821631916aa))
+
+
+### CI/CD
+
+* **deps-dev:** bump the development-dependencies group with 2 updates ([#38](https://github.com/vineethkrishnan/clearpr/issues/38)) ([7099f29](https://github.com/vineethkrishnan/clearpr/commit/7099f29fb6399554eedab273ca195f3e84773019))
+* **deps:** bump the github-actions group with 7 updates ([#35](https://github.com/vineethkrishnan/clearpr/issues/35)) ([d94a477](https://github.com/vineethkrishnan/clearpr/commit/d94a47747105d256117f7ed5d7f8dad5e5eb6e65))
+* **deps:** bump the production-dependencies group with 3 updates ([#37](https://github.com/vineethkrishnan/clearpr/issues/37)) ([52eb193](https://github.com/vineethkrishnan/clearpr/commit/52eb193db2da478046945c1927c1f90d0e2e29c4))
+
 ## [0.1.1](https://github.com/vineethkrishnan/clearpr/compare/v0.1.0...v0.1.1) (2026-05-01)
 
 
