@@ -28,6 +28,27 @@ describe('parseClearPrCommand', () => {
     expect(parseClearPrCommand('@clearpr destroy-everything')).toBeNull();
   });
 
+  it('treats "run" as an alias for "review"', () => {
+    const parsed = parseClearPrCommand('@clearpr run');
+    expect(parsed?.command).toBe('review');
+  });
+
+  it('treats "trigger" as an alias for "review"', () => {
+    const parsed = parseClearPrCommand('@clearpr trigger');
+    expect(parsed?.command).toBe('review');
+  });
+
+  it('still rejects unrelated verbs that look like aliases', () => {
+    expect(parseClearPrCommand('@clearpr exec')).toBeNull();
+    expect(parseClearPrCommand('@clearpr please')).toBeNull();
+  });
+
+  it('aliases preserve trailing args', () => {
+    const parsed = parseClearPrCommand('@clearpr run with extra context');
+    expect(parsed?.command).toBe('review');
+    expect(parsed?.args).toBe('with extra context');
+  });
+
   it('returns null when the bare @clearpr mention has no subcommand', () => {
     expect(parseClearPrCommand('@clearpr')).toBeNull();
   });

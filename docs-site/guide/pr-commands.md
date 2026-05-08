@@ -4,7 +4,7 @@ Comment on any PR to interact with ClearPR:
 
 | Command | What it does |
 |---------|-------------|
-| `@clearpr review` | Trigger a manual review |
+| `@clearpr review` | Trigger a manual review (aliases: `@clearpr run`, `@clearpr trigger`) |
 | `@clearpr diff` | Post the clean semantic diff as a comment |
 | `@clearpr ignore [pattern]` | Ignore a file pattern for this PR |
 | `@clearpr config` | Show active config for this repo |
@@ -20,6 +20,8 @@ Triggers a manual review, same as automatic review on PR open. Useful when:
 - The automatic review was skipped (e.g., diff too large)
 
 Manual reviews get **higher priority** in the queue.
+
+`@clearpr run` and `@clearpr trigger` are aliases that do exactly the same thing - use whichever feels natural.
 
 ## `@clearpr diff`
 
