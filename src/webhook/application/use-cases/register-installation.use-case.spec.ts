@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import { RegisterInstallationUseCase } from './register-installation.use-case.js';
-import { EnqueueJobUseCase } from '../../../queue/application/use-cases/enqueue-job.use-case.js';
+import { JobEnqueuerPort } from '../ports/job-enqueuer.port.js';
 import { InstallationRepositoryPort } from '../../../github/domain/ports/installation-repository.port.js';
 import { RepositoryRepositoryPort } from '../../../github/domain/ports/repository-repository.port.js';
 import { Installation } from '../../../github/domain/entities/installation.entity.js';
@@ -8,16 +8,16 @@ import { Repository } from '../../../github/domain/entities/repository.entity.js
 
 describe('RegisterInstallationUseCase', () => {
   let useCase: RegisterInstallationUseCase;
-  let jobProducer: jest.Mocked<EnqueueJobUseCase>;
+  let jobEnqueuer: jest.Mocked<JobEnqueuerPort>;
   let installationRepo: jest.Mocked<InstallationRepositoryPort>;
   let repositoryRepo: jest.Mocked<RepositoryRepositoryPort>;
 
   beforeEach(() => {
-    jobProducer = {
+    jobEnqueuer = {
       enqueueReview: jest.fn().mockResolvedValue(undefined),
       enqueueCommand: jest.fn().mockResolvedValue(undefined),
       enqueueIndexing: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<EnqueueJobUseCase>;
+    };
 
     installationRepo = {
       save: jest.fn().mockImplementation((inst: Installation) => Promise.resolve(inst)),
@@ -34,7 +34,7 @@ describe('RegisterInstallationUseCase', () => {
       deleteByGithubId: jest.fn().mockResolvedValue(null),
     };
 
-    useCase = new RegisterInstallationUseCase(jobProducer, installationRepo, repositoryRepo);
+    useCase = new RegisterInstallationUseCase(jobEnqueuer, installationRepo, repositoryRepo);
   });
 
   it('persists installation, registers initial repos, and enqueues bulk indexing', async () => {
@@ -54,8 +54,8 @@ describe('RegisterInstallationUseCase', () => {
 
     expect(installationRepo.save).toHaveBeenCalledTimes(1);
     expect(repositoryRepo.save).toHaveBeenCalledTimes(2);
-    expect(jobProducer.enqueueIndexing).toHaveBeenCalledTimes(1);
-    expect(jobProducer.enqueueIndexing).toHaveBeenCalledWith(
+    expect(jobEnqueuer.enqueueIndexing).toHaveBeenCalledTimes(1);
+    expect(jobEnqueuer.enqueueIndexing).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'bulk' }),
     );
   });
@@ -70,6 +70,6 @@ describe('RegisterInstallationUseCase', () => {
     });
 
     expect(installationRepo.save).not.toHaveBeenCalled();
-    expect(jobProducer.enqueueIndexing).not.toHaveBeenCalled();
+    expect(jobEnqueuer.enqueueIndexing).not.toHaveBeenCalled();
   });
 });

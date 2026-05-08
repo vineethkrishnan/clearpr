@@ -1,20 +1,20 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import { EnqueueReviewUseCase } from './enqueue-review.use-case.js';
-import { EnqueueJobUseCase } from '../../../queue/application/use-cases/enqueue-job.use-case.js';
+import { JobEnqueuerPort } from '../ports/job-enqueuer.port.js';
 import { RepositoryRepositoryPort } from '../../../github/domain/ports/repository-repository.port.js';
 import { Repository } from '../../../github/domain/entities/repository.entity.js';
 
 describe('EnqueueReviewUseCase', () => {
   let useCase: EnqueueReviewUseCase;
-  let jobProducer: jest.Mocked<EnqueueJobUseCase>;
+  let jobEnqueuer: jest.Mocked<JobEnqueuerPort>;
   let repositoryRepo: jest.Mocked<RepositoryRepositoryPort>;
 
   beforeEach(() => {
-    jobProducer = {
+    jobEnqueuer = {
       enqueueReview: jest.fn().mockResolvedValue(undefined),
       enqueueCommand: jest.fn().mockResolvedValue(undefined),
       enqueueIndexing: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<EnqueueJobUseCase>;
+    };
 
     repositoryRepo = {
       save: jest.fn(),
@@ -25,7 +25,7 @@ describe('EnqueueReviewUseCase', () => {
       deleteByGithubId: jest.fn().mockResolvedValue(null),
     };
 
-    useCase = new EnqueueReviewUseCase(jobProducer, repositoryRepo);
+    useCase = new EnqueueReviewUseCase(jobEnqueuer, repositoryRepo);
   });
 
   it('enqueues a review job for tracked repositories', async () => {
@@ -51,8 +51,8 @@ describe('EnqueueReviewUseCase', () => {
       },
     });
 
-    expect(jobProducer.enqueueReview).toHaveBeenCalledTimes(1);
-    expect(jobProducer.enqueueReview).toHaveBeenCalledWith(
+    expect(jobEnqueuer.enqueueReview).toHaveBeenCalledTimes(1);
+    expect(jobEnqueuer.enqueueReview).toHaveBeenCalledWith(
       expect.objectContaining({
         prNumber: 42,
         prSha: 'abc',
@@ -81,7 +81,7 @@ describe('EnqueueReviewUseCase', () => {
       },
     });
 
-    expect(jobProducer.enqueueReview).not.toHaveBeenCalled();
+    expect(jobEnqueuer.enqueueReview).not.toHaveBeenCalled();
   });
 
   it('is a no-op when payload is missing pull_request or repository', async () => {
@@ -92,6 +92,6 @@ describe('EnqueueReviewUseCase', () => {
       installationId: 999,
       body: {},
     });
-    expect(jobProducer.enqueueReview).not.toHaveBeenCalled();
+    expect(jobEnqueuer.enqueueReview).not.toHaveBeenCalled();
   });
 });

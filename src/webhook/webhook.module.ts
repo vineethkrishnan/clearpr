@@ -12,11 +12,13 @@ import { RemoveRepositoriesUseCase } from './application/use-cases/remove-reposi
 import { HmacSignatureGuard } from './infrastructure/guards/hmac-signature.guard.js';
 import { IdempotencyStorePort } from './domain/ports/idempotency-store.port.js';
 import { InstallationCleanupPort } from './application/ports/installation-cleanup.port.js';
+import { JobEnqueuerPort } from './application/ports/job-enqueuer.port.js';
 import { RedisIdempotencyStoreAdapter } from './infrastructure/adapters/redis-idempotency-store.adapter.js';
 import { QueueModule } from '../queue/queue.module.js';
 import { GitHubModule } from '../github/github.module.js';
 import { ReviewModule } from '../review/review.module.js';
 import { CleanupInstallationUseCase } from '../review/application/use-cases/cleanup-installation.use-case.js';
+import { EnqueueJobUseCase } from '../queue/application/use-cases/enqueue-job.use-case.js';
 
 @Module({
   imports: [
@@ -42,6 +44,10 @@ import { CleanupInstallationUseCase } from '../review/application/use-cases/clea
     {
       provide: InstallationCleanupPort,
       useExisting: CleanupInstallationUseCase,
+    },
+    {
+      provide: JobEnqueuerPort,
+      useExisting: EnqueueJobUseCase,
     },
     {
       provide: APP_GUARD,
