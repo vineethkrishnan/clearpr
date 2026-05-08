@@ -1,4 +1,13 @@
-import { IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, Max, Min } from 'class-validator';
+import {
+  IsBoolean,
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export enum LlmProvider {
@@ -102,6 +111,16 @@ export class AppConfig {
   @IsString()
   @IsOptional()
   REDIS_PASSWORD?: string;
+
+  @Transform(({ value }: { value: string }) => value === 'true' || value === '1')
+  @IsBoolean()
+  @IsOptional()
+  DATABASE_SSL?: boolean;
+
+  @Transform(({ value }: { value: string }) => value === 'true' || value === '1')
+  @IsBoolean()
+  @IsOptional()
+  REDIS_TLS?: boolean;
 
   // ===========================================================================
   // Application

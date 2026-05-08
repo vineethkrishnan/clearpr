@@ -29,6 +29,6 @@ import { ComputeSemanticDiffUseCase } from './application/use-cases/compute-sema
     ProcessFileDiffUseCase,
     ComputeSemanticDiffUseCase,
   ],
-  exports: [ComputeSemanticDiffUseCase],
+  exports: [ComputeSemanticDiffUseCase, FileContentProviderPort],
 })
 export class DiffEngineModule {}

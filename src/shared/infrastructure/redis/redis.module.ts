@@ -11,6 +11,12 @@ import { AppConfig, NodeEnv } from '../../../config/app.config.js';
 
 export const REDIS_CLIENT = Symbol('REDIS_CLIENT');
 
+const resolveTlsOption = (config: AppConfig): { rejectUnauthorized: boolean } | undefined => {
+  if (config.REDIS_TLS === false) return undefined;
+  if (config.REDIS_TLS === true) return { rejectUnauthorized: true };
+  return config.NODE_ENV === NodeEnv.PRODUCTION ? { rejectUnauthorized: true } : undefined;
+};
+
 @Global()
 @Module({
   providers: [
@@ -20,7 +26,7 @@ export const REDIS_CLIENT = Symbol('REDIS_CLIENT');
       useFactory: (config: AppConfig): Redis => {
         return new Redis(config.REDIS_URL, {
           password: config.REDIS_PASSWORD,
-          tls: config.NODE_ENV === NodeEnv.PRODUCTION ? { rejectUnauthorized: true } : undefined,
+          tls: resolveTlsOption(config),
           maxRetriesPerRequest: 3,
           retryStrategy: (times: number) => Math.min(times * 200, 5000),
           lazyConnect: true,

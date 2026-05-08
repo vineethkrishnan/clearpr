@@ -28,6 +28,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const correlationId = (request.headers['x-github-delivery'] as string) ?? undefined;
     const { statusCode, body } = this.buildResponse(exception, correlationId);
 
+    const detail = exception instanceof HttpException ? exception.getResponse() : undefined;
     this.logger.error(
       {
         correlationId,
@@ -35,6 +36,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         errorCode: body.error,
         path: request.url,
         method: request.method,
+        detail,
       },
       exception instanceof Error ? exception.message : 'Unknown error',
     );
