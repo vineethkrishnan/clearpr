@@ -87,7 +87,7 @@ Edit `.env` with your credentials:
 
 ```env
 GITHUB_APP_ID=your_app_id
-GITHUB_PRIVATE_KEY=your_private_key.pem
+GITHUB_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----"
 GITHUB_WEBHOOK_SECRET=your_webhook_secret
 
 # LLM Provider — choose one: anthropic, openai, ollama, mistral, gemini
@@ -125,6 +125,28 @@ That's it. Open a PR in any repo where you've installed the GitHub App, and Clea
 6. Generate a private key and save the `.pem` file
 7. Install the app on your repositories
 
+### Getting the private key into your env
+
+GitHub gives you a `.pem` file when you generate the key. The contents need to go into the env var, not the path.
+
+bash:
+
+```bash
+export GITHUB_PRIVATE_KEY="$(cat path/to/key.pem)"
+```
+
+docker compose:
+
+Mount the file and read it at startup, OR escape newlines:
+
+```env
+GITHUB_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----"
+```
+
+Kubernetes:
+
+Use a Secret with the file content, mount as env var.
+
 ---
 
 ## Usage
@@ -158,7 +180,7 @@ Comment on any PR to interact with ClearPR:
 | Variable | Required | Default | Description |
 |----------|:--------:|---------|-------------|
 | `GITHUB_APP_ID` | Yes | — | GitHub App ID |
-| `GITHUB_PRIVATE_KEY` | Yes | — | Path to `.pem` private key |
+| `GITHUB_PRIVATE_KEY` | Yes | — | PEM-formatted private key contents (newlines as `\n` if using a single-line `.env` value) |
 | `GITHUB_WEBHOOK_SECRET` | Yes | — | Webhook signature verification |
 | `LLM_PROVIDER` | No | `anthropic` | `anthropic`, `openai`, `ollama`, `mistral`, `gemini` |
 | `LLM_API_KEY` | Yes* | — | API key for chosen provider (*not required for Ollama) |
