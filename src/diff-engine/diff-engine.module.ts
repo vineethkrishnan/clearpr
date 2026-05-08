@@ -8,8 +8,8 @@ import { TypeScriptNormalizer } from './infrastructure/normalizers/typescript.no
 import { PhpNormalizer } from './infrastructure/normalizers/php.normalizer.js';
 import { JsonNormalizer } from './infrastructure/normalizers/json.normalizer.js';
 import { YamlNormalizer } from './infrastructure/normalizers/yaml.normalizer.js';
-import { FileProcessorService } from './application/services/file-processor.service.js';
-import { SemanticDiffService } from './application/services/semantic-diff.service.js';
+import { FileProcessorService } from './application/use-cases/file-processor.use-case.js';
+import { SemanticDiffService } from './application/use-cases/semantic-diff.use-case.js';
 
 @Module({
   imports: [GitHubModule],

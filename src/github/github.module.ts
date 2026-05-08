@@ -6,9 +6,9 @@ import { TypeOrmInstallationRepository } from './infrastructure/repositories/typ
 import { TypeOrmRepositoryRepository } from './infrastructure/repositories/typeorm-repository.repository.js';
 import { InstallationRepositoryPort } from './domain/ports/installation-repository.port.js';
 import { RepositoryRepositoryPort } from './domain/ports/repository-repository.port.js';
-import { InstallationTokenService } from './application/services/installation-token.service.js';
-import { RateLimiterService } from './application/services/rate-limiter.service.js';
-import { GitHubClientService } from './application/services/github-client.service.js';
+import { InstallationTokenService } from './application/use-cases/installation-token.use-case.js';
+import { RateLimiterService } from './application/use-cases/rate-limiter.use-case.js';
+import { GitHubClientService } from './application/use-cases/github-client.use-case.js';
 
 @Module({
   imports: [TypeOrmModule.forFeature([InstallationRecord, RepositoryRecord])],

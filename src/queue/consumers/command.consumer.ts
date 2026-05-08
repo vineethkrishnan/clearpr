@@ -1,7 +1,7 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
-import { CommandHandlerService } from '../../review/application/services/command-handler.service.js';
+import { CommandHandlerService } from '../../review/application/use-cases/command-handler.use-case.js';
 import { QUEUE_NAMES, type CommandJobPayload } from '../types/job-payload.types.js';
 
 @Processor(QUEUE_NAMES.COMMANDS, { concurrency: 5 })

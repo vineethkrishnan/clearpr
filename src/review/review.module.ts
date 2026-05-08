@@ -11,13 +11,15 @@ import { PrFileListProviderPort } from './domain/ports/pr-file-list-provider.por
 import { GitHubReviewPosterAdapter } from './infrastructure/adapters/github-review-poster.adapter.js';
 import { GitHubPrFileListAdapter } from './infrastructure/adapters/github-pr-file-list.adapter.js';
 import { createLlmProvider } from './infrastructure/llm/llm-provider.registry.js';
-import { PromptSanitizer } from './application/services/prompt-sanitizer.service.js';
-import { GuidelineLoaderService } from './application/services/guideline-loader.service.js';
-import { PromptBuilderService } from './application/services/prompt-builder.service.js';
-import { ReviewOrchestratorService } from './application/services/review-orchestrator.service.js';
-import { IgnoreListService } from './application/services/ignore-list.service.js';
-import { CommandHandlerService } from './application/services/command-handler.service.js';
-import { InstallationCleanupService } from './application/services/installation-cleanup.service.js';
+import { PromptSanitizer } from './application/use-cases/prompt-sanitizer.use-case.js';
+import { GuidelineLoaderService } from './application/use-cases/guideline-loader.use-case.js';
+import { PromptBuilderService } from './application/use-cases/prompt-builder.use-case.js';
+import { ReviewOrchestratorService } from './application/use-cases/review-orchestrator.use-case.js';
+import { IgnoreListService } from './application/use-cases/ignore-list.use-case.js';
+import { CommandHandlerService } from './application/use-cases/command-handler.use-case.js';
+import { InstallationCleanupService } from './application/use-cases/installation-cleanup.use-case.js';
+import { ParseLlmResponseUseCase } from './application/use-cases/parse-llm-response.use-case.js';
+import { BuildReviewSummaryUseCase } from './application/use-cases/build-review-summary.use-case.js';
 
 @Module({
   imports: [TypeOrmModule.forFeature([ReviewRecord]), GitHubModule, DiffEngineModule, MemoryModule],
@@ -39,6 +41,8 @@ import { InstallationCleanupService } from './application/services/installation-
     GuidelineLoaderService,
     PromptBuilderService,
     IgnoreListService,
+    ParseLlmResponseUseCase,
+    BuildReviewSummaryUseCase,
     ReviewOrchestratorService,
     CommandHandlerService,
     InstallationCleanupService,
