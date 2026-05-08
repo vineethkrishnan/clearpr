@@ -1,6 +1,7 @@
 import { type Provider } from '@nestjs/common';
 import { AppConfig, LlmProvider } from '../../../config/app.config.js';
 import { LlmProviderPort } from '../../domain/ports/llm-provider.port.js';
+import { UnknownLlmProviderError } from '../../domain/errors/review.errors.js';
 import { AnthropicLlmAdapter } from './anthropic-llm.adapter.js';
 import { OpenAiLlmAdapter } from './openai-llm.adapter.js';
 import { OllamaLlmAdapter } from './ollama-llm.adapter.js';
@@ -24,7 +25,7 @@ export function createLlmProvider(): Provider<LlmProviderPort> {
         case LlmProvider.GEMINI:
           return new GeminiLlmAdapter(config);
         default:
-          throw new Error(`Unknown LLM_PROVIDER: ${config.LLM_PROVIDER as string}`);
+          throw new UnknownLlmProviderError(config.LLM_PROVIDER);
       }
     },
   };
