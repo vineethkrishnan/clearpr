@@ -19,8 +19,9 @@ import { RegisterRepositoriesUseCase } from '../src/webhook/application/use-case
 import { RemoveRepositoriesUseCase } from '../src/webhook/application/use-cases/remove-repositories.use-case.js';
 import { HmacSignatureGuard } from '../src/webhook/infrastructure/guards/hmac-signature.guard.js';
 import { IdempotencyStorePort } from '../src/webhook/domain/ports/idempotency-store.port.js';
+import { JobEnqueuerPort } from '../src/webhook/application/ports/job-enqueuer.port.js';
+import { InstallationCleanupPort } from '../src/webhook/application/ports/installation-cleanup.port.js';
 
-import { EnqueueJobUseCase } from '../src/queue/application/use-cases/enqueue-job.use-case.js';
 import {
   type CommandJobPayload,
   type IndexingJobPayload,
@@ -46,6 +47,8 @@ import { LlmProviderPort } from '../src/review/domain/ports/llm-provider.port.js
 import { ReviewRepositoryPort } from '../src/review/domain/ports/review-repository.port.js';
 import { ReviewPosterPort } from '../src/review/domain/ports/review-poster.port.js';
 import { PrFileListProviderPort } from '../src/review/domain/ports/pr-file-list-provider.port.js';
+import { DiffComputerPort } from '../src/review/application/ports/diff-computer.port.js';
+import { MemoryRetrieverPort } from '../src/review/application/ports/memory-retriever.port.js';
 import { type ReviewComment } from '../src/review/domain/entities/review-comment.entity.js';
 import { type Review } from '../src/review/domain/entities/review.entity.js';
 import { type ReviewContext } from '../src/review/domain/types/review-context.types.js';
@@ -56,7 +59,6 @@ import { BuildPromptUseCase } from '../src/review/application/use-cases/build-pr
 import { LoadGuidelinesUseCase } from '../src/review/application/use-cases/load-guidelines.use-case.js';
 import { OrchestrateReviewUseCase } from '../src/review/application/use-cases/orchestrate-review.use-case.js';
 import { ManageIgnorePatternsUseCase } from '../src/review/application/use-cases/manage-ignore-patterns.use-case.js';
-import { CleanupInstallationUseCase } from '../src/review/application/use-cases/cleanup-installation.use-case.js';
 import { ParseLlmResponseUseCase } from '../src/review/application/use-cases/parse-llm-response.use-case.js';
 import { BuildReviewSummaryUseCase } from '../src/review/application/use-cases/build-review-summary.use-case.js';
 
@@ -414,11 +416,13 @@ const prFiles: FileInput[] = [
     { provide: FileContentProviderPort, useValue: new FakeFileContentProvider(fileContents) },
     ProcessFileDiffUseCase,
     ComputeSemanticDiffUseCase,
+    { provide: DiffComputerPort, useExisting: ComputeSemanticDiffUseCase },
 
     // Memory (real retriever wrapping fake external providers)
     { provide: EmbeddingProviderPort, useClass: FakeEmbeddingProvider },
     { provide: MemoryRepositoryPort, useClass: FakeMemoryRepo },
     RetrieveMemoryUseCase,
+    { provide: MemoryRetrieverPort, useExisting: RetrieveMemoryUseCase },
 
     // Review pipeline (real)
     PromptSanitizer,
@@ -434,12 +438,23 @@ const prFiles: FileInput[] = [
     { provide: ReviewRepositoryPort, useClass: FakeReviewRepo },
     OrchestrateReviewUseCase,
 
-    // Cleanup service (unused in this path but wired to satisfy dispatcher DI)
-    CleanupInstallationUseCase,
-
-    // Fake job producer bridging dispatcher → orchestrator synchronously
+    // Cleanup port stub (unused in this path but wired to satisfy dispatcher DI)
     {
-      provide: EnqueueJobUseCase,
+      provide: InstallationCleanupPort,
+      useValue: {
+        cleanupInstallation: () =>
+          Promise.resolve({
+            repositoriesDeleted: 0,
+            reviewsDeleted: 0,
+            memoryEntriesDeleted: 0,
+          }),
+        cleanupRepository: () => Promise.resolve(null),
+      },
+    },
+
+    // Fake job enqueuer bridging dispatcher → orchestrator synchronously
+    {
+      provide: JobEnqueuerPort,
       inject: [OrchestrateReviewUseCase],
       useFactory: (orchestrator: OrchestrateReviewUseCase): SyncJobProducer =>
         new SyncJobProducer(orchestrator, TRACKED_REPO.fullName),
@@ -478,8 +493,8 @@ describe('Pipeline E2E: webhook → diff → review → post', () => {
       installation: { id: 12345 },
       pull_request: {
         number: 42,
-        head: { sha: 'abc123' },
-        base: { ref: 'main' },
+        head: { sha: 'abc123', ref: 'feature-x' },
+        base: { sha: 'def456', ref: 'main' },
       },
       repository: {
         id: TRACKED_REPO.githubRepoId,

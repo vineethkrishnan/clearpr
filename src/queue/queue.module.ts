@@ -1,4 +1,4 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { AppConfig } from '../config/app.config.js';
 import { QUEUE_NAMES } from './types/job-payload.types.js';
@@ -17,8 +17,8 @@ import { IndexRepositoryUseCase } from '../memory/application/use-cases/index-re
 
 @Module({
   imports: [
-    forwardRef(() => ReviewModule),
-    forwardRef(() => MemoryModule),
+    ReviewModule,
+    MemoryModule,
     BullModule.forRootAsync({
       inject: [AppConfig],
       useFactory: (config: AppConfig) => ({

@@ -1,4 +1,4 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { WebhookController } from './presenters/http/webhook.controller.js';
@@ -23,7 +23,7 @@ import { EnqueueJobUseCase } from '../queue/application/use-cases/enqueue-job.us
 @Module({
   imports: [
     ThrottlerModule.forRoot([{ name: 'webhook', ttl: 60000, limit: 100 }]),
-    forwardRef(() => QueueModule),
+    QueueModule,
     GitHubModule,
     ReviewModule,
   ],
