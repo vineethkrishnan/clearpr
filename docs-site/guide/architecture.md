@@ -4,6 +4,127 @@ ClearPR is a NestJS application built around **Hexagonal Architecture** (also kn
 
 ## High-level flow
 
+<<<<<<< HEAD
+```
+       GitHub PR webhook
+              │
+              ▼
+       ┌──────────────┐
+       │  HMAC guard  │   Verify signature, dedupe by delivery ID
+       └──────┬───────┘
+              │
+              ▼
+       ┌──────────────┐
+       │  Dispatcher  │   Map GitHub event → ClearPR action
+       └──────┬───────┘
+              │  enqueue (30s debounce)
+              ▼
+       ┌──────────────┐
+       │ BullMQ queue │   Redis-backed
+       └──────┬───────┘
+              │
+              ▼
+       ┌──────────────────────────────────────┐
+       │         Review Orchestrator          │
+       └──┬──────────────┬───────────────┬────┘
+          │              │               │
+          ▼              ▼               ▼
+   ┌─────────────┐ ┌────────────┐ ┌─────────────┐
+   │ Diff Engine │ │ PR Memory  │ │ LLM Provider│
+   │   (AST)     │ │ (pgvector) │ │  (port)     │
+   └─────────────┘ └────────────┘ └─────────────┘
+          │              │               │
+          └──────────────┴───────────────┘
+                         │
+                         ▼
+                ┌─────────────────┐
+                │  Review Poster  │   Inline + summary comments
+                └─────────────────┘
+                         │
+                         ▼
+                  GitHub PR
+```
+
+The webhook controller does only signature verification and delivery dedup. Everything else happens off the request path, in a BullMQ worker, so GitHub gets its 200 inside its 10-second window even when the LLM takes a while.
+
+## Hexagonal layout
+
+Every module is shaped the same way:
+
+```
+src/<module>/
+├── domain/
+│   ├── entities/         Pure TS classes, no decorators
+│   ├── value-objects/    Immutable, equality-by-value
+│   ├── ports/            Abstract classes (interfaces) for outside collaborators
+│   └── errors/           Domain-specific error types
+├── application/
+│   ├── use-cases/        One use case per business operation (*.use-case.ts)
+│   ├── ports/            Cross-module ports (bound via useExisting)
+│   └── dtos/             class-validator DTOs at the HTTP/queue boundary
+├── infrastructure/
+│   ├── adapters/         Concrete implementations of ports
+│   └── repositories/     TypeORM records + mappers + repository
+└── presenters/
+    └── http/             Controllers (only modules with an HTTP surface)
+        └── *.controller.ts
+```
+
+The arrows always point inward. `application` may depend on `domain`. `infrastructure` may depend on `domain` (to implement a port). Nothing in `domain` ever imports from `application` or `infrastructure`.
+
+### Concrete example: PR memory
+
+The memory module persists past review comments with embeddings and finds similar ones at review time. Its hexagonal slices look like this:
+
+```
+memory/
+├── domain/
+│   ├── entities/pr-memory-entry.entity.ts        ← plain class
+│   └── ports/memory-repository.port.ts           ← abstract class
+├── application/
+│   └── use-cases/retrieve-memory.use-case.ts     ← uses the port
+└── infrastructure/
+    └── repositories/
+        ├── pr-memory.record.ts                   ← @Entity-decorated record
+        ├── pr-memory.mapper.ts                   ← static toDomain / toRecord
+        └── typeorm-memory.repository.ts          ← implements the port
+```
+
+`MemoryRepositoryPort` is an abstract class in the domain layer:
+
+```ts
+export abstract class MemoryRepositoryPort {
+  abstract save(entry: PrMemoryEntry): Promise<void>;
+  abstract findSimilar(
+    repositoryId: string,
+    embedding: number[],
+    limit: number,
+    threshold: number,
+  ): Promise<SimilarMemoryResult[]>;
+  // ...
+}
+```
+
+`TypeOrmMemoryRepository` lives in `infrastructure/` and `extends MemoryRepositoryPort`. It knows about `pgvector`, raw SQL, and TypeORM `Repository<T>`. The domain layer knows none of that. Regular field mapping (snake_case columns, timestamps, enums) happens in `PrMemoryMapper`; the repository keeps only what mapping cannot express, mainly `pgvector` serialization and similarity-search SQL.
+
+The use case in `application/use-cases/retrieve-memory.use-case.ts` only ever sees `MemoryRepositoryPort` injected by Nest. Same for `EmbeddingProviderPort`. Swap pgvector for FAISS, swap OpenAI embeddings for a local model, and the use case is untouched.
+
+## Why hexagonal here
+
+This shape is overkill for a 200-line script. ClearPR has earned it because:
+
+- **Multiple LLM providers, one orchestrator.** Anthropic, OpenAI, Ollama, Mistral, and Gemini all sit behind `LlmProviderPort`. The review pipeline never imports a vendor SDK.
+- **Swappable storage.** TypeORM today, but the domain doesn't know that. If we move from PostgreSQL + pgvector to a dedicated vector store, only `infrastructure/` changes.
+- **Swappable queue.** BullMQ today. Tomorrow, SQS or Temporal. The producer/consumer interfaces are thin enough to retarget.
+- **Tests stay fast.** Use cases get fakes for ports; nothing spins up Redis, Postgres, or a real LLM in unit tests.
+- **The webhook can't pollute the domain.** GitHub's payload shape is an infrastructure concern. A change in their API surface should never ripple into the review domain.
+
+## Module list
+
+| Module | Responsibility | Where to look |
+||||||| b1d6546
+| Module | Responsibility | Owns |
+=======
 ```
        GitHub PR webhook
               │
@@ -115,7 +236,23 @@ This shape is overkill for a 200-line script. ClearPR has earned it because:
 ## Module list
 
 | Module | Responsibility | Where to look |
+>>>>>>> origin/main
 |---|---|---|
+<<<<<<< HEAD
+| **Webhook** | Receive GitHub events, validate HMAC, dedupe by `X-GitHub-Delivery`, fan out via per-action use cases (`DispatchWebhookUseCase`, `EnqueueJobUseCase`, `HandleCommandUseCase`, `ManageIgnorePatternsUseCase`, `CleanupInstallationUseCase`) | `src/webhook/` |
+| **Queue** | BullMQ producers and thin consumer shells; one job per ClearPR action | `src/queue/` |
+| **Review** | `OrchestrateReviewUseCase` composes the pipeline: load guidelines, fetch memory, build prompt, call LLM, parse + summarize, post comments | `src/review/` |
+| **Diff Engine** | `ComputeSemanticDiffUseCase` + `ProcessFileDiffUseCase`; AST normalizers per language | `src/diff-engine/` |
+| **Memory** | `IndexMemoryUseCase`, `IndexRepositoryUseCase`, `RetrieveMemoryUseCase`, `DetectFeedbackOutcomeUseCase`; embeddings + pgvector | `src/memory/` |
+| **GitHub** | Shared kernel: `GitHubClientService`, `RateLimiterService`, `InstallationTokenService` (infrastructure adapters keep the `*Service` suffix) | `src/github/` |
+| **Health** | Liveness and readiness endpoints for orchestrators | `src/health/` |
+||||||| b1d6546
+| **Webhook** | Receive, validate, dispatch GitHub events | Delivery tracking |
+| **Diff Engine** | Compute semantic diffs via AST parsing | No state (pure computation) |
+| **Review** | Orchestrate AI review pipeline | Reviews, comments |
+| **Memory** | Index and retrieve past PR feedback | Embeddings |
+| **GitHub** | Shared kernel — API client, tokens, installations | Installations, repos |
+=======
 | **Webhook** | Receive GitHub events, validate HMAC, dedupe by `X-GitHub-Delivery`, dispatch to actions | `src/webhook/` |
 | **Queue** | BullMQ producers and thin consumer shells; one job per ClearPR action | `src/queue/` |
 | **Review** | Orchestrate the pipeline: load guidelines, fetch memory, build prompt, call LLM, post comments | `src/review/` |
@@ -123,11 +260,29 @@ This shape is overkill for a 200-line script. ClearPR has earned it because:
 | **Memory** | Index past PR feedback, embed it, find similar past comments at review time | `src/memory/` |
 | **GitHub** | Shared kernel: API client, App auth, installation tokens, repo metadata | `src/github/` |
 | **Health** | Liveness and readiness endpoints for orchestrators | `src/health/` |
+>>>>>>> origin/main
 
 Each module owns its slice end-to-end. Cross-module imports go through ports, not concrete classes. The closest thing to a shared kernel is the `github/` module, used by everything that needs to call the GitHub API.
 
 ## Data flow
 
+<<<<<<< HEAD
+1. GitHub `POST /webhook`
+2. `HmacGuard` validates `X-Hub-Signature-256`
+3. Delivery ID looked up in Redis; duplicates dropped
+4. Dispatcher maps event type to an action (e.g. `pull_request.opened` → `ReviewPrAction`)
+5. Producer enqueues with a 30s debounce key (e.g. `review:owner/repo#42`) so a flurry of pushes collapses to one review
+6. Consumer pops the job, calls `OrchestrateReviewUseCase.execute(...)`
+7. The orchestrator runs the pipeline by composing focused use cases:
+   1. `ComputeSemanticDiffUseCase` returns the AST-normalized diff (per file via `ProcessFileDiffUseCase`)
+   2. `LoadGuidelinesUseCase` reads `claude.md` / `agent.md` / `.reviewconfig`
+   3. `RetrieveMemoryUseCase` finds accepted past feedback similar to the diff
+   4. `BuildPromptUseCase` assembles the final prompt with a token budget
+   5. `LlmProviderPort` generates the review; `ParseLlmResponseUseCase` validates the structured output
+   6. `BuildReviewSummaryUseCase` posts inline + summary comments back to GitHub
+||||||| b1d6546
+## Module Dependencies
+=======
 1. GitHub `POST /webhook`
 2. `HmacGuard` validates `X-Hub-Signature-256`
 3. Delivery ID looked up in Redis; duplicates dropped
@@ -141,6 +296,7 @@ Each module owns its slice end-to-end. Cross-module imports go through ports, no
    4. Prompt Builder assembles the final prompt with a token budget
    5. LLM Provider generates the review
    6. Review Poster writes inline + summary comments back to GitHub
+>>>>>>> origin/main
 
 ## Key patterns
 

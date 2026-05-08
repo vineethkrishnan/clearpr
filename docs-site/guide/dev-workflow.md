@@ -42,23 +42,35 @@ Suppose we want a `notifications/` module that sends a Slack message when a revi
 
 ### 1. Sketch the boundary
 
-What's the use case? "Notify a channel when a review completes." That's one application service: `NotifyOnReviewCompleteService`. It needs an outbound capability: send a notification. That's a port.
+What's the use case? "Notify a channel when a review completes." That's one application use case: `NotifyOnReviewCompleteUseCase`. It needs an outbound capability: send a notification. That's a port.
 
 ### 2. Lay out the folders
 
 ```
 src/notifications/
+├── SUMMARY.md                                        ← module purpose + boundary (see CONTRIBUTING.md)
 ├── domain/
 │   ├── entities/
 │   │   └── notification.entity.ts
-│   └── ports/
-│       └── notifier.port.ts
+│   ├── value-objects/
+│   ├── ports/
+│   │   └── notifier.port.ts
+│   └── errors/
 ├── application/
-│   └── services/
-│       └── notify-on-review-complete.service.ts
+│   ├── use-cases/
+│   │   └── notify-on-review-complete.use-case.ts
+│   ├── ports/                                        ← cross-module ports (if any)
+│   └── dtos/                                         ← class-validator DTOs (if there's an HTTP boundary)
 ├── infrastructure/
+│   ├── repositories/
+│   │   ├── notification.record.ts                    ← @Entity-decorated record
+│   │   ├── notification.mapper.ts                    ← static toDomain / toRecord
+│   │   └── typeorm-notification.repository.ts        ← implements the port
 │   └── adapters/
 │       └── slack-notifier.adapter.ts
+├── presenters/
+│   └── http/                                         ← only if the module has an HTTP surface
+│       └── *.controller.ts
 └── notifications.module.ts
 ```
 
@@ -76,14 +88,14 @@ Abstract class, not interface. No vendor types in sight.
 ### 4. Write the use case (application)
 
 ```ts
-// src/notifications/application/services/notify-on-review-complete.service.ts
+// src/notifications/application/use-cases/notify-on-review-complete.use-case.ts
 @Injectable()
-export class NotifyOnReviewCompleteService {
-  private readonly logger = new Logger(NotifyOnReviewCompleteService.name);
+export class NotifyOnReviewCompleteUseCase {
+  private readonly logger = new Logger(NotifyOnReviewCompleteUseCase.name);
 
   constructor(private readonly notifier: NotifierPort) {}
 
-  async run(repository: string, prNumber: number): Promise<void> {
+  async execute(repository: string, prNumber: number): Promise<void> {
     const message = `Review complete for ${repository}#${prNumber}`;
     await this.notifier.send('#code-review', message);
     this.logger.debug({ repository, prNumber }, 'Notification sent');
@@ -91,7 +103,7 @@ export class NotifyOnReviewCompleteService {
 }
 ```
 
-The use case depends on the port. It does not know Slack exists.
+The use case depends on the port. It does not know Slack exists. Class names follow `<Verb><Noun>UseCase`; the public method is conventionally `execute()`.
 
 ### 5. Implement the adapter (infrastructure)
 
@@ -116,15 +128,15 @@ Vendor SDK errors get caught here and translated to a domain error if a higher l
 // src/notifications/notifications.module.ts
 @Module({
   providers: [
-    NotifyOnReviewCompleteService,
+    NotifyOnReviewCompleteUseCase,
     { provide: NotifierPort, useClass: SlackNotifierAdapter },
   ],
-  exports: [NotifyOnReviewCompleteService],
+  exports: [NotifyOnReviewCompleteUseCase],
 })
 export class NotificationsModule {}
 ```
 
-The binding `{ provide: NotifierPort, useClass: SlackNotifierAdapter }` is where domain meets infrastructure. Swap to `DiscordNotifierAdapter` later by changing this one line.
+The binding `{ provide: NotifierPort, useClass: SlackNotifierAdapter }` is where domain meets infrastructure. Swap to `DiscordNotifierAdapter` later by changing this one line. If another module needs to call `NotifyOnReviewCompleteUseCase`, expose it via an abstract port in `application/ports/` and bind it with `useExisting` so the consumer module imports the port, not the concrete class.
 
 ### 7. Register it
 
