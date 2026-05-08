@@ -3,11 +3,13 @@ import { BullModule } from '@nestjs/bullmq';
 import { AppConfig } from '../config/app.config.js';
 import { QUEUE_NAMES } from './types/job-payload.types.js';
 import { EnqueueJobUseCase } from './application/use-cases/enqueue-job.use-case.js';
+import { ReviewExecutorPort } from './application/ports/review-executor.port.js';
 import { ReviewConsumer } from './consumers/review.consumer.js';
 import { IndexingConsumer } from './consumers/indexing.consumer.js';
 import { CommandConsumer } from './consumers/command.consumer.js';
 import { ReviewModule } from '../review/review.module.js';
 import { MemoryModule } from '../memory/memory.module.js';
+import { OrchestrateReviewUseCase } from '../review/application/use-cases/orchestrate-review.use-case.js';
 
 @Module({
   imports: [
@@ -53,7 +55,16 @@ import { MemoryModule } from '../memory/memory.module.js';
       },
     ),
   ],
-  providers: [EnqueueJobUseCase, ReviewConsumer, IndexingConsumer, CommandConsumer],
+  providers: [
+    EnqueueJobUseCase,
+    ReviewConsumer,
+    IndexingConsumer,
+    CommandConsumer,
+    {
+      provide: ReviewExecutorPort,
+      useExisting: OrchestrateReviewUseCase,
+    },
+  ],
   exports: [EnqueueJobUseCase],
 })
 export class QueueModule {}
