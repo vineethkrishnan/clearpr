@@ -17,6 +17,10 @@ Estimated time: 20-30 minutes.
 | **GitHub account** | Required. Free tier is fine. |
 | **A machine to run Docker** | Local laptop is fine for testing. For production, a small VM with a public IP. |
 | **Anthropic API key** | Or OpenAI / Mistral / Gemini key. [Get one from console.anthropic.com](https://console.anthropic.com). Ollama or LM Studio also work; no key needed for those. |
+
+::: warning Pick a strong model for real reviews
+Small local models (under ~14B parameters) miss real bugs and produce confident false positives. They're fine for verifying the pipeline is wired up correctly, but **switch to Claude Sonnet 4 or GPT-4o before pointing the bot at PRs you actually care about**. See [Choosing an LLM](./choosing-an-llm) for the full breakdown.
+:::
 | **Voyage AI API key** | For PR memory (similarity search on past comments). [Get one from dash.voyageai.com](https://dash.voyageai.com). Optional: leave unset and the memory feature is silently skipped, the rest of the review still works. |
 
 ## Step 1: Run ClearPR with Docker
@@ -86,7 +90,10 @@ Scroll down to **Repository permissions**:
 | Pull requests | Read and write |
 | Contents | Read-only |
 | Metadata | Read-only |
-| Issues | Read-only |
+| Issues | Read and write |
+| Checks | Read and write |
+
+`Issues: write` is needed for the `:eyes:` reaction on `@clearpr` comments and to edit the in-progress placeholder comment. `Checks: write` is needed for the "ClearPR review" check that shows in-progress / completed status at the top of the PR.
 
 ![Repository permissions](/setup/04-permissions.png)
 
@@ -208,7 +215,31 @@ git commit -m "refactor: tidy discount module"
 git push -u origin demo-prettier-noise
 ```
 
-Open the PR on GitHub. The diff GitHub shows is **8 changed lines** (every line of the file changed - quote style + the gold-tier discount went from 0.8 to 0.75 + the `<= 0` became `< 0`).
+Open the PR on GitHub.
+
+### What you'll see (in order)
+
+Within the first second of the webhook landing:
+
+1. A **"ClearPR review" check** appears at the top of the PR with status `In progress` and a yellow dot. The check links back to the GitHub commit so you can find it later from the Checks tab.
+2. A **placeholder comment** posts on the PR: `:hourglass_flowing_sand: **ClearPR** is reviewing this PR...`.
+
+When the LLM call finishes (typically 30-60s with a hosted model, 40-90s with a small local model):
+
+3. The **placeholder comment is edited in place** with the final review summary. GitHub shows an `edited` badge next to the comment timestamp, but no second comment is posted, so the PR conversation stays clean.
+4. **Inline findings** are posted as a regular GitHub review with line-anchored comments, severity-tagged.
+5. The **check run completes** with one of three conclusions:
+   - `success` (green) - 0 findings
+   - `neutral` (grey dot) - 1+ findings, or review skipped (e.g., diff too large)
+   - `failure` (red) - the review threw (LLM timeout, parse error, etc.)
+
+If you triggered the run with `@clearpr review` rather than waiting for the auto-trigger on PR open, the bot first reacts with `:eyes:` on your comment so you know the command was picked up. Reaction usually shows within 1 second of posting.
+
+![Full PR view showing the eyes reaction, edited summary comment, and ClearPR review check](/setup/11-in-progress-ux.png)
+
+### Diff stats
+
+The diff GitHub shows is **8 changed lines** (every line of the file changed - quote style + the gold-tier discount went from 0.8 to 0.75 + the `<= 0` became `< 0`).
 
 ClearPR sees the noise (quote style is identical AST), strips it, and tells you the **2 real changes**:
 
@@ -286,6 +317,29 @@ curl http://localhost:3000/health/ready | jq .
 ### Webhook not arriving at all
 
 Check the GitHub App's **Advanced** tab. Recent deliveries should be listed with a green check or red X. Click into a failing one to see the response. If GitHub got a 5xx, look at `docker compose logs app`.
+
+### "ClearPR review" check stays stuck on `In progress`
+
+The orchestrator failed mid-run (LLM timeout, parse error) but didn't reach the failure-handling path. Force a re-trigger by pushing an empty commit:
+
+```bash
+git commit --allow-empty -m "chore: trigger re-review"
+git push
+```
+
+The new run will create a fresh check run; GitHub displays the latest one for the head SHA.
+
+### Eye reaction never appears on `@clearpr` comments
+
+Three causes, in order of likelihood:
+
+1. **GitHub App's `Issues` permission is still `Read-only`**. Bump it to `Read & write` on the App settings page, then accept the new permission on the installation. See [GitHub App Setup](./github-app-setup) for the permission table.
+2. **Webhook didn't arrive**. Check `docker compose logs app` for `process_command` -- if absent, see the smee tunnel section above.
+3. **Comment didn't start with `@clearpr`**. The parser strictly requires that prefix; comments like `/review` or `clearpr review` are silently ignored.
+
+### Check run never appears at the top of the PR
+
+The App's `Checks` permission is missing or set to `No access`. Set it to `Read & write` and re-accept on the installation. The pipeline still runs (placeholder + summary still post); only the check is skipped, with a `Failed to create check run` warning in the app logs.
 
 ### Webhook arrives but ClearPR says it doesn't know the repo
 

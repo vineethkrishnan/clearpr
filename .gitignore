@@ -66,3 +66,4 @@ docs-site/.vitepress/cache/
 tmp/
 temp/
 *.tmp
+clearpr-perms-*.yml

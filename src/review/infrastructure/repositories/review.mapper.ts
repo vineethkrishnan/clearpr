@@ -21,6 +21,9 @@ export class ReviewMapper {
       completionTokens: record.completion_tokens ?? undefined,
       reviewDurationMs: record.review_duration_ms ?? undefined,
       errorMessage: record.error_message ?? undefined,
+      progressCommentId:
+        record.progress_comment_id === null ? undefined : Number(record.progress_comment_id),
+      checkRunId: record.check_run_id === null ? undefined : Number(record.check_run_id),
     });
   }
 
@@ -40,6 +43,9 @@ export class ReviewMapper {
     record.completion_tokens = entity.completionTokens ?? null;
     record.review_duration_ms = entity.reviewDurationMs ?? null;
     record.error_message = entity.errorMessage ?? null;
+    record.progress_comment_id =
+      entity.progressCommentId === undefined ? null : String(entity.progressCommentId);
+    record.check_run_id = entity.checkRunId === undefined ? null : String(entity.checkRunId);
     record.created_at = entity.createdAt;
     return record;
   }

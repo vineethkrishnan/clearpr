@@ -14,24 +14,31 @@ export class ClearPrCommandDto {
   args?: string;
 }
 
-const COMMAND_SET = new Set<string>(CLEARPR_COMMANDS);
+// Aliases let users type whatever feels natural ("run", "trigger") and have
+// it resolve to the canonical command. Keep aliases tied to `review` only -
+// the read-only subcommands (`diff`, `ignore`, `config`) are specific enough
+// that an alias would obscure intent more than it would help.
+const COMMAND_ALIASES: Record<string, ClearPrCommand> = {
+  review: 'review',
+  run: 'review',
+  trigger: 'review',
+  diff: 'diff',
+  ignore: 'ignore',
+  config: 'config',
+};
 
-// Parses a comment body into a typed command. Returns null when the comment
-// is not addressed to @clearpr or carries an unsupported subcommand. Keeping
-// this as a pure function (no Nest pipes) lets the use case decide how to
-// surface "no command" vs "invalid command" without throwing across the
-// dispatcher chain.
 export function parseClearPrCommand(commentBody: string): ClearPrCommandDto | null {
   const normalized = commentBody.trim().toLowerCase();
   if (!normalized.startsWith('@clearpr')) return null;
 
   const parts = normalized.split(/\s+/);
-  const command = parts[1];
-  if (!command || !COMMAND_SET.has(command)) return null;
+  const word = parts[1];
+  const command = word ? COMMAND_ALIASES[word] : undefined;
+  if (!command) return null;
 
   const args = parts.slice(2).join(' ').trim();
   const dto = new ClearPrCommandDto();
-  dto.command = command as ClearPrCommand;
+  dto.command = command;
   if (args.length > 0) dto.args = args;
   return dto;
 }

@@ -1,3 +1,9 @@
+jest.mock('../src/github/infrastructure/adapters/github-client.service.js', () => ({
+  GitHubClientService: class {
+    addIssueCommentReaction = jest.fn().mockResolvedValue(undefined);
+  },
+}));
+
 import { Test } from '@nestjs/testing';
 import { type INestApplication, Module } from '@nestjs/common';
 import { createHmac } from 'node:crypto';
@@ -7,6 +13,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 
 import { ConfigModule } from '../src/config/config.module.js';
+import { GitHubClientService } from '../src/github/infrastructure/adapters/github-client.service.js';
 import { ClsConfigModule } from '../src/shared/infrastructure/cls/cls.module.js';
 import { LoggingModule } from '../src/shared/infrastructure/logging/logging.module.js';
 import { WebhookController } from '../src/webhook/presenters/http/webhook.controller.js';
@@ -46,6 +53,10 @@ import { ComputeSemanticDiffUseCase } from '../src/diff-engine/application/use-c
 import { LlmProviderPort } from '../src/review/domain/ports/llm-provider.port.js';
 import { ReviewRepositoryPort } from '../src/review/domain/ports/review-repository.port.js';
 import { ReviewPosterPort } from '../src/review/domain/ports/review-poster.port.js';
+import {
+  CheckRunPosterPort,
+  type CheckRunConclusion,
+} from '../src/review/domain/ports/check-run-poster.port.js';
 import { PrFileListProviderPort } from '../src/review/domain/ports/pr-file-list-provider.port.js';
 import { DiffComputerPort } from '../src/review/application/ports/diff-computer.port.js';
 import { MemoryRetrieverPort } from '../src/review/application/ports/memory-retriever.port.js';
@@ -274,13 +285,39 @@ class FakeLlmProvider extends LlmProviderPort {
 }
 
 class FakeReviewPoster extends ReviewPosterPort {
+  private nextCommentId = 1000;
+
   async postInlineComments(_context: ReviewContext, comments: ReviewComment[]): Promise<void> {
     await Promise.resolve();
     capture.inlineComments.push(comments);
   }
-  async postSummary(_context: ReviewContext, summary: string): Promise<void> {
+  async postSummary(_context: ReviewContext, summary: string): Promise<number> {
     await Promise.resolve();
     capture.summaries.push(summary);
+    return this.nextCommentId++;
+  }
+  async updateSummary(_context: ReviewContext, _commentId: number, summary: string): Promise<void> {
+    await Promise.resolve();
+    capture.summaries.push(summary);
+  }
+  async postProgressPlaceholder(_context: ReviewContext): Promise<number> {
+    await Promise.resolve();
+    return this.nextCommentId++;
+  }
+}
+
+class FakeCheckRunPoster extends CheckRunPosterPort {
+  async createInProgress(_context: ReviewContext): Promise<number> {
+    await Promise.resolve();
+    return 99;
+  }
+  async complete(
+    _context: ReviewContext,
+    _checkRunId: number,
+    _conclusion: CheckRunConclusion,
+    _output: { title: string; summary: string },
+  ): Promise<void> {
+    await Promise.resolve();
   }
 }
 
@@ -401,6 +438,7 @@ const prFiles: FileInput[] = [
     RemoveRepositoriesUseCase,
     HmacSignatureGuard,
     { provide: IdempotencyStorePort, useClass: InMemoryIdempotencyStore },
+    { provide: GitHubClientService, useClass: GitHubClientService },
     { provide: APP_GUARD, useClass: ThrottlerGuard },
 
     // GitHub repos (mocked persistence)
@@ -435,6 +473,7 @@ const prFiles: FileInput[] = [
     { provide: PrFileListProviderPort, useValue: new FakePrFileListProvider(prFiles) },
     { provide: LlmProviderPort, useClass: FakeLlmProvider },
     { provide: ReviewPosterPort, useClass: FakeReviewPoster },
+    { provide: CheckRunPosterPort, useClass: FakeCheckRunPoster },
     { provide: ReviewRepositoryPort, useClass: FakeReviewRepo },
     OrchestrateReviewUseCase,
 

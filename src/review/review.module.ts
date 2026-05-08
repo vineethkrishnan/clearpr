@@ -7,10 +7,12 @@ import { ReviewRecord } from './infrastructure/repositories/review.record.js';
 import { TypeOrmReviewRepository } from './infrastructure/repositories/typeorm-review.repository.js';
 import { ReviewRepositoryPort } from './domain/ports/review-repository.port.js';
 import { ReviewPosterPort } from './domain/ports/review-poster.port.js';
+import { CheckRunPosterPort } from './domain/ports/check-run-poster.port.js';
 import { PrFileListProviderPort } from './domain/ports/pr-file-list-provider.port.js';
 import { MemoryRetrieverPort } from './application/ports/memory-retriever.port.js';
 import { DiffComputerPort } from './application/ports/diff-computer.port.js';
 import { GitHubReviewPosterAdapter } from './infrastructure/adapters/github-review-poster.adapter.js';
+import { GitHubCheckRunPosterAdapter } from './infrastructure/adapters/github-check-run-poster.adapter.js';
 import { GitHubPrFileListAdapter } from './infrastructure/adapters/github-pr-file-list.adapter.js';
 import { RetrieveMemoryUseCase } from '../memory/application/use-cases/retrieve-memory.use-case.js';
 import { ComputeSemanticDiffUseCase } from '../diff-engine/application/use-cases/compute-semantic-diff.use-case.js';
@@ -36,6 +38,10 @@ import { BuildReviewSummaryUseCase } from './application/use-cases/build-review-
     {
       provide: ReviewPosterPort,
       useClass: GitHubReviewPosterAdapter,
+    },
+    {
+      provide: CheckRunPosterPort,
+      useClass: GitHubCheckRunPosterAdapter,
     },
     {
       provide: PrFileListProviderPort,

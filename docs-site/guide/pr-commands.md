@@ -4,12 +4,14 @@ Comment on any PR to interact with ClearPR:
 
 | Command | What it does |
 |---------|-------------|
-| `@clearpr review` | Trigger a manual review |
+| `@clearpr review` | Trigger a manual review (aliases: `@clearpr run`, `@clearpr trigger`) |
 | `@clearpr diff` | Post the clean semantic diff as a comment |
 | `@clearpr ignore [pattern]` | Ignore a file pattern for this PR |
 | `@clearpr config` | Show active config for this repo |
 
 Commands are case-insensitive. The command word must immediately follow the `@clearpr` mention.
+
+When ClearPR sees a recognised command, it reacts with `:eyes:` on your comment so you know the request was picked up. If no reaction appears within a few seconds, the bot didn't see the comment - check that the GitHub App is installed on the repo and that webhooks are reaching the server.
 
 ## `@clearpr review`
 
@@ -18,6 +20,8 @@ Triggers a manual review, same as automatic review on PR open. Useful when:
 - The automatic review was skipped (e.g., diff too large)
 
 Manual reviews get **higher priority** in the queue.
+
+`@clearpr run` and `@clearpr trigger` are aliases that do exactly the same thing - use whichever feels natural.
 
 ## `@clearpr diff`
 

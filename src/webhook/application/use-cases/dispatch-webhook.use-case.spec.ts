@@ -1,4 +1,8 @@
 /* eslint-disable @typescript-eslint/unbound-method */
+jest.mock('../../../github/infrastructure/adapters/github-client.service.js', () => ({
+  GitHubClientService: class {},
+}));
+
 import { DispatchWebhookUseCase } from './dispatch-webhook.use-case.js';
 import { IdempotencyStorePort } from '../../domain/ports/idempotency-store.port.js';
 import { ClearPrAction } from '../../domain/value-objects/webhook-event-type.vo.js';

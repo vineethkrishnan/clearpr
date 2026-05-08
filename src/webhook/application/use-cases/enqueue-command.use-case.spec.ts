@@ -1,13 +1,21 @@
 /* eslint-disable @typescript-eslint/unbound-method */
+jest.mock('../../../github/infrastructure/adapters/github-client.service.js', () => ({
+  GitHubClientService: class {},
+}));
+
 import { EnqueueCommandUseCase } from './enqueue-command.use-case.js';
 import { JobEnqueuerPort } from '../ports/job-enqueuer.port.js';
 import { RepositoryRepositoryPort } from '../../../github/domain/ports/repository-repository.port.js';
 import { Repository } from '../../../github/domain/entities/repository.entity.js';
+type GitHubClientStub = {
+  addIssueCommentReaction: jest.Mock;
+};
 
 describe('EnqueueCommandUseCase', () => {
   let useCase: EnqueueCommandUseCase;
   let jobEnqueuer: jest.Mocked<JobEnqueuerPort>;
   let repositoryRepo: jest.Mocked<RepositoryRepositoryPort>;
+  let githubClient: GitHubClientStub;
 
   beforeEach(() => {
     jobEnqueuer = {
@@ -32,7 +40,15 @@ describe('EnqueueCommandUseCase', () => {
     });
     repositoryRepo.findByGithubId.mockResolvedValue(dbRepo);
 
-    useCase = new EnqueueCommandUseCase(jobEnqueuer, repositoryRepo);
+    githubClient = {
+      addIssueCommentReaction: jest.fn().mockResolvedValue(undefined),
+    };
+
+    useCase = new EnqueueCommandUseCase(
+      jobEnqueuer,
+      repositoryRepo,
+      githubClient as unknown as ConstructorParameters<typeof EnqueueCommandUseCase>[2],
+    );
   });
 
   it('enqueues a command job for "@clearpr review"', async () => {
@@ -82,5 +98,43 @@ describe('EnqueueCommandUseCase', () => {
       },
     });
     expect(jobEnqueuer.enqueueCommand).not.toHaveBeenCalled();
+    expect(githubClient.addIssueCommentReaction).not.toHaveBeenCalled();
+  });
+
+  it('reacts with :eyes: on the comment when a command is recognised', async () => {
+    await useCase.execute({
+      event: 'issue_comment',
+      action: 'created',
+      deliveryId: 'd-4',
+      installationId: 999,
+      body: {
+        comment: { body: '@clearpr review', id: 17 },
+        issue: { number: 21 },
+        repository: { id: 555, full_name: 'acme/widgets' },
+      },
+    });
+    expect(githubClient.addIssueCommentReaction).toHaveBeenCalledWith(
+      999,
+      'acme',
+      'widgets',
+      17,
+      'eyes',
+    );
+  });
+
+  it('still enqueues the job when the reaction call fails', async () => {
+    githubClient.addIssueCommentReaction.mockRejectedValueOnce(new Error('forbidden'));
+    await useCase.execute({
+      event: 'issue_comment',
+      action: 'created',
+      deliveryId: 'd-5',
+      installationId: 999,
+      body: {
+        comment: { body: '@clearpr review', id: 18 },
+        issue: { number: 22 },
+        repository: { id: 555, full_name: 'acme/widgets' },
+      },
+    });
+    expect(jobEnqueuer.enqueueCommand).toHaveBeenCalledTimes(1);
   });
 });

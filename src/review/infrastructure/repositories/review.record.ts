@@ -45,6 +45,12 @@ export class ReviewRecord {
   @Column({ type: 'text', nullable: true })
   error_message!: string | null;
 
+  @Column({ type: 'bigint', nullable: true })
+  progress_comment_id!: string | null;
+
+  @Column({ type: 'bigint', nullable: true })
+  check_run_id!: string | null;
+
   @CreateDateColumn({ type: 'timestamptz' })
   created_at!: Date;
 }

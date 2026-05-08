@@ -30,6 +30,7 @@ export default defineConfig({
             { text: 'GitHub App Setup', link: '/guide/github-app-setup' },
             { text: 'Docker Deployment', link: '/guide/docker-deployment' },
             { text: 'LLM Providers', link: '/guide/llm-providers' },
+            { text: 'Choosing an LLM', link: '/guide/choosing-an-llm' },
           ],
         },
         {

@@ -22,6 +22,8 @@ describe('ReviewMapper', () => {
     record.completion_tokens = 500;
     record.review_duration_ms = 12000;
     record.error_message = null;
+    record.progress_comment_id = '987654321';
+    record.check_run_id = '123456789';
     record.created_at = new Date('2025-01-01T00:00:00.000Z');
     return record;
   };
@@ -111,6 +113,8 @@ describe('ReviewMapper', () => {
     record.completion_tokens = null;
     record.review_duration_ms = null;
     record.error_message = 'Diff too large';
+    record.progress_comment_id = null;
+    record.check_run_id = null;
     record.created_at = new Date('2025-02-01T00:00:00.000Z');
 
     const roundTripped = ReviewMapper.toRecord(ReviewMapper.toDomain(record));

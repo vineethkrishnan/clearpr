@@ -295,14 +295,106 @@ export class GitHubClientService {
     repo: string,
     issueNumber: number,
     body: string,
-  ): Promise<void> {
+  ): Promise<number> {
     try {
       const octokit = await this.getOctokit(installationId);
-      const { headers } = await octokit.rest.issues.createComment({
+      const { data, headers } = await octokit.rest.issues.createComment({
         owner,
         repo,
         issue_number: issueNumber,
         body,
+      });
+      this.updateRateLimit(headers as Record<string, string | undefined>);
+      return data.id;
+    } catch (error) {
+      throw this.wrapError(error);
+    }
+  }
+
+  async updateIssueComment(
+    installationId: number,
+    owner: string,
+    repo: string,
+    commentId: number,
+    body: string,
+  ): Promise<void> {
+    try {
+      const octokit = await this.getOctokit(installationId);
+      const { headers } = await octokit.rest.issues.updateComment({
+        owner,
+        repo,
+        comment_id: commentId,
+        body,
+      });
+      this.updateRateLimit(headers as Record<string, string | undefined>);
+    } catch (error) {
+      throw this.wrapError(error);
+    }
+  }
+
+  async addIssueCommentReaction(
+    installationId: number,
+    owner: string,
+    repo: string,
+    commentId: number,
+    content: 'eyes' | '+1' | '-1' | 'laugh' | 'confused' | 'heart' | 'hooray' | 'rocket',
+  ): Promise<void> {
+    try {
+      const octokit = await this.getOctokit(installationId);
+      const { headers } = await octokit.rest.reactions.createForIssueComment({
+        owner,
+        repo,
+        comment_id: commentId,
+        content,
+      });
+      this.updateRateLimit(headers as Record<string, string | undefined>);
+    } catch (error) {
+      throw this.wrapError(error);
+    }
+  }
+
+  async createCheckRun(
+    installationId: number,
+    owner: string,
+    repo: string,
+    headSha: string,
+    name: string,
+  ): Promise<number> {
+    try {
+      const octokit = await this.getOctokit(installationId);
+      const { data, headers } = await octokit.rest.checks.create({
+        owner,
+        repo,
+        name,
+        head_sha: headSha,
+        status: 'in_progress',
+        started_at: new Date().toISOString(),
+      });
+      this.updateRateLimit(headers as Record<string, string | undefined>);
+      return data.id;
+    } catch (error) {
+      throw this.wrapError(error);
+    }
+  }
+
+  async completeCheckRun(
+    installationId: number,
+    owner: string,
+    repo: string,
+    checkRunId: number,
+    conclusion: 'success' | 'neutral' | 'failure',
+    output: { title: string; summary: string },
+  ): Promise<void> {
+    try {
+      const octokit = await this.getOctokit(installationId);
+      const { headers } = await octokit.rest.checks.update({
+        owner,
+        repo,
+        check_run_id: checkRunId,
+        status: 'completed',
+        conclusion,
+        completed_at: new Date().toISOString(),
+        output,
       });
       this.updateRateLimit(headers as Record<string, string | undefined>);
     } catch (error) {

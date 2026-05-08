@@ -1,9 +1,16 @@
+jest.mock('../src/github/infrastructure/adapters/github-client.service.js', () => ({
+  GitHubClientService: class {
+    addIssueCommentReaction = jest.fn().mockResolvedValue(undefined);
+  },
+}));
+
 import { Test } from '@nestjs/testing';
 import { type INestApplication, Module } from '@nestjs/common';
 import { createHmac } from 'node:crypto';
 import request from 'supertest';
 import type { Server } from 'http';
 import { ConfigModule } from '../src/config/config.module.js';
+import { GitHubClientService } from '../src/github/infrastructure/adapters/github-client.service.js';
 import { ClsConfigModule } from '../src/shared/infrastructure/cls/cls.module.js';
 import { LoggingModule } from '../src/shared/infrastructure/logging/logging.module.js';
 import { WebhookController } from '../src/webhook/presenters/http/webhook.controller.js';
@@ -92,6 +99,7 @@ function signPayload(body: string): string {
     { provide: InstallationRepositoryPort, useValue: mockInstallationRepo },
     { provide: RepositoryRepositoryPort, useValue: mockRepositoryRepo },
     { provide: InstallationCleanupPort, useValue: mockCleanupService },
+    { provide: GitHubClientService, useClass: GitHubClientService },
     { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],
 })

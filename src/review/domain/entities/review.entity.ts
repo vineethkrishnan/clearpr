@@ -17,6 +17,8 @@ export class Review extends BaseEntity {
   completionTokens?: number;
   reviewDurationMs?: number;
   errorMessage?: string;
+  progressCommentId?: number;
+  checkRunId?: number;
   comments: ReviewComment[];
 
   private constructor(params: {
@@ -34,6 +36,8 @@ export class Review extends BaseEntity {
     completionTokens?: number;
     reviewDurationMs?: number;
     errorMessage?: string;
+    progressCommentId?: number;
+    checkRunId?: number;
   }) {
     super(params.id);
     this.repositoryId = params.repositoryId;
@@ -49,6 +53,8 @@ export class Review extends BaseEntity {
     this.completionTokens = params.completionTokens;
     this.reviewDurationMs = params.reviewDurationMs;
     this.errorMessage = params.errorMessage;
+    this.progressCommentId = params.progressCommentId;
+    this.checkRunId = params.checkRunId;
     this.comments = [];
   }
 
@@ -76,6 +82,8 @@ export class Review extends BaseEntity {
     completionTokens?: number;
     reviewDurationMs?: number;
     errorMessage?: string;
+    progressCommentId?: number;
+    checkRunId?: number;
   }): Review {
     return new Review(params);
   }
