@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { GitHubClientService } from '../../../github/application/use-cases/github-client.use-case.js';
+import { PrHistoryProviderPort } from '../ports/pr-history-provider.port.js';
 import { InstallationRepositoryPort } from '../../../github/domain/ports/installation-repository.port.js';
 import { RepositoryRepositoryPort } from '../../../github/domain/ports/repository-repository.port.js';
 import {
@@ -15,7 +15,7 @@ export class IndexRepositoryUseCase {
   private readonly logger = new Logger(IndexRepositoryUseCase.name);
 
   constructor(
-    private readonly githubClient: GitHubClientService,
+    private readonly prHistoryProvider: PrHistoryProviderPort,
     private readonly installationRepo: InstallationRepositoryPort,
     private readonly repositoryRepo: RepositoryRepositoryPort,
     private readonly outcomeDetector: DetectFeedbackOutcomeUseCase,
@@ -96,7 +96,7 @@ export class IndexRepositoryUseCase {
     owner: string,
     repo: string,
   ): Promise<IndexableComment[]> {
-    const mergedPrs = await this.githubClient.listMergedPullRequests(
+    const mergedPrs = await this.prHistoryProvider.listMergedPullRequests(
       installationId,
       owner,
       repo,
@@ -107,8 +107,13 @@ export class IndexRepositoryUseCase {
 
     for (const pr of mergedPrs) {
       const [comments, commits] = await Promise.all([
-        this.githubClient.listPullRequestReviewComments(installationId, owner, repo, pr.number),
-        this.githubClient.listPullRequestCommits(installationId, owner, repo, pr.number),
+        this.prHistoryProvider.listPullRequestReviewComments(
+          installationId,
+          owner,
+          repo,
+          pr.number,
+        ),
+        this.prHistoryProvider.listPullRequestCommits(installationId, owner, repo, pr.number),
       ]);
 
       for (const comment of comments) {
