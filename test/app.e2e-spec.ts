@@ -16,10 +16,10 @@ import { RegisterRepositoriesUseCase } from '../src/webhook/application/use-case
 import { RemoveRepositoriesUseCase } from '../src/webhook/application/use-cases/remove-repositories.use-case.js';
 import { HmacSignatureGuard } from '../src/webhook/infrastructure/guards/hmac-signature.guard.js';
 import { IdempotencyStorePort } from '../src/webhook/domain/ports/idempotency-store.port.js';
-import { EnqueueJobUseCase } from '../src/queue/application/use-cases/enqueue-job.use-case.js';
+import { JobEnqueuerPort } from '../src/webhook/application/ports/job-enqueuer.port.js';
+import { InstallationCleanupPort } from '../src/webhook/application/ports/installation-cleanup.port.js';
 import { InstallationRepositoryPort } from '../src/github/domain/ports/installation-repository.port.js';
 import { RepositoryRepositoryPort } from '../src/github/domain/ports/repository-repository.port.js';
-import { CleanupInstallationUseCase } from '../src/review/application/use-cases/cleanup-installation.use-case.js';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 
@@ -88,10 +88,10 @@ function signPayload(body: string): string {
     RemoveRepositoriesUseCase,
     HmacSignatureGuard,
     { provide: IdempotencyStorePort, useClass: InMemoryIdempotencyStore },
-    { provide: EnqueueJobUseCase, useValue: mockJobProducer },
+    { provide: JobEnqueuerPort, useValue: mockJobProducer },
     { provide: InstallationRepositoryPort, useValue: mockInstallationRepo },
     { provide: RepositoryRepositoryPort, useValue: mockRepositoryRepo },
-    { provide: CleanupInstallationUseCase, useValue: mockCleanupService },
+    { provide: InstallationCleanupPort, useValue: mockCleanupService },
     { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],
 })

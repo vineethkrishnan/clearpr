@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { EnqueueJobUseCase } from '../../../queue/application/use-cases/enqueue-job.use-case.js';
+import { JobEnqueuerPort } from '../ports/job-enqueuer.port.js';
 import { InstallationRepositoryPort } from '../../../github/domain/ports/installation-repository.port.js';
 import { RepositoryRepositoryPort } from '../../../github/domain/ports/repository-repository.port.js';
 import { Installation } from '../../../github/domain/entities/installation.entity.js';
@@ -11,7 +11,7 @@ export class RegisterInstallationUseCase {
   private readonly logger = new Logger(RegisterInstallationUseCase.name);
 
   constructor(
-    private readonly jobProducer: EnqueueJobUseCase,
+    private readonly jobEnqueuer: JobEnqueuerPort,
     private readonly installationRepo: InstallationRepositoryPort,
     private readonly repositoryRepo: RepositoryRepositoryPort,
   ) {}
@@ -41,7 +41,7 @@ export class RegisterInstallationUseCase {
     }
 
     // Queue bulk indexing for the new installation
-    await this.jobProducer.enqueueIndexing({
+    await this.jobEnqueuer.enqueueIndexing({
       correlationId: payload.deliveryId,
       installationId: installation.id,
       repositoryId: '',

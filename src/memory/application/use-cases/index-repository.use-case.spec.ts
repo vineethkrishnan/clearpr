@@ -1,11 +1,7 @@
-jest.mock('../../../github/application/use-cases/github-client.use-case.js', () => ({
-  GitHubClientService: class {},
-}));
-
 import { IndexRepositoryUseCase } from './index-repository.use-case.js';
 import { IndexMemoryUseCase } from './index-memory.use-case.js';
 import { DetectFeedbackOutcomeUseCase } from './detect-feedback-outcome.use-case.js';
-import type { GitHubClientService } from '../../../github/application/use-cases/github-client.use-case.js';
+import { PrHistoryProviderPort } from '../ports/pr-history-provider.port.js';
 import { InstallationRepositoryPort } from '../../../github/domain/ports/installation-repository.port.js';
 import { RepositoryRepositoryPort } from '../../../github/domain/ports/repository-repository.port.js';
 import { Installation } from '../../../github/domain/entities/installation.entity.js';
@@ -15,7 +11,7 @@ import { FeedbackOutcome } from '../../domain/value-objects/feedback-outcome.vo.
 
 describe('IndexRepositoryUseCase', () => {
   let service: IndexRepositoryUseCase;
-  let githubClient: jest.Mocked<GitHubClientService>;
+  let prHistoryProvider: jest.Mocked<PrHistoryProviderPort>;
   let installationRepo: jest.Mocked<InstallationRepositoryPort>;
   let repositoryRepo: jest.Mocked<RepositoryRepositoryPort>;
   let memoryIndexer: jest.Mocked<IndexMemoryUseCase>;
@@ -33,11 +29,11 @@ describe('IndexRepositoryUseCase', () => {
   });
 
   beforeEach(() => {
-    githubClient = {
+    prHistoryProvider = {
       listMergedPullRequests: jest.fn(),
       listPullRequestReviewComments: jest.fn(),
       listPullRequestCommits: jest.fn(),
-    } as unknown as jest.Mocked<GitHubClientService>;
+    };
 
     installationRepo = {
       save: jest.fn(),
@@ -62,7 +58,7 @@ describe('IndexRepositoryUseCase', () => {
     const config = { HISTORY_DEPTH: 50 } as AppConfig;
 
     service = new IndexRepositoryUseCase(
-      githubClient,
+      prHistoryProvider,
       installationRepo,
       repositoryRepo,
       outcomeDetector,
@@ -72,10 +68,10 @@ describe('IndexRepositoryUseCase', () => {
   });
 
   it('marks the repository COMPLETED after a successful run', async () => {
-    githubClient.listMergedPullRequests.mockResolvedValue([
+    prHistoryProvider.listMergedPullRequests.mockResolvedValue([
       { number: 1, mergedAt: new Date('2026-01-10'), mergeCommitSha: 'abc', title: 'Feature' },
     ]);
-    githubClient.listPullRequestReviewComments.mockResolvedValue([
+    prHistoryProvider.listPullRequestReviewComments.mockResolvedValue([
       {
         id: 1,
         prNumber: 1,
@@ -88,7 +84,7 @@ describe('IndexRepositoryUseCase', () => {
         createdAt: new Date('2026-01-09'),
       },
     ]);
-    githubClient.listPullRequestCommits.mockResolvedValue([
+    prHistoryProvider.listPullRequestCommits.mockResolvedValue([
       { sha: 'def', committedAt: new Date('2026-01-09T10:00:00Z'), changedFiles: ['src/foo.ts'] },
     ]);
 
@@ -104,17 +100,17 @@ describe('IndexRepositoryUseCase', () => {
   });
 
   it('marks the repository FAILED if a downstream call throws', async () => {
-    githubClient.listMergedPullRequests.mockRejectedValue(new Error('boom'));
+    prHistoryProvider.listMergedPullRequests.mockRejectedValue(new Error('boom'));
 
     await expect(service.indexRepository(repository)).rejects.toThrow('boom');
     expect(repository.indexingStatus).toBe(IndexingStatus.FAILED);
   });
 
   it('skips comments without a line number', async () => {
-    githubClient.listMergedPullRequests.mockResolvedValue([
+    prHistoryProvider.listMergedPullRequests.mockResolvedValue([
       { number: 7, mergedAt: new Date('2026-02-01'), mergeCommitSha: null, title: 'Other' },
     ]);
-    githubClient.listPullRequestReviewComments.mockResolvedValue([
+    prHistoryProvider.listPullRequestReviewComments.mockResolvedValue([
       {
         id: 5,
         prNumber: 7,
@@ -127,7 +123,7 @@ describe('IndexRepositoryUseCase', () => {
         createdAt: new Date('2026-02-01'),
       },
     ]);
-    githubClient.listPullRequestCommits.mockResolvedValue([]);
+    prHistoryProvider.listPullRequestCommits.mockResolvedValue([]);
 
     await service.indexRepository(repository);
     const indexed = memoryIndexer.indexComments.mock.calls[0]![1];
@@ -141,7 +137,7 @@ describe('IndexRepositoryUseCase', () => {
       fullName: 'acme/other',
     });
     repositoryRepo.findByInstallationId.mockResolvedValue([repository, second]);
-    githubClient.listMergedPullRequests.mockResolvedValue([]);
+    prHistoryProvider.listMergedPullRequests.mockResolvedValue([]);
 
     const result = await service.indexInstallation(installation.id);
     expect(result.reposIndexed).toBe(2);

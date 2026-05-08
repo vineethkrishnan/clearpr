@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { EnqueueJobUseCase } from '../../../queue/application/use-cases/enqueue-job.use-case.js';
+import { JobEnqueuerPort } from '../ports/job-enqueuer.port.js';
 import { RepositoryRepositoryPort } from '../../../github/domain/ports/repository-repository.port.js';
 import type { WebhookPayload } from '../types/webhook-event.types.js';
 
 @Injectable()
 export class EnqueueReviewUseCase {
   constructor(
-    private readonly jobProducer: EnqueueJobUseCase,
+    private readonly jobEnqueuer: JobEnqueuerPort,
     private readonly repositoryRepo: RepositoryRepositoryPort,
   ) {}
 
@@ -18,7 +18,7 @@ export class EnqueueReviewUseCase {
     const dbRepo = await this.repositoryRepo.findByGithubId(repository.id);
     if (!dbRepo) return;
 
-    await this.jobProducer.enqueueReview({
+    await this.jobEnqueuer.enqueueReview({
       correlationId: payload.deliveryId,
       installationId: String(payload.installationId),
       repositoryId: dbRepo.id,

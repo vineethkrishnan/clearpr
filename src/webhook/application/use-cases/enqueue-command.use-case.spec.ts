@@ -1,20 +1,20 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import { EnqueueCommandUseCase } from './enqueue-command.use-case.js';
-import { EnqueueJobUseCase } from '../../../queue/application/use-cases/enqueue-job.use-case.js';
+import { JobEnqueuerPort } from '../ports/job-enqueuer.port.js';
 import { RepositoryRepositoryPort } from '../../../github/domain/ports/repository-repository.port.js';
 import { Repository } from '../../../github/domain/entities/repository.entity.js';
 
 describe('EnqueueCommandUseCase', () => {
   let useCase: EnqueueCommandUseCase;
-  let jobProducer: jest.Mocked<EnqueueJobUseCase>;
+  let jobEnqueuer: jest.Mocked<JobEnqueuerPort>;
   let repositoryRepo: jest.Mocked<RepositoryRepositoryPort>;
 
   beforeEach(() => {
-    jobProducer = {
+    jobEnqueuer = {
       enqueueReview: jest.fn().mockResolvedValue(undefined),
       enqueueCommand: jest.fn().mockResolvedValue(undefined),
       enqueueIndexing: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<EnqueueJobUseCase>;
+    };
 
     repositoryRepo = {
       save: jest.fn(),
@@ -32,7 +32,7 @@ describe('EnqueueCommandUseCase', () => {
     });
     repositoryRepo.findByGithubId.mockResolvedValue(dbRepo);
 
-    useCase = new EnqueueCommandUseCase(jobProducer, repositoryRepo);
+    useCase = new EnqueueCommandUseCase(jobEnqueuer, repositoryRepo);
   });
 
   it('enqueues a command job for "@clearpr review"', async () => {
@@ -48,8 +48,8 @@ describe('EnqueueCommandUseCase', () => {
       },
     });
 
-    expect(jobProducer.enqueueCommand).toHaveBeenCalledTimes(1);
-    expect(jobProducer.enqueueCommand).toHaveBeenCalledWith(
+    expect(jobEnqueuer.enqueueCommand).toHaveBeenCalledTimes(1);
+    expect(jobEnqueuer.enqueueCommand).toHaveBeenCalledWith(
       expect.objectContaining({ command: 'review', prNumber: 12, commentId: 7 }),
     );
   });
@@ -66,7 +66,7 @@ describe('EnqueueCommandUseCase', () => {
         repository: { id: 555, full_name: 'acme/widgets' },
       },
     });
-    expect(jobProducer.enqueueCommand).not.toHaveBeenCalled();
+    expect(jobEnqueuer.enqueueCommand).not.toHaveBeenCalled();
   });
 
   it('ignores unsupported subcommands', async () => {
@@ -81,6 +81,6 @@ describe('EnqueueCommandUseCase', () => {
         repository: { id: 555, full_name: 'acme/widgets' },
       },
     });
-    expect(jobProducer.enqueueCommand).not.toHaveBeenCalled();
+    expect(jobEnqueuer.enqueueCommand).not.toHaveBeenCalled();
   });
 });

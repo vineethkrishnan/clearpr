@@ -1,18 +1,24 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { AppConfig } from '../config/app.config.js';
 import { QUEUE_NAMES } from './types/job-payload.types.js';
 import { EnqueueJobUseCase } from './application/use-cases/enqueue-job.use-case.js';
+import { ReviewExecutorPort } from './application/ports/review-executor.port.js';
+import { CommandHandlerPort } from './application/ports/command-handler.port.js';
+import { RepositoryIndexerPort } from './application/ports/repository-indexer.port.js';
 import { ReviewConsumer } from './consumers/review.consumer.js';
 import { IndexingConsumer } from './consumers/indexing.consumer.js';
 import { CommandConsumer } from './consumers/command.consumer.js';
 import { ReviewModule } from '../review/review.module.js';
 import { MemoryModule } from '../memory/memory.module.js';
+import { OrchestrateReviewUseCase } from '../review/application/use-cases/orchestrate-review.use-case.js';
+import { HandleCommandUseCase } from '../review/application/use-cases/handle-command.use-case.js';
+import { IndexRepositoryUseCase } from '../memory/application/use-cases/index-repository.use-case.js';
 
 @Module({
   imports: [
-    forwardRef(() => ReviewModule),
-    forwardRef(() => MemoryModule),
+    ReviewModule,
+    MemoryModule,
     BullModule.forRootAsync({
       inject: [AppConfig],
       useFactory: (config: AppConfig) => ({
@@ -53,7 +59,24 @@ import { MemoryModule } from '../memory/memory.module.js';
       },
     ),
   ],
-  providers: [EnqueueJobUseCase, ReviewConsumer, IndexingConsumer, CommandConsumer],
+  providers: [
+    EnqueueJobUseCase,
+    ReviewConsumer,
+    IndexingConsumer,
+    CommandConsumer,
+    {
+      provide: ReviewExecutorPort,
+      useExisting: OrchestrateReviewUseCase,
+    },
+    {
+      provide: CommandHandlerPort,
+      useExisting: HandleCommandUseCase,
+    },
+    {
+      provide: RepositoryIndexerPort,
+      useExisting: IndexRepositoryUseCase,
+    },
+  ],
   exports: [EnqueueJobUseCase],
 })
 export class QueueModule {}
