@@ -17,6 +17,10 @@ Estimated time: 20-30 minutes.
 | **GitHub account** | Required. Free tier is fine. |
 | **A machine to run Docker** | Local laptop is fine for testing. For production, a small VM with a public IP. |
 | **Anthropic API key** | Or OpenAI / Mistral / Gemini key. [Get one from console.anthropic.com](https://console.anthropic.com). Ollama or LM Studio also work; no key needed for those. |
+
+::: warning Pick a strong model for real reviews
+Small local models (under ~14B parameters) miss real bugs and produce confident false positives. They're fine for verifying the pipeline is wired up correctly, but **switch to Claude Sonnet 4 or GPT-4o before pointing the bot at PRs you actually care about**. See [Choosing an LLM](./choosing-an-llm) for the full breakdown.
+:::
 | **Voyage AI API key** | For PR memory (similarity search on past comments). [Get one from dash.voyageai.com](https://dash.voyageai.com). Optional: leave unset and the memory feature is silently skipped, the rest of the review still works. |
 
 ## Step 1: Run ClearPR with Docker
@@ -86,7 +90,10 @@ Scroll down to **Repository permissions**:
 | Pull requests | Read and write |
 | Contents | Read-only |
 | Metadata | Read-only |
-| Issues | Read-only |
+| Issues | Read and write |
+| Checks | Read and write |
+
+`Issues: write` is needed for the `:eyes:` reaction on `@clearpr` comments and to edit the in-progress placeholder comment. `Checks: write` is needed for the "ClearPR review" check that shows in-progress / completed status at the top of the PR.
 
 ![Repository permissions](/setup/04-permissions.png)
 
@@ -208,7 +215,17 @@ git commit -m "refactor: tidy discount module"
 git push -u origin demo-prettier-noise
 ```
 
-Open the PR on GitHub. The diff GitHub shows is **8 changed lines** (every line of the file changed - quote style + the gold-tier discount went from 0.8 to 0.75 + the `<= 0` became `< 0`).
+Open the PR on GitHub.
+
+As soon as the webhook lands, ClearPR will:
+
+1. Add a "ClearPR review" check at the top of the PR with status `In progress`.
+2. Post a placeholder comment: `:hourglass: ClearPR is reviewing this PR...`.
+3. When the review completes (~30-60s with a hosted LLM), edit that same comment with the final summary and post any inline findings.
+
+If you `@clearpr review` to trigger a manual run, the bot reacts with `:eyes:` on your comment to confirm it picked up the command.
+
+The diff GitHub shows is **8 changed lines** (every line of the file changed - quote style + the gold-tier discount went from 0.8 to 0.75 + the `<= 0` became `< 0`).
 
 ClearPR sees the noise (quote style is identical AST), strips it, and tells you the **2 real changes**:
 

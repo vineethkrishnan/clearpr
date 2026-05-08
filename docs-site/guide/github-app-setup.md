@@ -16,7 +16,8 @@
 | **Pull requests** | Read & Write | Read PR metadata/diff, post review comments |
 | **Contents** | Read | Fetch file contents for AST parsing |
 | **Metadata** | Read | Required for all GitHub Apps |
-| **Issues** | Read | Read comments for @clearpr commands |
+| **Issues** | Read & Write | Read `@clearpr` commands, react with `:eyes:`, edit the in-progress placeholder comment |
+| **Checks** | Read & Write | Show "ClearPR review" check (in-progress / completed) at the top of the PR |
 
 ## Subscribe to Events
 

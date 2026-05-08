@@ -11,6 +11,8 @@ Comment on any PR to interact with ClearPR:
 
 Commands are case-insensitive. The command word must immediately follow the `@clearpr` mention.
 
+When ClearPR sees a recognised command, it reacts with `:eyes:` on your comment so you know the request was picked up. If no reaction appears within a few seconds, the bot didn't see the comment - check that the GitHub App is installed on the repo and that webhooks are reaching the server.
+
 ## `@clearpr review`
 
 Triggers a manual review, same as automatic review on PR open. Useful when:

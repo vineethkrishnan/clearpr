@@ -28,13 +28,38 @@ export class GitHubReviewPosterAdapter extends ReviewPosterPort {
     );
   }
 
-  async postSummary(context: ReviewContext, summary: string): Promise<void> {
-    await this.githubClient.createIssueComment(
+  async postSummary(context: ReviewContext, summary: string): Promise<number> {
+    return this.githubClient.createIssueComment(
       parseInt(context.installationId, 10),
       context.owner,
       context.repo,
       context.prNumber,
       summary,
+    );
+  }
+
+  async updateSummary(context: ReviewContext, commentId: number, summary: string): Promise<void> {
+    await this.githubClient.updateIssueComment(
+      parseInt(context.installationId, 10),
+      context.owner,
+      context.repo,
+      commentId,
+      summary,
+    );
+  }
+
+  async postProgressPlaceholder(context: ReviewContext): Promise<number> {
+    const body = [
+      ':hourglass_flowing_sand: **ClearPR** is reviewing this PR...',
+      '',
+      'This comment will be replaced with the review summary when the run completes.',
+    ].join('\n');
+    return this.githubClient.createIssueComment(
+      parseInt(context.installationId, 10),
+      context.owner,
+      context.repo,
+      context.prNumber,
+      body,
     );
   }
 }

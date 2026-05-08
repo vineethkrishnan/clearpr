@@ -2,6 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { LlmProviderPort } from '../../domain/ports/llm-provider.port.js';
 import { ReviewRepositoryPort } from '../../domain/ports/review-repository.port.js';
 import { ReviewPosterPort } from '../../domain/ports/review-poster.port.js';
+import {
+  CheckRunPosterPort,
+  type CheckRunConclusion,
+} from '../../domain/ports/check-run-poster.port.js';
 import { Review } from '../../domain/entities/review.entity.js';
 import { ReviewComment } from '../../domain/entities/review-comment.entity.js';
 import { ReviewTrigger } from '../../domain/value-objects/review-trigger.vo.js';
@@ -33,6 +37,7 @@ export class OrchestrateReviewUseCase {
     private readonly llmProvider: LlmProviderPort,
     private readonly reviewRepo: ReviewRepositoryPort,
     private readonly reviewPoster: ReviewPosterPort,
+    private readonly checkRunPoster: CheckRunPosterPort,
     private readonly prFileListProvider: PrFileListProviderPort,
     private readonly memoryRetriever: MemoryRetrieverPort,
     private readonly ignoreList: ManageIgnorePatternsUseCase,
@@ -58,6 +63,8 @@ export class OrchestrateReviewUseCase {
     await this.reviewRepo.save(review);
 
     try {
+      await this.announceInProgress(context, review);
+
       // Fetch PR file list
       const prFiles = await this.prFileListProvider.getPrFiles(
         context.installationId,
@@ -94,10 +101,15 @@ export class OrchestrateReviewUseCase {
         if (diffError instanceof DiffTooLargeError) {
           review.markSkipped(diffError.message);
           await this.reviewRepo.save(review);
-          await this.reviewPoster.postSummary(
+          await this.publishSummary(
             context,
+            review,
             `**ClearPR** — Review skipped: ${diffError.message.toLowerCase()}.`,
           );
+          await this.completeCheck(context, review, 'neutral', {
+            title: 'Review skipped',
+            summary: diffError.message,
+          });
           return err(new ReviewSkippedError(diffError.message));
         }
         throw diffError;
@@ -161,7 +173,7 @@ export class OrchestrateReviewUseCase {
         parsed,
         hasGuidelines: guidelines !== null,
       });
-      await this.reviewPoster.postSummary(context, summary);
+      await this.publishSummary(context, review, summary);
 
       // Mark completed
       review.markCompleted({
@@ -185,13 +197,97 @@ export class OrchestrateReviewUseCase {
         `Review completed: ${comments.length} findings`,
       );
 
+      const conclusion: CheckRunConclusion = comments.length === 0 ? 'success' : 'neutral';
+      const checkTitle =
+        comments.length === 0
+          ? 'No findings'
+          : `${comments.length} finding${comments.length === 1 ? '' : 's'}`;
+      await this.completeCheck(context, review, conclusion, {
+        title: checkTitle,
+        summary: `${diffResult.totalRawLines} raw lines analysed (${diffResult.noiseReductionPct}% noise filtered).`,
+      });
+
       return ok(review);
     } catch (error) {
       this.logger.error(
         { reviewId: review.id, prNumber: context.prNumber },
         `Review failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      await this.publishSummary(context, review, `**ClearPR** — Review failed: ${message}.`).catch(
+        () => {},
+      );
+      await this.completeCheck(context, review, 'failure', {
+        title: 'Review failed',
+        summary: message,
+      }).catch(() => {});
       throw error;
     }
+  }
+
+  private async announceInProgress(context: ReviewContext, review: Review): Promise<void> {
+    try {
+      review.progressCommentId = await this.reviewPoster.postProgressPlaceholder(context);
+      await this.reviewRepo.save(review);
+    } catch (error) {
+      this.logger.warn(
+        { reviewId: review.id, error: error instanceof Error ? error.message : 'unknown' },
+        'Failed to post progress placeholder; review will post a fresh summary at completion',
+      );
+    }
+
+    try {
+      review.checkRunId = await this.checkRunPoster.createInProgress(context);
+      await this.reviewRepo.save(review);
+    } catch (error) {
+      this.logger.warn(
+        { reviewId: review.id, error: error instanceof Error ? error.message : 'unknown' },
+        'Failed to create check run; review will continue without a check status',
+      );
+    }
+  }
+
+  private async completeCheck(
+    context: ReviewContext,
+    review: Review,
+    conclusion: CheckRunConclusion,
+    output: { title: string; summary: string },
+  ): Promise<void> {
+    if (review.checkRunId === undefined) return;
+    try {
+      await this.checkRunPoster.complete(context, review.checkRunId, conclusion, output);
+    } catch (error) {
+      this.logger.warn(
+        {
+          reviewId: review.id,
+          checkRunId: review.checkRunId,
+          error: error instanceof Error ? error.message : 'unknown',
+        },
+        'Failed to complete check run; status will remain in_progress until GitHub times it out',
+      );
+    }
+  }
+
+  private async publishSummary(
+    context: ReviewContext,
+    review: Review,
+    body: string,
+  ): Promise<void> {
+    if (review.progressCommentId !== undefined) {
+      try {
+        await this.reviewPoster.updateSummary(context, review.progressCommentId, body);
+        return;
+      } catch (error) {
+        this.logger.warn(
+          {
+            reviewId: review.id,
+            commentId: review.progressCommentId,
+            error: error instanceof Error ? error.message : 'unknown',
+          },
+          'Failed to edit progress placeholder; falling back to a fresh summary comment',
+        );
+      }
+    }
+    await this.reviewPoster.postSummary(context, body);
   }
 }
