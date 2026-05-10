@@ -4,6 +4,8 @@
 
 ClearPR is a self-hosted GitHub App that strips formatting noise from diffs, reviews code against your project guidelines, and learns from past PR feedback to catch repeat mistakes.
 
+Docs: [clearpr.vinelabs.de](https://clearpr.vinelabs.de)
+
 ---
 
 ## The Problem
