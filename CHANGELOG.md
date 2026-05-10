@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.5](https://github.com/vineethkrishnan/clearpr/compare/v0.1.4...v0.1.5) (2026-05-10)
+
+
+### Documentation
+
+* add docs site link to README ([043176b](https://github.com/vineethkrishnan/clearpr/commit/043176b4b9484fc6dff7c6e06c55720277794634))
+
 ## [0.1.4](https://github.com/vineethkrishnan/clearpr/compare/v0.1.3...v0.1.4) (2026-05-08)
 
 
