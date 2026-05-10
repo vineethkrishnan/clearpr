@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.6](https://github.com/vineethkrishnan/clearpr/compare/v0.1.5...v0.1.6) (2026-05-10)
+
+
+### CI/CD
+
+* **deps-dev:** bump fast-uri from 3.1.0 to 3.1.2 ([#67](https://github.com/vineethkrishnan/clearpr/issues/67)) ([d9ea401](https://github.com/vineethkrishnan/clearpr/commit/d9ea401c8f58ce2d0b94a5c764055cc8354c54ad))
+
 ## [0.1.5](https://github.com/vineethkrishnan/clearpr/compare/v0.1.4...v0.1.5) (2026-05-10)
 
 
