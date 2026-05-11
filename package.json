@@ -33,7 +33,7 @@
     "migration:revert": "typeorm migration:revert -d dist/shared/infrastructure/database/data-source.js"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.93.0",
+    "@anthropic-ai/sdk": "^0.95.2",
     "@google/generative-ai": "^0.24.1",
     "@mistralai/mistralai": "^2.2.1",
     "@nest-lab/throttler-storage-redis": "^1.2.0",
@@ -45,25 +45,25 @@
     "@nestjs/terminus": "^11.1.1",
     "@nestjs/throttler": "^6.5.0",
     "@nestjs/typeorm": "^11.0.1",
-    "bullmq": "^5.76.5",
+    "bullmq": "^5.76.7",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "compression": "^1.8.1",
-    "dotenv": "^17.4.1",
+    "dotenv": "^17.4.2",
     "helmet": "^8.1.0",
     "ioredis": "^5.10.1",
     "js-yaml": "^4.1.1",
     "nestjs-cls": "^6.2.0",
     "nestjs-pino": "^4.6.1",
     "octokit": "^5.0.5",
-    "openai": "^6.36.0",
+    "openai": "^6.37.0",
     "pg": "^8.20.0",
     "pgvector": "^0.2.1",
     "pino": "^10.3.1",
     "pino-http": "^11.0.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "typeorm": "^0.3.28"
+    "typeorm": "^0.3.29"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
