@@ -12,10 +12,12 @@ Thank you for your interest in contributing! This document covers the developmen
 
 ```bash
 git clone https://github.com/vineethkrishnan/clearpr.git
-cd ClearPR
+cd clearpr
 npm install
-cp .env.example .env  # fill in your GitHub App credentials
-docker compose up -d  # start PostgreSQL + Redis
+cp .env.example .env                         # fill in your GitHub App credentials
+docker compose -f docker-compose.dev.yml up -d   # start PostgreSQL + Redis
+npm run build                                # compile (migration CLI reads from dist/)
+npm run migration:run                        # apply schema to the dev DB
 npm run start:dev
 ```
 
