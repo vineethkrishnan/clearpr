@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import 'dotenv/config';
+import * as path from 'node:path';
 import { DataSource } from 'typeorm';
 import { InstallationRecord } from '../../../github/infrastructure/repositories/installation.record.js';
 import { RepositoryRecord } from '../../../github/infrastructure/repositories/repository.record.js';
@@ -19,12 +20,14 @@ if (!databaseUrl) {
   throw new Error('DATABASE_URL must be set for migration commands');
 }
 
+// Pick the migration extension matching how this file is being loaded.
+// Mixing globs (e.g. both .ts and .js) breaks the compiled CJS CLI flow
+// under Node's built-in TypeScript loader, which treats .ts matches as ESM.
+const migrationsExt = __filename.endsWith('.ts') ? 'ts' : 'js';
+
 export default new DataSource({
   type: 'postgres',
   url: databaseUrl,
   entities: [InstallationRecord, RepositoryRecord, ReviewRecord, PrMemoryRecord],
-  migrations: [
-    'src/shared/infrastructure/database/migrations/*.ts',
-    'dist/shared/infrastructure/database/migrations/*.js',
-  ],
+  migrations: [path.join(__dirname, 'migrations', `*.${migrationsExt}`)],
 });
