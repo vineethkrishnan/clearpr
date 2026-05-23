@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.1.7](https://github.com/vineethkrishnan/clearpr/compare/v0.1.6...v0.1.7) (2026-05-23)
+
+
+### Bug Fixes
+
+* scope migration CLI globs to the loader being used ([#75](https://github.com/vineethkrishnan/clearpr/issues/75)) ([020b1d2](https://github.com/vineethkrishnan/clearpr/commit/020b1d2567ff2047f04ba615d7d3d53e9baf918d))
+
+
+### CI/CD
+
+* **deps-dev:** bump the development-dependencies group with 5 updates ([#71](https://github.com/vineethkrishnan/clearpr/issues/71)) ([4681a8d](https://github.com/vineethkrishnan/clearpr/commit/4681a8d0a5c8d69135447144dff0be515e57a502))
+* **deps-dev:** bump the development-dependencies group with 6 updates ([#74](https://github.com/vineethkrishnan/clearpr/issues/74)) ([ff90944](https://github.com/vineethkrishnan/clearpr/commit/ff90944de1023ecbe0b3ac0fe21228cb0953e181))
+* **deps:** bump qs from 6.15.1 to 6.15.2 ([#77](https://github.com/vineethkrishnan/clearpr/issues/77)) ([8177c4f](https://github.com/vineethkrishnan/clearpr/commit/8177c4f37fe9e2766f4ad5ab5625184d80fe72a9))
+* **deps:** bump the production-dependencies group with 5 updates ([#70](https://github.com/vineethkrishnan/clearpr/issues/70)) ([c961c4a](https://github.com/vineethkrishnan/clearpr/commit/c961c4a7c0e1dc8476720746f5e447457c19479e))
+* **deps:** bump the production-dependencies group with 8 updates ([#73](https://github.com/vineethkrishnan/clearpr/issues/73)) ([4a03809](https://github.com/vineethkrishnan/clearpr/commit/4a03809987e1fb951eacd2e742a8e487dadd1af8))
+* honor severity filter when trivy emits sarif ([#76](https://github.com/vineethkrishnan/clearpr/issues/76)) ([686a86b](https://github.com/vineethkrishnan/clearpr/commit/686a86bef184a9baa20fff7f97b7ee0615b5b301))
+
 ## [0.1.6](https://github.com/vineethkrishnan/clearpr/compare/v0.1.5...v0.1.6) (2026-05-10)
 
 
