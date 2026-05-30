@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.8](https://github.com/vineethkrishnan/clearpr/compare/v0.1.7...v0.1.8) (2026-05-30)
+
+
+### CI/CD
+
+* **deps-dev:** bump the development-dependencies group with 5 updates ([#79](https://github.com/vineethkrishnan/clearpr/issues/79)) ([d8e42cf](https://github.com/vineethkrishnan/clearpr/commit/d8e42cf536007e04bdd7a6740d4794a1af15d4ac))
+* **deps:** bump the production-dependencies group across 1 directory with 4 updates ([#83](https://github.com/vineethkrishnan/clearpr/issues/83)) ([b0eb7a8](https://github.com/vineethkrishnan/clearpr/commit/b0eb7a8cc504455d677d48dac20af742170cda11))
+* **deps:** bump the production-dependencies group with 9 updates ([#78](https://github.com/vineethkrishnan/clearpr/issues/78)) ([1aa3b8e](https://github.com/vineethkrishnan/clearpr/commit/1aa3b8ea7ab5e5199c1a4beec1c317d0226acf21))
+
 ## [0.1.7](https://github.com/vineethkrishnan/clearpr/compare/v0.1.6...v0.1.7) (2026-05-23)
 
 
