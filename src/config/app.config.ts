@@ -16,6 +16,7 @@ export enum LlmProvider {
   OLLAMA = 'ollama',
   MISTRAL = 'mistral',
   GEMINI = 'gemini',
+  AGENT = 'agent',
 }
 
 export enum EmbeddingProvider {
@@ -203,6 +204,7 @@ export class AppConfig {
       [LlmProvider.OLLAMA]: 'llama3',
       [LlmProvider.MISTRAL]: 'mistral-large-latest',
       [LlmProvider.GEMINI]: 'gemini-2.5-pro',
+      [LlmProvider.AGENT]: 'claude-code',
     };
 
     return defaults[this.LLM_PROVIDER];

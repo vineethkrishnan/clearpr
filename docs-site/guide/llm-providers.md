@@ -13,6 +13,7 @@ Set `LLM_PROVIDER` in your `.env` file:
 | Ollama | `ollama` | `llama3` | No |
 | Mistral | `mistral` | `mistral-large-latest` | Yes |
 | Google Gemini | `gemini` | `gemini-2.5-pro` | Yes |
+| Local Agent | `agent` | `claude-code` | No (bearer token) |
 
 ## Anthropic Claude (Default)
 
@@ -73,6 +74,22 @@ LLM_API_KEY=your-google-ai-key
 # LLM_MODEL=gemini-2.5-pro
 ```
 
+## Local Agent (Claude Code)
+
+Route reviews through a local Claude Code agent that exposes `POST /trigger` and runs `claude -p` non-interactively. This reuses an existing Claude subscription on the host instead of an API key.
+
+```env
+LLM_PROVIDER=agent
+LLM_BASE_URL=http://host.docker.internal:8765
+LLM_API_KEY=your-agent-bearer-token
+```
+
+`LLM_BASE_URL` points at the agent's host and port; ClearPR appends `/trigger`. `LLM_API_KEY` is sent as `Authorization: Bearer <token>`. The agent is expected to return `{ ok, result: { result, usage, modelUsage } }`, where `result.result` is the review text.
+
+::: tip
+When ClearPR runs in Docker and the agent runs on the host, use `host.docker.internal` so the container can reach it, and add `extra_hosts: ["host.docker.internal:host-gateway"]` to the app service in `docker-compose.yml`.
+:::
+
 ## Custom Model
 
 Override the default model for any provider:
@@ -92,5 +109,6 @@ LlmProviderPort (abstract)
 ├── OpenAiLlmAdapter
 ├── OllamaLlmAdapter
 ├── MistralLlmAdapter
-└── GeminiLlmAdapter
+├── GeminiLlmAdapter
+└── AgentLlmAdapter
 ```

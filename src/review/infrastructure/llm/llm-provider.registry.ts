@@ -7,6 +7,7 @@ import { OpenAiLlmAdapter } from './openai-llm.adapter.js';
 import { OllamaLlmAdapter } from './ollama-llm.adapter.js';
 import { MistralLlmAdapter } from './mistral-llm.adapter.js';
 import { GeminiLlmAdapter } from './gemini-llm.adapter.js';
+import { AgentLlmAdapter } from './agent-llm.adapter.js';
 
 export function createLlmProvider(): Provider<LlmProviderPort> {
   return {
@@ -24,6 +25,8 @@ export function createLlmProvider(): Provider<LlmProviderPort> {
           return new MistralLlmAdapter(config);
         case LlmProvider.GEMINI:
           return new GeminiLlmAdapter(config);
+        case LlmProvider.AGENT:
+          return new AgentLlmAdapter(config);
         default:
           throw new UnknownLlmProviderError(config.LLM_PROVIDER);
       }
