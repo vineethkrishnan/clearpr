@@ -8,6 +8,8 @@ services:
       - DATABASE_URL=postgresql://clearpr:clearpr@db:5432/clearpr
       - REDIS_URL=redis://redis:6379
       - NODE_ENV=production
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
     depends_on:
       db:
         condition: service_healthy

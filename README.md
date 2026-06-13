@@ -92,7 +92,7 @@ GITHUB_APP_ID=your_app_id
 GITHUB_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----"
 GITHUB_WEBHOOK_SECRET=your_webhook_secret
 
-# LLM Provider — choose one: anthropic, openai, ollama, mistral, gemini
+# LLM Provider — choose one: anthropic, openai, ollama, mistral, gemini, agent
 LLM_PROVIDER=anthropic
 LLM_API_KEY=sk-ant-...
 
@@ -184,7 +184,7 @@ Comment on any PR to interact with ClearPR:
 | `GITHUB_APP_ID` | Yes | — | GitHub App ID |
 | `GITHUB_PRIVATE_KEY` | Yes | — | PEM-formatted private key contents (newlines as `\n` if using a single-line `.env` value) |
 | `GITHUB_WEBHOOK_SECRET` | Yes | — | Webhook signature verification |
-| `LLM_PROVIDER` | No | `anthropic` | `anthropic`, `openai`, `ollama`, `mistral`, `gemini` |
+| `LLM_PROVIDER` | No | `anthropic` | `anthropic`, `openai`, `ollama`, `mistral`, `gemini`, `agent` |
 | `LLM_API_KEY` | Yes* | — | API key for chosen provider (*not required for Ollama) |
 | `LLM_MODEL` | No | (per provider) | Model override (e.g., `gpt-4o`, `llama3`) |
 | `LLM_BASE_URL` | No | — | Custom API URL (required for Ollama) |
@@ -381,7 +381,7 @@ No. ClearPR is advisory only. It posts comments but never approves or requests c
 ClearPR falls back to whitespace-only filtering. You'll still get a cleaner diff than GitHub's default, just not as precise as AST-based filtering.
 
 **Can I use a different LLM instead of Claude?**
-Yes. ClearPR supports 5 providers: Anthropic Claude, OpenAI, Ollama (local), Mistral, and Google Gemini. Set `LLM_PROVIDER` in your `.env` to switch. See the [LLM Providers docs](docs-site/guide/llm-providers.md) for details.
+Yes. ClearPR supports 6 providers: Anthropic Claude, OpenAI, Ollama (local), Mistral, Google Gemini, and `agent` (a local Claude Code agent exposing `POST /trigger` that runs `claude -p`, so you reuse an existing Claude subscription instead of an API key). Set `LLM_PROVIDER` in your `.env` to switch. See the [LLM Providers docs](docs-site/guide/llm-providers.md) for details.
 
 **How does it handle monorepos?**
 ClearPR processes each PR independently. For very large diffs, use `MAX_DIFF_LINES` and file exclusion patterns in `.reviewconfig` to keep token usage reasonable.
