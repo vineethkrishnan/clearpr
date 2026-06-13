@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.9](https://github.com/vineethkrishnan/clearpr/compare/v0.1.8...v0.1.9) (2026-06-13)
+
+
+### Features
+
+* **ai-review:** add agent LLM provider backed by local Claude Code ([#93](https://github.com/vineethkrishnan/clearpr/issues/93)) ([078851a](https://github.com/vineethkrishnan/clearpr/commit/078851a5ec19f19adbc8288626e4f0477738a50b))
+
+
+### CI/CD
+
+* **deps-dev:** bump the development-dependencies group across 1 directory with 8 updates ([#90](https://github.com/vineethkrishnan/clearpr/issues/90)) ([fd26153](https://github.com/vineethkrishnan/clearpr/commit/fd261537329a842fb6e79edd824c5d6813e793a3))
+* **deps:** bump the github-actions group with 2 updates ([#85](https://github.com/vineethkrishnan/clearpr/issues/85)) ([6a9ce12](https://github.com/vineethkrishnan/clearpr/commit/6a9ce126e4f3bc34ccfe7707e36f8088cbc5fcc9))
+* **deps:** bump the production-dependencies group across 1 directory with 9 updates ([#91](https://github.com/vineethkrishnan/clearpr/issues/91)) ([ec43bfc](https://github.com/vineethkrishnan/clearpr/commit/ec43bfccbbd74251707103cf5fc8289a06e743e5))
+
 ## [0.1.8](https://github.com/vineethkrishnan/clearpr/compare/v0.1.7...v0.1.8) (2026-05-30)
 
 
