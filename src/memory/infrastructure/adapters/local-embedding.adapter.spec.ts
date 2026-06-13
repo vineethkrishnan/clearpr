@@ -25,9 +25,7 @@ describe('LocalEmbeddingAdapter', () => {
     const result = await new LocalEmbeddingAdapter(buildConfig()).embedBatch(['hello']);
 
     expect(result).toEqual([[0.1, 0.2, 0.3]]);
-    expect(pipelineMock).toHaveBeenCalledWith('feature-extraction', 'Xenova/all-MiniLM-L6-v2', {
-      device: 'wasm',
-    });
+    expect(pipelineMock).toHaveBeenCalledWith('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
     expect(extractor).toHaveBeenCalledWith(['hello'], { pooling: 'mean', normalize: true });
   });
 
@@ -42,9 +40,7 @@ describe('LocalEmbeddingAdapter', () => {
     await adapter.embed('b');
 
     expect(pipelineMock).toHaveBeenCalledTimes(1);
-    expect(pipelineMock).toHaveBeenCalledWith('feature-extraction', 'Xenova/bge-small-en', {
-      device: 'wasm',
-    });
+    expect(pipelineMock).toHaveBeenCalledWith('feature-extraction', 'Xenova/bge-small-en');
   });
 
   it('returns the single vector from embed()', async () => {

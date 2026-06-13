@@ -6,14 +6,6 @@ import { AppConfig } from '../../../config/app.config.js';
 
 const DEFAULT_LOCAL_MODEL = 'Xenova/all-MiniLM-L6-v2';
 
-// The runner image is Alpine (musl), where the native onnxruntime-node binary
-// will not load. Force the WASM backend and a single thread so embeddings work
-// without SharedArrayBuffer.
-const wasmBackend = env.backends?.onnx?.wasm;
-if (wasmBackend) {
-  wasmBackend.numThreads = 1;
-}
-
 @Injectable()
 export class LocalEmbeddingAdapter extends EmbeddingProviderPort {
   private readonly logger = new Logger(LocalEmbeddingAdapter.name);
@@ -47,7 +39,7 @@ export class LocalEmbeddingAdapter extends EmbeddingProviderPort {
 
   private loadExtractor(): Promise<FeatureExtractionPipeline> {
     if (!this.extractor) {
-      this.extractor = pipeline('feature-extraction', this.model, { device: 'wasm' });
+      this.extractor = pipeline('feature-extraction', this.model);
     }
     return this.extractor;
   }
