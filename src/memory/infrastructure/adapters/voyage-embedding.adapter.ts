@@ -12,7 +12,7 @@ export class VoyageEmbeddingAdapter extends EmbeddingProviderPort {
   constructor(config: AppConfig) {
     super();
     this.apiKey = config.VOYAGE_API_KEY ?? '';
-    this.model = config.EMBEDDING_MODEL;
+    this.model = config.EMBEDDING_MODEL ?? 'voyage-3-lite';
   }
 
   async embed(text: string): Promise<number[]> {

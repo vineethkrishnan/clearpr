@@ -10,6 +10,8 @@ services:
       - NODE_ENV=production
     extra_hosts:
       - 'host.docker.internal:host-gateway'
+    volumes:
+      - modelcache:/app/models
     depends_on:
       db:
         condition: service_healthy
@@ -55,3 +57,4 @@ services:
 volumes:
   pgdata:
   redisdata:
+  modelcache:
