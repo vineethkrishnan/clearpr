@@ -88,7 +88,11 @@ export class AppConfig {
 
   @IsString()
   @IsOptional()
-  EMBEDDING_MODEL: string = 'voyage-3-lite';
+  EMBEDDING_MODEL?: string;
+
+  @IsString()
+  @IsOptional()
+  EMBEDDING_CACHE_DIR?: string;
 
   @Transform(({ value }: { value: string }) => parseInt(value, 10))
   @IsInt()
