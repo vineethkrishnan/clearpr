@@ -24,6 +24,22 @@ Only to the LLM provider you configure (e.g., Anthropic, OpenAI). Source code is
 
 ## Setup Issues
 
+### The app container keeps restarting on startup
+
+Check `docker compose logs app`. Two common causes, both from production TLS defaults clashing with the bundled (plain) database/redis:
+
+- `Error: The server does not support SSL connections` — Postgres. Set `DATABASE_SSL=false`.
+- `ioredis ... connect ETIMEDOUT` on a TLS socket / `/health/ready` hangs — Redis. Set `REDIS_TLS=false`.
+
+The shipped compose runs plain Postgres/Redis but sets `NODE_ENV=production`, which turns both TLS requirements on by default. Add to `.env`:
+
+```env
+DATABASE_SSL=false
+REDIS_TLS=false
+```
+
+Then `docker compose up -d --force-recreate app`. Only keep them on when your database/redis actually terminate TLS.
+
 ### ClearPR isn't receiving webhooks
 
 1. **Check the webhook URL** — it must be reachable from GitHub's servers. Use `curl https://your-domain/health/live` from an external machine.
@@ -48,6 +64,18 @@ The response shows the status of each subsystem:
 2. **Check the LLM API key** — an invalid key causes silent failures. Check logs: `docker compose logs app | grep -i "error\|fail"`
 3. **Check the installation** — the repo must be included in the GitHub App installation. Go to Settings > GitHub Apps > Configure on the installed app.
 4. **Check the queue** — `curl http://localhost:3000/health` shows queue depths. If `reviews.failed` is high, jobs are failing.
+
+### Webhooks return 200 but reviews and indexing never run (404 on installation token)
+
+If logs show `Failed to index repository: Not Found - .../create-an-installation-access-token-for-an-app` (or reviews dispatch but do nothing), your `GITHUB_APP_ID` + `GITHUB_PRIVATE_KEY` belong to a **different GitHub App** than the one that's installed and sending webhooks. The webhook still verifies (the secret is configured per-webhook, independent of the App key), but ClearPR can't mint an installation token for an installation that isn't under that App, so GitHub returns 404.
+
+Fix: use the App ID **and** a private key from the *same* App whose webhook points at your ClearPR URL. To confirm which App a key belongs to, mint a JWT and call `GET https://api.github.com/app`, the returned `slug` is the App. Regenerate a key on the correct App's settings page if needed, update `.env`, and recreate the app container.
+
+### Installed the App but ClearPR has no record of it (empty `installations`/`repositories`)
+
+`installations`, `repositories`, and the memory index are only populated when the `installation.created` event is processed. If you installed the App **before** the webhook secret and App credentials were correct, that event was rejected (401/404) and dropped.
+
+Fix: make the webhook secret and App credentials correct first, then **re-install** the App (or replay the `installation.created` delivery from the App's Advanced > Recent Deliveries tab). That registers the installation and enqueues indexing.
 
 ### Duplicate reviews on the same PR
 
@@ -117,3 +145,13 @@ The webhook is acknowledged in < 500ms. The review runs asynchronously in the ba
 ### Memory usage is growing
 
 The PR memory system stores one embedding (~2 KB) per review comment from merged PRs. At 10,000 entries per repo, this is roughly 20 MB. If storage is a concern, reduce `HISTORY_DEPTH` (default: 200 merged PRs indexed).
+
+### PR memory isn't flagging repeat issues / "Indexed 0 comments"
+
+PR memory learns from **past human review comments on merged PRs**. If indexing logs `Indexed 0 comments from <repo>` and `pr_memory` stays empty, the repo simply has no review-comment history to learn from (common for solo or new repos), this is expected, not a failure. The semantic diff and AI review still work fully; only the "similar to PR #X" hints are absent.
+
+Memory fills in two ways: the on-install backfill of repos that *do* have review history, and accumulation over time as feedback on new PRs gets accepted. To see the backfill populate immediately, install on a repo with real past PR review discussions.
+
+### Indexing failed for every repo
+
+Re-check the App credentials, see "Webhooks return 200 but reviews and indexing never run (404 ...)" above. Indexing runs once at install; if it failed (e.g. wrong App key at the time), the repos stay `failed` and don't auto-retry. Fix the credentials, then re-install (or re-scope the installation) to re-enqueue indexing.
