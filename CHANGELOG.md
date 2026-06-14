@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.1.10](https://github.com/vineethkrishnan/clearpr/compare/v0.1.9...v0.1.10) (2026-06-14)
+
+
+### Features
+
+* **memory:** add local embedding provider via transformers.js ([#95](https://github.com/vineethkrishnan/clearpr/issues/95)) ([cedcbc2](https://github.com/vineethkrishnan/clearpr/commit/cedcbc2cdaf6bf4c0bb7a576289ec0dc9f54044e))
+
+
+### Bug Fixes
+
+* **ai-review:** don't fail the whole review when inline lines can't anchor ([#99](https://github.com/vineethkrishnan/clearpr/issues/99)) ([b67aed2](https://github.com/vineethkrishnan/clearpr/commit/b67aed2941c1a75d12554ce543074cccceadbe7e))
+* **docker:** use glibc base image so local embeddings load ([#97](https://github.com/vineethkrishnan/clearpr/issues/97)) ([d7ac07e](https://github.com/vineethkrishnan/clearpr/commit/d7ac07e89463b90bacfd6e27232f93f5c6556934))
+
+
+### Documentation
+
+* capture deployment gotchas (TLS defaults, app-key match, local embeddings) ([#98](https://github.com/vineethkrishnan/clearpr/issues/98)) ([b53fa8d](https://github.com/vineethkrishnan/clearpr/commit/b53fa8d1ca04c23df6c2f5dee4d6ca9ee2d935a3))
+
 ## [0.1.9](https://github.com/vineethkrishnan/clearpr/compare/v0.1.8...v0.1.9) (2026-06-13)
 
 
