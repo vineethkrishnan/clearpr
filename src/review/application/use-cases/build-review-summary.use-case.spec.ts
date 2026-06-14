@@ -45,6 +45,41 @@ describe('BuildReviewSummaryUseCase', () => {
     expect(result).not.toContain('No issues found.');
   });
 
+  it('lists finding details in the summary when inline comments could not be anchored', () => {
+    const parsed: ParsedReview = {
+      summary: 'mixed',
+      comments: [
+        {
+          path: 'README.md',
+          line: 12,
+          side: 'RIGHT',
+          severity: Severity.WARNING,
+          body: 'unclear wording',
+        },
+        { path: 'docs/faq.md', line: 3, side: 'RIGHT', severity: Severity.INFO, body: 'typo' },
+      ],
+    };
+
+    const anchored = useCase.execute({ diff: baseDiff, parsed, hasGuidelines: false });
+    const unanchored = useCase.execute({
+      diff: baseDiff,
+      parsed,
+      hasGuidelines: false,
+      inlineAnchored: false,
+    });
+
+    // Anchored: counts only, no per-finding detail
+    expect(anchored).not.toContain('unclear wording');
+    expect(anchored).not.toContain('could not be anchored');
+
+    // Unanchored: findings rendered as text so they are not lost
+    expect(unanchored).toContain('could not be anchored');
+    expect(unanchored).toContain('`README.md:12`');
+    expect(unanchored).toContain('unclear wording');
+    expect(unanchored).toContain('`docs/faq.md:3`');
+    expect(unanchored).toContain('typo');
+  });
+
   it('appends guidelines footer when hasGuidelines is true', () => {
     const parsed: ParsedReview = {
       summary: '',
