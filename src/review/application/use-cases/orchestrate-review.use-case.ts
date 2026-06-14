@@ -163,15 +163,15 @@ export class OrchestrateReviewUseCase {
       review.comments = comments;
 
       // Post to GitHub
-      if (comments.length > 0) {
-        await this.reviewPoster.postInlineComments(context, comments);
-      }
+      const inlineAnchored =
+        comments.length > 0 ? await this.reviewPoster.postInlineComments(context, comments) : true;
 
       // Build and post summary
       const summary = this.buildReviewSummary.execute({
         diff: diffResult,
         parsed,
         hasGuidelines: guidelines !== null,
+        inlineAnchored,
       });
       await this.publishSummary(context, review, summary);
 

@@ -287,9 +287,10 @@ class FakeLlmProvider extends LlmProviderPort {
 class FakeReviewPoster extends ReviewPosterPort {
   private nextCommentId = 1000;
 
-  async postInlineComments(_context: ReviewContext, comments: ReviewComment[]): Promise<void> {
+  async postInlineComments(_context: ReviewContext, comments: ReviewComment[]): Promise<boolean> {
     await Promise.resolve();
     capture.inlineComments.push(comments);
+    return true;
   }
   async postSummary(_context: ReviewContext, summary: string): Promise<number> {
     await Promise.resolve();

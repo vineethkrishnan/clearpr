@@ -3,9 +3,11 @@ import { DomainError } from '../../../shared/domain/errors/domain-error.base.js'
 export class GitHubApiError extends DomainError {
   readonly code = 'GITHUB_API_ERROR';
   readonly isTransient: boolean;
+  readonly statusCode: number;
 
   constructor(message: string, statusCode: number) {
     super(message);
+    this.statusCode = statusCode;
     this.isTransient = statusCode >= 500;
   }
 }
