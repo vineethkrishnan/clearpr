@@ -99,6 +99,28 @@ LLM_PROVIDER=openai
 LLM_MODEL=gpt-4-turbo
 ```
 
+## Embeddings (PR memory)
+
+Separate from the LLM, the PR-memory feature embeds past review comments so it can flag repeat issues. Pick the embedding provider with `EMBEDDING_PROVIDER`:
+
+| Provider | `EMBEDDING_PROVIDER` | Default model | Dimensions | API key |
+|---|---|---|---|---|
+| Voyage AI | `voyage` | `voyage-3-lite` | 512 | Yes (`VOYAGE_API_KEY`) |
+| Local | `local` | `Xenova/all-MiniLM-L6-v2` | 384 | No |
+
+**Local** runs a sentence-transformers model in-process via transformers.js, no API key, fully on-box. It downloads the model once (cache it on a volume with `EMBEDDING_CACHE_DIR`):
+
+```env
+EMBEDDING_PROVIDER=local
+EMBEDDING_MODEL=Xenova/all-MiniLM-L6-v2
+EMBEDDING_DIMENSIONS=384
+EMBEDDING_CACHE_DIR=/app/models
+```
+
+::: warning
+`EMBEDDING_DIMENSIONS` must match the model (512 for `voyage-3-lite`, 384 for `all-MiniLM-L6-v2`). Local embeddings require a glibc-based image (the shipped image is `node:slim`); they will not load on Alpine. If you leave `EMBEDDING_PROVIDER` unset/`voyage` with no key, PR memory is silently skipped and the rest of the review still works.
+:::
+
 ## Architecture
 
 All providers extend the same `LlmProviderPort` abstract class. The `LlmProviderRegistry` selects the right adapter at startup based on `LLM_PROVIDER`. Adding a new provider means creating one adapter file - no changes to domain logic.

@@ -21,7 +21,7 @@ Estimated time: 20-30 minutes.
 ::: warning Pick a strong model for real reviews
 Small local models (under ~14B parameters) miss real bugs and produce confident false positives. They're fine for verifying the pipeline is wired up correctly, but **switch to Claude Sonnet 4 or GPT-4o before pointing the bot at PRs you actually care about**. See [Choosing an LLM](./choosing-an-llm) for the full breakdown.
 :::
-| **Voyage AI API key** | For PR memory (similarity search on past comments). [Get one from dash.voyageai.com](https://dash.voyageai.com). Optional: leave unset and the memory feature is silently skipped, the rest of the review still works. |
+| **Embeddings for PR memory** | Optional. Either a [Voyage AI key](https://dash.voyageai.com), or set `EMBEDDING_PROVIDER=local` to run embeddings on-box with no key. Leave unset and the memory feature is silently skipped, the rest of the review still works. See [LLM Providers → Embeddings](./llm-providers#embeddings-pr-memory). |
 
 ## Step 1: Run ClearPR with Docker
 
@@ -34,14 +34,27 @@ curl -O https://raw.githubusercontent.com/vineethkrishnan/clearpr/main/docker-co
 curl -o .env https://raw.githubusercontent.com/vineethkrishnan/clearpr/main/.env.example
 ```
 
-Open `.env` in an editor. Don't fill in `GITHUB_*` yet - we get those from the GitHub App in Step 2. For now just set the LLM keys:
+Open `.env` in an editor. Don't fill in `GITHUB_*` yet - we get those from the GitHub App in Step 2. For now set the LLM keys, and (because the bundled `db`/`redis` are plain while `NODE_ENV=production`) turn off the production TLS requirement so the app can connect:
 
 ```env
 LLM_PROVIDER=anthropic
 LLM_API_KEY=sk-ant-...
 
+# Bundled Postgres/Redis have no TLS — required, or the app crash-loops on boot
+DATABASE_SSL=false
+REDIS_TLS=false
+
+# PR memory embeddings: either a Voyage key, or run it locally with no key:
 VOYAGE_API_KEY=pa-...
+# EMBEDDING_PROVIDER=local
+# EMBEDDING_MODEL=Xenova/all-MiniLM-L6-v2
+# EMBEDDING_DIMENSIONS=384
+# EMBEDDING_CACHE_DIR=/app/models
 ```
+
+::: warning
+If you skip `DATABASE_SSL=false` / `REDIS_TLS=false` with the bundled services, Step 3 will fail with `The server does not support SSL connections` (or a Redis timeout) and the container will restart in a loop.
+:::
 
 Pin the image version (skip `:latest` for production):
 
@@ -297,6 +310,14 @@ npx smee-client --url https://smee.io/aBcDeFgHiJ123 --target http://localhost:30
 Use the `https://smee.io/aBcDeFgHiJ123` URL as the webhook URL when creating the GitHub App in Step 2.2. Leave the `smee-client` running while you test.
 
 ## Troubleshooting
+
+### App container restarts in a loop on first start
+
+With the bundled (plain) `db`/`redis` and `NODE_ENV=production`, ClearPR defaults to requiring TLS and can't connect. Logs show `Error: The server does not support SSL connections` (Postgres) or `ioredis ... ETIMEDOUT` (Redis). Add `DATABASE_SSL=false` and `REDIS_TLS=false` to `.env`, then `docker compose up -d --force-recreate app`.
+
+### Reviews/indexing fail with "Not Found" on an installation token
+
+If logs show `Failed to index repository: Not Found - .../create-an-installation-access-token-for-an-app`, your `GITHUB_APP_ID` + `GITHUB_PRIVATE_KEY` are from a **different App** than the one installed. The webhook still passes (the secret is per-webhook), but ClearPR can't mint a token for that installation. Use the App ID and a private key from the *same* App whose webhook points at your ClearPR URL. Confirm an App key with a JWT call to `GET https://api.github.com/app` (the `slug` tells you which App it is).
 
 ### `health/ready` returns 503
 

@@ -20,25 +20,37 @@ docker compose up -d
 
 ## Database Migrations
 
-The container does NOT auto-run migrations. You need to run them yourself the first time you bring the stack up, and again after every release that ships a new migration.
+Migrations run **automatically on container start**. The image entrypoint runs `typeorm migration:run` before the app boots, so a fresh database is schema-ready on the first `docker compose up -d`, and any new migration in a release is applied when the new image starts. You'll see it in the logs:
 
-On a fresh database, after `docker compose up -d`:
+```
+[entrypoint] Running TypeORM migrations...
+... No migrations are pending
+[entrypoint] Starting application...
+```
+
+For zero-downtime deploys with a **breaking** migration, apply it out-of-band before rolling the new image:
 
 ```bash
 docker compose run --rm app npm run migration:run
 ```
 
-After each release that includes a new migration, run the same command again before the new image starts serving traffic.
+Additive (non-breaking) migrations are safe to let the entrypoint apply during a normal rolling deploy.
 
-For production, the safest order is:
+## Connecting to Postgres and Redis (TLS)
 
-1. Stop the app: `docker compose stop app`
-2. Run migrations: `docker compose run --rm app npm run migration:run`
-3. Start the app: `docker compose start app`
+In production (`NODE_ENV=production`, which the shipped compose sets), ClearPR **defaults to requiring TLS** for both Postgres and Redis. The bundled `db` and `redis` services are plain (no TLS), so if you use them as-is you must turn TLS off explicitly or the app crash-loops on boot:
 
-If your migrations are non-breaking (additive only), a blue/green or rolling deploy works too: run the migration first, then roll the new image.
+```env
+DATABASE_SSL=false
+REDIS_TLS=false
+```
 
-Future: a parallel PR (`feat(docker): ...`) is adding migration-on-startup; once that lands, this manual step goes away.
+Symptoms if you forget:
+
+- Postgres: `Error: The server does not support SSL connections` (app restarts in a loop)
+- Redis: repeated `ioredis ... connect ETIMEDOUT` on a TLS socket, and `/health/ready` hangs
+
+Leave them at the production default (TLS on) only when your Postgres/Redis actually terminate TLS, e.g. a managed database or `rediss://` endpoint.
 
 ## Services
 
