@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.1.11](https://github.com/vineethkrishnan/clearpr/compare/v0.1.10...v0.1.11) (2026-08-19)
+
+
+### CI/CD
+
+* **deps-dev:** bump fast-uri from 3.1.2 to 3.1.5 ([#125](https://github.com/vineethkrishnan/clearpr/issues/125)) ([681a873](https://github.com/vineethkrishnan/clearpr/commit/681a8735e248ae52af06ee92c0253720a2efeb23))
+* **deps-dev:** bump postcss from 8.5.10 to 8.5.26 ([#129](https://github.com/vineethkrishnan/clearpr/issues/129)) ([7d02528](https://github.com/vineethkrishnan/clearpr/commit/7d025285dd75ce1d0951c6414e5262fafaf114a6))
+* **deps-dev:** bump vitepress from 2.0.0-alpha.17 to 2.0.0-alpha.19 ([#134](https://github.com/vineethkrishnan/clearpr/issues/134)) ([517a8a3](https://github.com/vineethkrishnan/clearpr/commit/517a8a3a4945b7140b5257131f497b02c0f4744c))
+* **deps:** bump body-parser from 2.2.2 to 2.3.0 ([#115](https://github.com/vineethkrishnan/clearpr/issues/115)) ([d3d9695](https://github.com/vineethkrishnan/clearpr/commit/d3d96957cbef0d55f72f14a88d32ec5b355dfc24))
+* **deps:** bump form-data from 4.0.5 to 4.0.6 ([#103](https://github.com/vineethkrishnan/clearpr/issues/103)) ([42feb5d](https://github.com/vineethkrishnan/clearpr/commit/42feb5d60aa3211d2a6974a8ecc8726a537e3fe5))
+* **deps:** bump js-yaml from 4.2.0 to 4.3.1 ([#128](https://github.com/vineethkrishnan/clearpr/issues/128)) ([5ba3b1e](https://github.com/vineethkrishnan/clearpr/commit/5ba3b1efeeb91395fd32fd9143183fe2ce978771))
+* **deps:** bump the github-actions group across 1 directory with 3 updates ([#122](https://github.com/vineethkrishnan/clearpr/issues/122)) ([6710e1c](https://github.com/vineethkrishnan/clearpr/commit/6710e1c7ddf02112a74d6b8d3bbd954d7a47a173))
+* **deps:** bump the production-dependencies group across 1 directory with 9 updates ([#126](https://github.com/vineethkrishnan/clearpr/issues/126)) ([70c6957](https://github.com/vineethkrishnan/clearpr/commit/70c6957389433711a09eb3df3d28611916328638))
+* **deps:** bump typeorm from 0.3.30 to 0.3.31 ([#116](https://github.com/vineethkrishnan/clearpr/issues/116)) ([e71e7bd](https://github.com/vineethkrishnan/clearpr/commit/e71e7bd98824d8dbe6f9703ac5ba106706e37650))
+* **deps:** bump ws from 8.20.1 to 8.21.0 ([#107](https://github.com/vineethkrishnan/clearpr/issues/107)) ([2d42ae2](https://github.com/vineethkrishnan/clearpr/commit/2d42ae216c1f4c79a74ce89b2112994a90106aef))
+
 ## [0.1.10](https://github.com/vineethkrishnan/clearpr/compare/v0.1.9...v0.1.10) (2026-06-14)
 
 
