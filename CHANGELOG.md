@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.1.12](https://github.com/vineethkrishnan/clearpr/compare/v0.1.11...v0.1.12) (2026-11-20)
+
+
+### CI/CD
+
+* **deps-dev:** bump @humanfs/node from 0.16.7 to 0.16.8 ([#144](https://github.com/vineethkrishnan/clearpr/issues/144)) ([6de142a](https://github.com/vineethkrishnan/clearpr/commit/6de142a60dd37d72e4907291c9f6ff2d47af43ac))
+* **deps-dev:** bump browserslist from 4.28.2 to 4.28.9 ([#145](https://github.com/vineethkrishnan/clearpr/issues/145)) ([135ee7a](https://github.com/vineethkrishnan/clearpr/commit/135ee7a127b1bd46a30c8d3138983a7f1429dac8))
+* **deps-dev:** bump fast-uri from 3.1.5 to 3.1.9 ([#168](https://github.com/vineethkrishnan/clearpr/issues/168)) ([54a8286](https://github.com/vineethkrishnan/clearpr/commit/54a828673ea9a2d5b3de968de1299e7ceba144c4))
+* **deps-dev:** bump handlebars from 4.7.9 to 4.7.10 ([#161](https://github.com/vineethkrishnan/clearpr/issues/161)) ([f23ed52](https://github.com/vineethkrishnan/clearpr/commit/f23ed52c4c48ab0b0209d7252102a22c91a0ce79))
+* **deps-dev:** bump source-map-js from 1.2.1 to 1.2.2 ([#163](https://github.com/vineethkrishnan/clearpr/issues/163)) ([1ee9402](https://github.com/vineethkrishnan/clearpr/commit/1ee9402bcc019ddcf2e99576893c104fbc73fc05))
+* **deps-dev:** bump vite from 8.2.1 to 8.3.4 ([#165](https://github.com/vineethkrishnan/clearpr/issues/165)) ([417610e](https://github.com/vineethkrishnan/clearpr/commit/417610ebb58f3e691e52ce751b02809feeebfdc1))
+* **deps:** bump adm-zip and @huggingface/transformers ([#150](https://github.com/vineethkrishnan/clearpr/issues/150)) ([fd756b1](https://github.com/vineethkrishnan/clearpr/commit/fd756b1dcfda1c013742ade577511a488fa55ef7))
+* **deps:** bump body-parser from 2.3.0 to 2.4.0 ([#170](https://github.com/vineethkrishnan/clearpr/issues/170)) ([c9df69c](https://github.com/vineethkrishnan/clearpr/commit/c9df69c85e53aab1fb6cf7b0c1a7ef43b86cae1f))
+* **deps:** bump brace-expansion ([#157](https://github.com/vineethkrishnan/clearpr/issues/157)) ([2fb203c](https://github.com/vineethkrishnan/clearpr/commit/2fb203c5981946c2bc41c1c3af81d58078f04620))
+* **deps:** bump compression from 1.8.1 to 1.8.2 ([#162](https://github.com/vineethkrishnan/clearpr/issues/162)) ([ec21da1](https://github.com/vineethkrishnan/clearpr/commit/ec21da1186c4048b3c8bf5b46448cdf49ed2fffd))
+* **deps:** bump github/codeql-action in the github-actions group ([#141](https://github.com/vineethkrishnan/clearpr/issues/141)) ([8f58e7b](https://github.com/vineethkrishnan/clearpr/commit/8f58e7baccf2f75acffa00dd7a45ae13b2ce5e6e))
+* **deps:** bump js-yaml ([#148](https://github.com/vineethkrishnan/clearpr/issues/148)) ([50b3015](https://github.com/vineethkrishnan/clearpr/commit/50b3015bdb6e168c159f6aa089ba67e3ee60134b))
+* **deps:** bump proxy-addr from 2.0.7 to 2.0.8 ([#160](https://github.com/vineethkrishnan/clearpr/issues/160)) ([d89e6b1](https://github.com/vineethkrishnan/clearpr/commit/d89e6b1da435c89a5611e9c918abd471f0a6c5ab))
+* **deps:** bump qs from 6.15.2 to 6.16.0 ([#143](https://github.com/vineethkrishnan/clearpr/issues/143)) ([156f6d9](https://github.com/vineethkrishnan/clearpr/commit/156f6d9349f76cc3ad6dbc79345d393975aa2fcd))
+* **deps:** bump zod from 4.3.6 to 4.6.7 ([#171](https://github.com/vineethkrishnan/clearpr/issues/171)) ([12f7ba2](https://github.com/vineethkrishnan/clearpr/commit/12f7ba27f921a9a7fecfeec7683649b5246946ce))
+
 ## [0.1.11](https://github.com/vineethkrishnan/clearpr/compare/v0.1.10...v0.1.11) (2026-08-19)
 
 
